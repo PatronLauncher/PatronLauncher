@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-mods-check-updates"
+description = "Enables the mods_check_updates command without any pre-configured scope."
+commands.allow = ["mods_check_updates"]
+
+[[permission]]
+identifier = "deny-mods-check-updates"
+description = "Denies the mods_check_updates command without any pre-configured scope."
+commands.deny = ["mods_check_updates"]

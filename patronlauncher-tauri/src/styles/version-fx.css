@@ -1,0 +1,68 @@
+/* Sürüm kapakları: her ailenin renginde gezen ışık, alttan yükselen sis ve imleç partikülleri. */
+.vfx {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+  transition: box-shadow 0.3s;
+}
+.vfx::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 42%;
+  background: linear-gradient(transparent, var(--vfx-fog));
+}
+.vfx-tint {
+  position: absolute;
+  inset: -35%;
+  background: linear-gradient(125deg, transparent 32%, color-mix(in srgb, var(--vfx-a) 42%, transparent) 48%, color-mix(in srgb, var(--vfx-b) 34%, transparent) 60%, transparent 76%);
+  opacity: 0.55;
+  animation: vfx-sweep 9s ease-in-out infinite alternate;
+  transition: opacity 0.3s;
+}
+.vfx-fog {
+  position: absolute;
+  left: -30%;
+  right: -30%;
+  bottom: -30%;
+  height: 72%;
+  background:
+    radial-gradient(55% 55% at 28% 68%, var(--vfx-fog), transparent 72%),
+    radial-gradient(48% 50% at 72% 74%, var(--vfx-fog), transparent 74%);
+  opacity: 0;
+  animation: vfx-rise 9s ease-in-out infinite;
+}
+.vfx-fog.late { animation-delay: -4.5s; }
+.vfx-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+}
+button:hover .vfx,
+article:hover .vfx,
+button:focus-visible .vfx {
+  box-shadow: inset 0 0 0 1px var(--vfx-a), inset 0 0 30px color-mix(in srgb, var(--vfx-a) 70%, transparent);
+}
+button:hover .vfx-tint,
+article:hover .vfx-tint { opacity: 0.8; }
+@keyframes vfx-sweep {
+  from { transform: translate3d(-16%, 8%, 0); }
+  to { transform: translate3d(16%, -8%, 0); }
+}
+@keyframes vfx-rise {
+  0% { transform: translate3d(-4%, 24%, 0) scale(1); opacity: 0; }
+  28% { opacity: 0.85; }
+  72% { opacity: 0.55; }
+  100% { transform: translate3d(5%, -46%, 0) scale(1.28); opacity: 0; }
+}
+:root[data-motion="off"] .vfx-tint,
+:root[data-motion="off"] .vfx-fog { animation: none; }
+:root[data-motion="off"] .vfx-fog { opacity: 0.5; }
+@media (prefers-reduced-motion: reduce) {
+  .vfx-tint, .vfx-fog { animation: none; }
+  .vfx-fog { opacity: 0.5; }
+}

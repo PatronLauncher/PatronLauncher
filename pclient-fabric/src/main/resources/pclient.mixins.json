@@ -1,0 +1,32 @@
+{
+	"required": true,
+	"package": "com.patron.pclient.mixin",
+	"compatibilityLevel": "JAVA_25",
+	"client": [
+		"CameraMixin",
+		"ChatComponentMixin",
+		"FramerateLimitTrackerMixin",
+		"GameRendererMixin",
+		"GuiMixin",
+		"HudMixin",
+		"KeyboardHandlerMixin",
+		"LightmapMixin",
+		"MinecraftMixin",
+		"MinecraftSessionAccessor",
+		"MouseHandlerMixin",
+		"MultiPlayerGameModeMixin",
+		"OverlayTextureAccessor",
+		"PacketDecoderMixin",
+		"RenderLimitMixins$BlockEntities",
+		"RenderLimitMixins$Entities",
+		"RenderLimitMixins$Hands",
+		"RenderLimitMixins$Names",
+		"RenderLimitMixins$Outline",
+		"RenderLimitMixins$Particles",
+		"RenderLimitMixins$TabList",
+		"RenderLimitMixins$Toasts",
+		"RenderLimitMixins$Totem",
+		"ScreenEffectRendererMixin"
+	],
+	"injectors": { "defaultRequire": 1 }
+}

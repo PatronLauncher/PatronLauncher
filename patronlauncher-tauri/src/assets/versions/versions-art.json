@@ -1,0 +1,52 @@
+{
+  "1.12": {
+    "title": "World of Color",
+    "image": "1.12.webp",
+    "desc": "Yapılarına canlı renkler kat; kendi dünyana yeni bir görünüm ver."
+  },
+  "1.13": {
+    "title": "Update Aquatic",
+    "image": "1.13.webp",
+    "desc": "Kıyıdan uzaklaş ve suyun altında saklı keşiflere doğru yola çık."
+  },
+  "1.14": {
+    "title": "Village & Pillage",
+    "image": "1.14.webp",
+    "desc": "Köy hayatını keşfet, yerleşimini geliştir ve yaklaşan tehlikelere hazırlan."
+  },
+  "1.15": {
+    "title": "Buzzy Bees",
+    "image": "1.15.webp",
+    "desc": "Doğayla iç içe sakin bir başlangıç yap; arılarla küçük bir çiftlik kur."
+  },
+  "1.16": {
+    "title": "Nether Update",
+    "image": "1.16.webp",
+    "desc": "Portalın ötesine geç; sıcak renklerin ve zorlu yolların arasında kendi rotanı çiz."
+  },
+  "1.17": {
+    "title": "Caves & Cliffs: Part I",
+    "image": "1.17.webp",
+    "desc": "Yeni malzemelerle üret, küçük ayrıntılarla keşiflerine farklı bir hava kat."
+  },
+  "1.18": {
+    "title": "Caves & Cliffs: Part II",
+    "image": "1.18.webp",
+    "desc": "Derin mağaralardan yüksek zirvelere uzanan bir dünyada yeni bir ev bul."
+  },
+  "1.19": {
+    "title": "The Wild Update",
+    "image": "1.19.webp",
+    "desc": "Yabanın sessiz köşelerinde dolaş; karanlığa inerken hazırlığını tamamla."
+  },
+  "1.20": {
+    "title": "Trails & Tales",
+    "image": "1.20.webp",
+    "desc": "Keşiflerinden izler biriktir ve yaptığın her yapıda kendi hikâyeni anlat."
+  },
+  "1.21": {
+    "title": "Tricky Trials",
+    "image": "1.21.webp",
+    "desc": "Yeni bir meydan okumaya hazırlan; ekipmanını seç ve maceranı adım adım büyüt."
+  }
+}

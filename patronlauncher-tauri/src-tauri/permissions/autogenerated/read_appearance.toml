@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-read-appearance"
+description = "Enables the read_appearance command without any pre-configured scope."
+commands.allow = ["read_appearance"]
+
+[[permission]]
+identifier = "deny-read-appearance"
+description = "Denies the read_appearance command without any pre-configured scope."
+commands.deny = ["read_appearance"]

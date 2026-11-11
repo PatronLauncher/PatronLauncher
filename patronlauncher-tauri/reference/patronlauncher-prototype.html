@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PatronLauncher – Arayüz Prototipi</title>
+<style>
+:root{--bg:#0b0d12;--side:#0f1117;--panel:#151820;--line:rgba(255,255,255,.08);--text:#f3f4f7;--muted:#969dac;--red:#fa5265;--red2:#d5253c;--green:#64c9a2;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%;background:var(--bg);color:var(--text);font:14px/1.45 "Segoe UI",Inter,system-ui,sans-serif;overflow:hidden}
+button,select{font:inherit;color:inherit}
+.app{display:flex;height:100%;position:relative}
+#fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
+.glow{position:fixed;border-radius:50%;filter:blur(90px);pointer-events:none;z-index:0;opacity:.5}
+.g1{width:520px;height:520px;background:radial-gradient(circle,#b01c34 0,transparent 70%);top:-160px;right:-80px;animation:d1 26s ease-in-out infinite alternate}
+.g2{width:560px;height:560px;background:radial-gradient(circle,#4a1a5e 0,transparent 70%);bottom:-220px;left:20%;opacity:.38;animation:d2 32s ease-in-out infinite alternate}
+@keyframes d1{to{transform:translate(-90px,70px)}}@keyframes d2{to{transform:translate(110px,-60px)}}
+.side{width:224px;flex:none;z-index:2;padding:16px 14px;display:flex;flex-direction:column;gap:8px;background:linear-gradient(160deg,rgba(15,17,23,.92),rgba(33,19,26,.86) 55%,rgba(15,17,23,.92));border-right:1px solid var(--line);backdrop-filter:blur(14px)}
+.logo{display:flex;align-items:center;gap:10px;padding:6px 8px 18px;font-weight:700;font-size:17px}
+.mark{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--red),var(--red2));display:grid;place-items:center;font-weight:800;box-shadow:0 4px 14px rgba(213,37,60,.35)}
+.cap{font-size:10px;letter-spacing:.08em;color:var(--muted);padding:4px 8px}
+nav{position:relative;display:flex;flex-direction:column;gap:4px}
+.ind{position:absolute;left:0;width:100%;height:42px;border-radius:10px;background:linear-gradient(90deg,rgba(250,82,101,.18),rgba(250,82,101,.05));border-right:3px solid var(--red);transition:transform .32s cubic-bezier(.3,.9,.3,1);pointer-events:none}
+.nav{position:relative;display:flex;align-items:center;gap:12px;height:42px;padding:0 12px;border:0;background:none;border-radius:10px;color:var(--muted);cursor:pointer;text-align:left;transition:color .2s,background .2s}
+.nav:hover{background:rgba(255,255,255,.05);color:var(--text)}.nav.on{color:var(--text)}.nav.on svg{stroke:var(--red)}
+svg.i{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.65;stroke-linecap:round;stroke-linejoin:round;flex:none;transition:stroke .2s}
+.sp{flex:1}
+.cur{margin:10px 0;padding:12px;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid var(--line)}
+.cur b{display:block;font-size:15px;margin:4px 0 2px}.cur small,.lbl{color:var(--muted);font-size:12px}
+main{flex:1;min-width:0;z-index:1;overflow-y:auto;padding:22px 28px 28px}
+.top{display:flex;align-items:center;gap:10px;margin-bottom:20px}
+.top h1{font-size:25px}.top p{color:var(--muted);font-size:12px}
+.btn{height:40px;min-width:40px;padding:0 14px;border-radius:11px;border:1px solid var(--line);background:rgba(255,255,255,.05);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:background .2s,border-color .2s,transform .15s}
+.btn:hover{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.18)}.btn:active{transform:scale(.96)}
+.spin svg{animation:sp .8s linear infinite}@keyframes sp{to{transform:rotate(360deg)}}
+.chip{padding:0 14px;height:40px;display:flex;align-items:center;gap:8px;border-radius:11px;border:1px solid var(--line);background:rgba(255,255,255,.05)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green)}
+.page{animation:in .38s cubic-bezier(.2,.8,.2,1) both}@keyframes in{from{opacity:0;transform:translateY(14px)}}
+.hero{position:relative;height:270px;border-radius:20px;overflow:hidden;border:1px solid var(--line);background:linear-gradient(120deg,#12141b,#2a1620 60%,#3a1626);--mx:0;--my:0}
+.layer{position:absolute;inset:0;pointer-events:none}
+.moon{position:absolute;right:16%;top:34px;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#ff7a8a,#c8223b 70%);box-shadow:0 0 70px rgba(250,82,101,.45);transform:translate(calc(var(--mx)*-14px),calc(var(--my)*-10px))}
+.sky{position:absolute;left:0;right:0;bottom:0;height:120px;background:linear-gradient(#1a1118,#120d12);clip-path:polygon(0 100%,0 62%,5% 62%,5% 40%,10% 40%,10% 55%,16% 55%,16% 30%,22% 30%,22% 58%,30% 58%,30% 45%,38% 45%,38% 68%,48% 68%,48% 36%,54% 36%,54% 60%,64% 60%,64% 42%,70% 42%,70% 64%,80% 64%,80% 28%,86% 28%,86% 52%,94% 52%,94% 40%,100% 40%,100% 100%);opacity:.9;transform:translate(calc(var(--mx)*-6px),0)}
+.cube{position:absolute;width:76px;height:84px;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);background:conic-gradient(from 0deg at 50% 50%,rgba(255,150,160,.55) 0 60deg,rgba(150,40,60,.55) 60deg 180deg,rgba(90,20,40,.6) 180deg 300deg,rgba(255,150,160,.55) 300deg);animation:fl 6s ease-in-out infinite alternate}
+@keyframes fl{to{translate:0 -14px}}
+.c1{right:6%;bottom:56px;transform:translate(calc(var(--mx)*-22px),calc(var(--my)*-14px))}.c2{right:22%;bottom:30px;width:56px;height:62px;animation-delay:-2s;transform:translate(calc(var(--mx)*-30px),calc(var(--my)*-18px))}
+.hero .txt{position:absolute;left:30px;top:26px;max-width:55%;transform:translate(calc(var(--mx)*4px),calc(var(--my)*3px))}
+.bd{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.05em;padding:6px 10px;border-radius:7px;margin-right:6px;background:rgba(250,82,101,.14);color:var(--red)}.bd.m{background:rgba(255,255,255,.08);color:var(--muted)}
+.hero h2{font-size:38px;line-height:1.1;margin:12px 0 8px}.hero p{color:var(--muted)}
+.glass{margin-top:20px;padding:22px;border-radius:18px;border:1px solid rgba(255,255,255,.12);background:linear-gradient(110deg,rgba(34,35,45,.72),rgba(21,24,32,.6));backdrop-filter:blur(18px);box-shadow:0 18px 40px rgba(0,0,0,.28)}
+.row{display:grid;grid-template-columns:1.5fr 1fr 230px;gap:16px;align-items:end}
+.pcard{display:flex;align-items:center;gap:12px;height:48px;padding:0 6px 0 12px;border-radius:11px;border:1px solid var(--line);background:rgba(0,0,0,.25)}
+.pcard b{flex:1}select{height:48px;width:100%;padding:0 12px;border-radius:11px;border:1px solid var(--line);background:rgba(0,0,0,.25)}
+.play{position:relative;overflow:hidden;height:68px;border:0;border-radius:14px;cursor:pointer;font-weight:800;font-size:17px;letter-spacing:.02em;color:#fff;background:linear-gradient(135deg,#e02a42,#c21f36);box-shadow:0 8px 22px rgba(213,37,60,.35),inset 0 0 0 1px rgba(255,255,255,.18);transition:transform .18s,box-shadow .25s,filter .2s}
+.play:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(213,37,60,.5),inset 0 0 0 1px rgba(255,255,255,.4);filter:brightness(1.07)}.play:active{transform:scale(.97)}
+.play::after{content:"";position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.28),transparent);transform:skewX(-20deg);transition:left .6s}.play:hover::after{left:130%}
+.play .bar{position:absolute;left:0;bottom:0;height:4px;width:0;background:#fff;transition:width .2s}
+.play.busy{filter:saturate(.7);cursor:default}.play.run{background:linear-gradient(135deg,#2c3a35,#1f2a27);box-shadow:inset 0 0 0 1px rgba(100,201,162,.4);cursor:default}
+.meta{display:flex;justify-content:space-between;margin-top:16px;font-size:12px;color:var(--muted)}
+h3{font-size:21px;margin:30px 0 4px}
+.news{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:14px}
+.nc{border-radius:16px;overflow:hidden;border:1px solid var(--line);background:rgba(21,24,32,.7);cursor:pointer;transition:transform .25s,border-color .25s,box-shadow .25s;animation:in .5s calc(var(--i)*70ms) cubic-bezier(.2,.8,.2,1) both}
+.nc:hover{transform:translateY(-4px);border-color:rgba(250,82,101,.6);box-shadow:0 14px 30px rgba(0,0,0,.4)}
+.art{position:relative;aspect-ratio:16/9;overflow:hidden}.art i{position:absolute;inset:0;transition:transform .6s cubic-bezier(.2,.8,.2,1)}.nc:hover .art i{transform:scale(1.07)}
+.art::after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 40%,rgba(0,0,0,.6))}
+.nb{padding:14px 16px 16px}.nb .r{display:flex;justify-content:space-between;font-size:11px}.nb .r b{color:var(--red);letter-spacing:.06em}.nb h4{font-size:16px;margin:8px 0 6px}.nb span{color:var(--muted);font-size:12px;transition:color .2s}.nc:hover .nb span{color:var(--text)}
+.pg{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px}
+.pf{padding:20px;border-radius:16px;border:1px solid var(--line);background:rgba(21,24,32,.72);transition:border-color .25s,transform .25s,background .25s}
+.pf:hover{transform:translateY(-3px)}.pf.sel{border-color:var(--red);background:linear-gradient(160deg,rgba(250,82,101,.14),rgba(21,24,32,.72))}
+.pf .ic{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:rgba(250,82,101,.12);margin-bottom:14px}.pf .ic svg{stroke:var(--red)}
+.pf h4{font-size:17px}.pf p{color:var(--muted);font-size:12px;margin:2px 0 16px}.pf.add{border-style:dashed;display:grid;place-items:center;color:var(--muted);cursor:pointer;min-height:170px}
+.empty{padding:40px;border-radius:16px;border:1px dashed var(--line);color:var(--muted);text-align:center}
+.bar2{display:flex;align-items:center;gap:10px;margin-top:22px;padding:12px 16px;border-radius:12px;background:rgba(15,17,23,.7);border:1px solid var(--line);font-size:12px;color:var(--muted)}
+#toast{position:fixed;right:24px;bottom:24px;z-index:9;padding:12px 16px;border-radius:12px;background:rgba(21,24,32,.95);border:1px solid rgba(100,201,162,.4);display:flex;gap:10px;align-items:center;transform:translateY(90px);opacity:0;transition:.4s cubic-bezier(.2,.8,.2,1)}#toast.show{transform:none;opacity:1}
+@media(max-width:860px){.side{width:68px;padding:14px 8px}.t,.cap,.cur,.logo span{display:none}.row{grid-template-columns:1fr}.news{grid-template-columns:1fr}.hero .txt{max-width:90%}main{padding:18px}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="glow g1"></div><div class="glow g2"></div><canvas id="fx"></canvas>
+<div class="app">
+<aside class="side">
+ <div class="logo"><div class="mark">P</div><span>PatronLauncher</span></div>
+ <div class="cap">OYUN ALANIN</div>
+ <nav id="nav"><div class="ind" id="ind"></div></nav>
+ <div class="cur" id="cur"></div>
+ <div class="sp"></div>
+ <nav id="nav2"></nav>
+ <div class="cap" style="padding-top:10px">PatronLauncher 0.4.0</div>
+</aside>
+<main id="main"></main>
+</div>
+<div id="toast"></div>
+<script>
+const P={home:"<path d='m3 10 9-7 9 7v11h-6v-7H9v7H3z'/>",profiles:"<path d='m12 3 9 5-9 5-9-5zM3 12l9 5 9-5M3 16l9 5 9-5'/>",account:"<circle cx='12' cy='8' r='4'/><path d='M4 21v-2a8 8 0 0 1 16 0v2'/>",folder:"<path d='M3 6h7l2 3h9v11H3zM3 9V4h7l2 2h9v3'/>",settings:"<path d='M4 7h16M4 17h16'/><rect x='7' y='4' width='4' height='6' rx='1'/><rect x='14' y='14' width='4' height='6' rx='1'/>",refresh:"<path d='M20 7a9 9 0 1 0 0 10M20 3v5h-5'/>",play:"<path d='m8 4 12 8-12 8z'/>",activity:"<path d='M3 12h4l3-8 4 16 3-8h4'/>",shield:"<path d='m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6zM8 12l3 3 5-6'/>",plus:"<path d='M12 5v14M5 12h14'/>"};
+const ic=n=>`<svg class="i" viewBox="0 0 24 24">${P[n]}</svg>`;
+const $=s=>document.querySelector(s);
+const profiles=[{n:"PatronTest",v:"1.21.11"},{n:"Hayatta Kalma",v:"1.21.11"},{n:"Yaratıcı Mod",v:"1.20.4"}];
+let sel=0,page="home",playing=false;
+const items=[["home","Ana sayfa"],["profiles","Profiller"],["account","Hesaplar"],["folder","Oyun dosyaları"]];
+const items2=[["activity","İşlem geçmişi"],["settings","Ayarlar"]];
+const titles={home:["Ana sayfa","Minecraft, sana ait bir alanda."],profiles:["Oyun profilleri","Her dünyaya ayrı bir başlangıç."],account:["Hesapların","Oyuncunu seç, macerana devam et."],folder:["Oyun dosyaları","Dünyaların, paketlerin ve ayarların bir arada."],activity:["İşlem geçmişi","Bu oturumda olan biten her şey."],settings:["Launcher ayarları","Deneyimini sana göre düzenle."]};
+function navBuild(){
+ const b=(l)=>l.map(([k,t])=>`<button class="nav ${k===page?"on":""}" data-p="${k}">${ic(k)}<span class="t">${t}</span></button>`).join("");
+ $("#nav").innerHTML=`<div class="ind" id="ind"></div>`+b(items);$("#nav2").innerHTML=b(items2);
+ document.querySelectorAll(".nav").forEach(e=>e.onclick=()=>go(e.dataset.p));
+ const on=document.querySelector("#nav .nav.on"),ind=$("#ind");
+ if(on){ind.style.opacity=1;ind.style.transform=`translateY(${on.offsetTop}px)`}else ind.style.opacity=0;
+ $("#cur").innerHTML=`<span class="lbl">SEÇİLİ PROFİL</span><b>${profiles[sel].n}</b><small>Vanilla · ${profiles[sel].v}</small>`;
+}
+const art=[["linear-gradient(135deg,#3a0f2a,#c8223b)","radial-gradient(circle at 70% 40%,#ffb0a0,transparent 40%)"],["linear-gradient(135deg,#102a52,#7a3fbf)","radial-gradient(circle at 30% 60%,#9fd0ff,transparent 45%)"],["linear-gradient(135deg,#3b2a0a,#e9a23b)","radial-gradient(circle at 60% 30%,#fff1b0,transparent 40%)"],["linear-gradient(135deg,#0c3a33,#2fae8f)","radial-gradient(circle at 40% 50%,#b8ffe8,transparent 40%)"]];
+const news=[["Halloween on Realms","30.10.2026"],["New on Java Realms: Grinding & Galaxy","28.09.2026"],["Snapshot notları: yeni oyun değişiklikleri","24.09.2026"],["Spooky Scary koleksiyonu yayında","20.09.2026"]];
+function home(){
+ return `<section class="hero" id="hero"><div class="layer moon-l"><div class="moon"></div></div><div class="sky"></div><div class="cube c1"></div><div class="cube c2"></div>
+ <div class="txt"><span class="bd">MINECRAFT JAVA EDITION</span><span class="bd m">VANILLA</span><div class="lbl" style="margin-top:14px">Tekrar hoş geldin, Justt_.</div><h2>${profiles[sel].n}</h2><p>Dünyana kaldığın yerden devam et.</p></div></section>
+ <section class="glass"><div class="row">
+  <div><div class="lbl" style="margin-bottom:8px">OYUN PROFİLİ</div><div class="pcard">${ic("profiles")}<b>${profiles[sel].n}</b><button class="btn" style="height:36px" onclick="go('profiles')">Değiştir</button></div></div>
+  <div><div class="lbl" style="margin-bottom:8px">MINECRAFT SÜRÜMÜ</div><select><option>${profiles[sel].v}</option><option>1.21.10</option><option>1.20.6</option></select></div>
+  <button class="play" id="play"><span id="pl">▶ OYUNA GİR</span><span class="bar" id="pb"></span></button>
+ </div><div class="meta"><span style="display:flex;gap:8px;align-items:center">${ic("shield").replace("<svg","<svg style='stroke:var(--green);width:15px;height:15px'")}Profil ayarların ayrı saklanır</span><span>4096 MB RAM &nbsp;/&nbsp; Otomatik Java</span></div></section>
+ <h3>Minecraft’tan haberler</h3><div class="lbl">Resmi Minecraft duyuruları · Haberler kaynak dilinde gösterilir</div>
+ <div class="news">${news.map((n,i)=>`<article class="nc" style="--i:${i}"><div class="art"><i style="background:${art[i][1]},${art[i][0]}"></i></div><div class="nb"><div class="r"><b>MINECRAFT</b><span>${n[1]}</span></div><h4>${n[0]}</h4><span>Haberi oku →</span></div></article>`).join("")}</div>`;
+}
+function profs(){
+ return `<div class="pg">${profiles.map((p,i)=>`<div class="pf ${i===sel?"sel":""}"><div class="ic">${ic("profiles")}</div><h4>${p.n}</h4><p>Minecraft ${p.v} · Vanilla</p>${i===sel?`<span class="bd" style="background:rgba(100,201,162,.14);color:var(--green)">SEÇİLİ</span>`:`<button class="btn" onclick="pick(${i})">Profili seç</button>`}</div>`).join("")}<div class="pf add" onclick="toast('Yeni profil sihirbazı burada açılır')">${ic("plus")}<span>Yeni profil oluştur</span></div></div>`;
+}
+function render(){
+ const t=titles[page];
+ $("#main").innerHTML=`<div class="top"><div style="flex:1"><h1>${t[0]}</h1><p>${t[1]}</p></div><button class="btn" id="rf" title="Yenile">${ic("refresh")}</button><div class="chip"><span class="dot"></span>Justt_ · Yerel</div></div>
+ <div class="page" id="pg">${page==="home"?home():page==="profiles"?profs():`<div class="empty">Bu sayfa prototipte yok.</div>`}</div>
+ <div class="bar2"><span class="dot" id="sd"></span><span id="st">Sürüm listesi ve profil klasörleri hazır. Seçimlerin korundu.</span></div>`;
+ $("#rf").onclick=refresh;const pl=$("#play");if(pl)pl.onclick=play;
+ const h=$("#hero");if(h)h.onmousemove=e=>{const r=h.getBoundingClientRect();tx=(e.clientX-r.left)/r.width*2-1;ty=(e.clientY-r.top)/r.height*2-1};if(h)h.onmouseleave=()=>{tx=ty=0};
+ navBuild();
+}
+function go(p){if(p===page)return;page=p;render();$("#main").scrollTop=0}
+function pick(i){sel=i;toast("Profil değiştirildi: "+profiles[i].n);render()}
+let tt;function toast(m){const t=$("#toast");t.innerHTML=`<span class="dot"></span>${m}`;t.classList.add("show");clearTimeout(tt);tt=setTimeout(()=>t.classList.remove("show"),2600)}
+function refresh(){const b=$("#rf");b.classList.add("spin");$("#st").textContent="Sürüm listesi yenileniyor…";$("#sd").style.background="#e7b56b";
+ setTimeout(()=>{b.classList.remove("spin");$("#st").textContent="Sürüm listesi ve profil klasörleri güncellendi.";$("#sd").style.background="";toast("Liste güncellendi · 3 profil, 74 sürüm")},1100)}
+function play(){if(playing)return;playing=true;const b=$("#play"),l=$("#pl"),bar=$("#pb");b.classList.add("busy");let p=0;
+ const iv=setInterval(()=>{p+=2;bar.style.width=p+"%";const s=p<35?"HAZIRLANIYOR":p<75?"İNDİRİLİYOR":"BAŞLATILIYOR";l.textContent=s;$("#st").textContent="Oyun hazırlanıyor… "+s.toLowerCase();
+  if(p>=100){clearInterval(iv);b.classList.remove("busy");b.classList.add("run");l.textContent="OYUN ÇALIŞIYOR";bar.style.width=0;$("#st").textContent="Minecraft çalışıyor.";
+   setTimeout(()=>{b.classList.remove("run");l.textContent="▶ OYUNA GİR";playing=false;$("#st").textContent="Oyun kapandı. Profil ayarların yedeklendi."},3500)}},90)}
+/* parallax + particles */
+let tx=0,ty=0,mx=0,my=0;const cv=$("#fx"),cx=cv.getContext("2d");let W,H,D=Math.min(devicePixelRatio||1,2);
+function size(){W=innerWidth;H=innerHeight;cv.width=W*D;cv.height=H*D}addEventListener("resize",size);size();
+const spr=document.createElement("canvas");spr.width=spr.height=48;{const g=spr.getContext("2d"),r=g.createRadialGradient(24,24,0,24,24,24);r.addColorStop(0,"rgba(255,255,255,1)");r.addColorStop(.25,"rgba(255,140,155,.8)");r.addColorStop(1,"rgba(250,82,101,0)");g.fillStyle=r;g.fillRect(0,0,48,48)}
+const N=matchMedia("(prefers-reduced-motion:reduce)").matches?0:56;
+const pts=Array.from({length:N},()=>({x:Math.random()*W,y:Math.random()*H,s:6+Math.random()*16,v:.12+Math.random()*.4,a:.2+Math.random()*.5,ph:Math.random()*6.28,w:.2+Math.random()*.6}));
+let t0=0;function loop(t){requestAnimationFrame(loop);if(document.hidden)return;const dt=Math.min((t-t0)/16.7||1,3);t0=t;
+ cx.setTransform(D,0,0,D,0,0);cx.clearRect(0,0,W,H);
+ for(const p of pts){p.y-=p.v*dt;p.x+=Math.sin(t/1800+p.ph)*p.w*.4*dt;if(p.y<-20){p.y=H+20;p.x=Math.random()*W}
+  cx.globalAlpha=p.a*(.65+.35*Math.sin(t/900+p.ph));cx.drawImage(spr,p.x-p.s/2,p.y-p.s/2,p.s,p.s)}
+ mx+=(tx-mx)*.06;my+=(ty-my)*.06;const h=$("#hero");if(h){h.style.setProperty("--mx",mx.toFixed(3));h.style.setProperty("--my",my.toFixed(3))}}
+requestAnimationFrame(loop);
+render();
+</script>
+</body>
+</html>

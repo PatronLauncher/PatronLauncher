@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-curseforge-install"
+description = "Enables the curseforge_install command without any pre-configured scope."
+commands.allow = ["curseforge_install"]
+
+[[permission]]
+identifier = "deny-curseforge-install"
+description = "Denies the curseforge_install command without any pre-configured scope."
+commands.deny = ["curseforge_install"]

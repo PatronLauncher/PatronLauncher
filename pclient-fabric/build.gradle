@@ -1,0 +1,39 @@
+plugins {
+	id 'net.fabricmc.fabric-loom' version "${loom_version}"
+}
+
+base { archivesName = 'PClient' }
+
+dependencies {
+	minecraft "com.mojang:minecraft:${project.minecraft_version}"
+	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+	// Tam Fabric API'ye bağımlı değiliz. Yalnızca mod kaynaklarını (dil, doku) oyuna tanıtan modül
+	// jar içine gömülür (jar-in-jar); PClient tek jar olarak, yalnızca Fabric Loader ile çalışır.
+	implementation "net.fabricmc.fabric-api:fabric-api-base:${project.fabric_api_base_version}"
+	implementation "net.fabricmc.fabric-api:fabric-resource-loader-v1:${project.fabric_resource_loader_version}"
+	include "net.fabricmc.fabric-api:fabric-api-base:${project.fabric_api_base_version}"
+	include "net.fabricmc.fabric-api:fabric-resource-loader-v1:${project.fabric_resource_loader_version}"
+}
+
+loom {
+	runs {
+		client {
+			programArgs "--width", "1280", "--height", "720"
+			// Geliştirme: gradle runClient -Pdevshots=<klasör> ekran görüntülerini otomatik alır.
+			if (project.hasProperty('devshots')) vmArg "-Dpclient.devshots=${project.property('devshots')}"
+		}
+	}
+}
+
+processResources {
+	def version = project.version
+	inputs.property "version", version
+	filesMatching("fabric.mod.json") { expand "version": version }
+}
+
+tasks.withType(JavaCompile).configureEach { it.options.release = 25; it.options.encoding = 'UTF-8' }
+
+java {
+	sourceCompatibility = JavaVersion.VERSION_25
+	targetCompatibility = JavaVersion.VERSION_25
+}

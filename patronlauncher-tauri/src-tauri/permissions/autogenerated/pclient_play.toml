@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-pclient-play"
+description = "Enables the pclient_play command without any pre-configured scope."
+commands.allow = ["pclient_play"]
+
+[[permission]]
+identifier = "deny-pclient-play"
+description = "Denies the pclient_play command without any pre-configured scope."
+commands.deny = ["pclient_play"]

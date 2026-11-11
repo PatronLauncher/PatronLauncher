@@ -1,0 +1,124 @@
+/* Discord ve web sitesi düğmeleri: PatronLauncher kenar çubuğu ve PClient ana sayfası. */
+.cm-links { display: flex; gap: 8px; }
+.cm-links.cm-row { flex: none; width: 100%; margin-top: 8px; }
+.cm-links.cm-row .cm-link { flex: 1 1 0; }
+.side .pc-portal-btn { flex: none; }
+/* Kısa pencerelerde kenar çubuğuna sığması için sıkılaşır. */
+@media (max-height: 860px) {
+  .side .cap { display: none; }
+  .cm-links.cm-row .cm-link { gap: 7px; padding: 5px 8px; }
+  .cm-links.cm-row .cm-mark { width: 28px; height: 28px; }
+  .cm-links.cm-row .cm-mark img { width: 18px; height: 18px; }
+  .cm-links.cm-row .cm-mark img.cm-discord { width: 22px; height: 22px; }
+}
+.cm-links.cm-stack {
+  position: absolute;
+  left: 22px;
+  bottom: 16px;
+  z-index: 3;
+  width: 188px;
+  flex-direction: column;
+}
+@media (max-width: 1040px) {
+  .cm-links.cm-stack { display: none; }
+}
+.cm-link {
+  --cm: var(--pc-red, #ff2a3d);
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+  padding: 8px 10px;
+  border: 1px solid color-mix(in srgb, var(--cm) 42%, transparent);
+  border-radius: 13px;
+  background: linear-gradient(135deg, #0a0b10, color-mix(in srgb, var(--cm) 22%, #0a0b10));
+  color: #fff;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  overflow: hidden;
+  isolation: isolate;
+  transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
+}
+.cm-link.discord { --cm: #5865f2; }
+/* Kenarda dönen ışık. */
+.cm-link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  padding: 1px;
+  background: conic-gradient(from var(--pc-angle, 0deg), transparent 0 70%, var(--cm) 85%, #fff 90%, transparent 95%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: pc-spin-angle 3.6s linear infinite;
+}
+/* Üstünden geçen parıltı. */
+.cm-link::before {
+  content: "";
+  position: absolute;
+  inset: -40% auto -40% -35%;
+  z-index: -1;
+  width: 30%;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, #fff 26%, transparent), transparent);
+  transform: skewX(-20deg);
+  animation: cm-shine 3.8s ease-in-out infinite;
+}
+.cm-link.web::before { animation-delay: -1.9s; }
+.cm-link:hover,
+.cm-link:focus-visible {
+  transform: translateY(-2px);
+  border-color: var(--cm);
+  box-shadow: 0 10px 28px color-mix(in srgb, var(--cm) 38%, transparent);
+}
+.cm-sparks { position: absolute; inset: 0; z-index: -1; pointer-events: none; }
+.cm-sparks i {
+  position: absolute;
+  bottom: -4px;
+  width: var(--s);
+  height: var(--s);
+  background: color-mix(in srgb, var(--cm) 55%, #fff);
+  box-shadow: 0 0 6px var(--cm);
+  animation: cm-rise var(--d) linear var(--delay) infinite;
+}
+.cm-mark {
+  position: relative;
+  flex: none;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--cm) 18%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--cm) 45%, transparent);
+  animation: cm-pulse 2.4s ease-in-out infinite;
+}
+.cm-mark img { width: 22px; height: 22px; object-fit: contain; }
+.cm-mark img.cm-discord { width: 26px; height: 26px; image-rendering: pixelated; }
+.cm-text { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.cm-text b { font: 800 12px/1 var(--pc-font, inherit); letter-spacing: 0.06em; white-space: nowrap; }
+.cm-text small { color: #b4bccb; font-size: 10.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.side.collapsed .cm-links.cm-row { flex-direction: column; }
+.side.collapsed .cm-link { justify-content: center; padding: 7px; }
+.side.collapsed .cm-text { display: none; }
+@keyframes cm-shine {
+  0%, 55% { left: -35%; }
+  100% { left: 120%; }
+}
+@keyframes cm-rise {
+  0% { transform: translateY(0); opacity: 0; }
+  15% { opacity: 1; }
+  100% { transform: translateY(-72px); opacity: 0; }
+}
+@keyframes cm-pulse {
+  50% { box-shadow: inset 0 0 0 1px var(--cm), 0 0 14px color-mix(in srgb, var(--cm) 60%, transparent); }
+}
+:root[data-motion="off"] .cm-link::after,
+:root[data-motion="off"] .cm-link::before,
+:root[data-motion="off"] .cm-sparks i,
+:root[data-motion="off"] .cm-mark { animation: none; }
+:root[data-motion="off"] .cm-sparks { display: none; }
+:root[data-motion="off"] .cm-link::before { display: none; }

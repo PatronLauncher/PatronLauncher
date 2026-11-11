@@ -1,0 +1,1919 @@
+{
+ "version": 2,
+ "servers": [
+  {
+   "id": "chickennw",
+   "name": "ChickenNW",
+   "address": "oyna.chickennw.com",
+   "country": "tr",
+   "languages": [
+    "tr"
+   ],
+   "tags": [
+    "SkyBlock",
+    "Survival",
+    "SMP",
+    "PvP"
+   ],
+   "versions": "1.19.4–26.3",
+   "website": "https://chickennw.com/",
+   "description": {
+    "en": "One of Turkey's busiest networks with SkyBlock and Survival.",
+    "tr": "SkyBlock ve Survival modlarıyla Türkiye'nin en kalabalık ağlarından biri."
+   },
+   "featured": true
+  },
+  {
+   "id": "soulcraft",
+   "name": "SoulCraft",
+   "address": "mc.soulcraft.tc",
+   "country": "tr",
+   "languages": [
+    "tr"
+   ],
+   "tags": [
+    "SkyBlock",
+    "Towny",
+    "SMP",
+    "OneBlock",
+    "BoxPvP"
+   ],
+   "versions": "1.8–26.3",
+   "description": {
+    "en": "Turkish network with SkyBlock, Towny, SMP and BoxPvP.",
+    "tr": "SkyBlock, Towny, SMP ve BoxPvP sunan Türk ağı."
+   },
+   "featured": true
+  },
+  {
+   "id": "craftlitus",
+   "name": "CraftLitus",
+   "address": "play.craftlitus.net",
+   "country": "tr",
+   "languages": [
+    "tr"
+   ],
+   "tags": [
+    "KitPvP",
+    "Practice",
+    "PvP"
+   ],
+   "versions": "1.8–26.2",
+   "description": {
+    "en": "Turkish KitPvP and Practice PvP server.",
+    "tr": "KitPvP ve Practice odaklı Türk PvP sunucusu."
+   }
+  },
+  {
+   "id": "craftluna",
+   "name": "CraftLuna",
+   "address": "oyna.craftluna.net",
+   "country": "tr",
+   "languages": [
+    "tr"
+   ],
+   "tags": [
+    "Towny",
+    "Earth",
+    "SMP",
+    "Practice"
+   ],
+   "versions": "1.16.4–26.3",
+   "description": {
+    "en": "Realistic-style Turkish Towny server.",
+    "tr": "Gerçekçi tarzda Türk Towny sunucusu."
+   }
+  },
+  {
+   "id": "zenitmc",
+   "name": "ZenitMC",
+   "address": "play.zenitmc.com",
+   "country": "tr",
+   "languages": [
+    "tr"
+   ],
+   "tags": [
+    "SkyBlock",
+    "Towny",
+    "KitPvP",
+    "SMP"
+   ],
+   "versions": "1.16–26.2",
+   "description": {
+    "en": "Turkish network with SkyBlock, Towny and PvP modes.",
+    "tr": "SkyBlock, Towny ve PvP modlarına sahip Türk ağı."
+   }
+  },
+  {
+   "id": "knightnw",
+   "name": "Knight Network",
+   "address": "play.knightnw.com",
+   "country": "tr",
+   "languages": [
+    "tr"
+   ],
+   "tags": [
+    "SkyBlock",
+    "Factions",
+    "SMP",
+    "Survival",
+    "Cross-Play"
+   ],
+   "versions": "1.8–26.3",
+   "description": {
+    "en": "Turkish network with SkyBlock, Factions and SMP.",
+    "tr": "SkyBlock, Factions ve SMP sunan Türk ağı."
+   }
+  },
+  {
+   "id": "reborncraft",
+   "name": "RebornCraft",
+   "address": "play.reborncraft.pw",
+   "country": "tr",
+   "languages": [
+    "tr"
+   ],
+   "tags": [
+    "SkyBlock",
+    "OneBlock",
+    "Survival"
+   ],
+   "versions": "1.16.5–26.2",
+   "description": {
+    "en": "Long-running Turkish SkyBlock and OneBlock server.",
+    "tr": "Köklü Türk SkyBlock ve OneBlock sunucusu."
+   }
+  },
+  {
+   "id": "mc4fun",
+   "name": "MC4FUN",
+   "address": "play.mc4fun.net",
+   "country": "tr",
+   "languages": [
+    "tr"
+   ],
+   "tags": [
+    "SkyBlock",
+    "Towny",
+    "LifeSteal",
+    "Factions",
+    "Cross-Play"
+   ],
+   "versions": "1.8–26.3",
+   "description": {
+    "en": "Turkish network with SkyBlock, Towny, Factions and LifeSteal.",
+    "tr": "SkyBlock, Towny, Factions ve LifeSteal sunan Türk ağı."
+   }
+  },
+  {
+   "id": "craftavia",
+   "name": "Craftavia",
+   "address": "play.craftavia.net",
+   "country": "tr",
+   "languages": [
+    "tr"
+   ],
+   "tags": [
+    "SkyBlock",
+    "Towny",
+    "SMP",
+    "RPG",
+    "Cross-Play"
+   ],
+   "versions": "1.8–26.3",
+   "description": {
+    "en": "Java and Bedrock Turkish network.",
+    "tr": "Java ve Bedrock destekli Türk ağı."
+   }
+  },
+  {
+   "id": "blokya",
+   "name": "Blokya",
+   "address": "oyna.blokya.com",
+   "country": "tr",
+   "languages": [
+    "tr"
+   ],
+   "tags": [
+    "SMP",
+    "Survival",
+    "Earth",
+    "PvP"
+   ],
+   "versions": "1.21–26.3",
+   "description": {
+    "en": "Turkish SMP survival server.",
+    "tr": "Türkiye'nin SMP Survival sunucusu."
+   }
+  },
+  {
+   "id": "navelya",
+   "name": "Navelya Network",
+   "address": "play.navelya.net",
+   "country": "tr",
+   "languages": [
+    "tr"
+   ],
+   "tags": [
+    "BoxPvP",
+    "KitPvP",
+    "PvP"
+   ],
+   "versions": "1.8–26.2",
+   "description": {
+    "en": "Turkish BoxPvP and KitPvP server.",
+    "tr": "BoxPvP ve KitPvP sunan Türk sunucusu."
+   }
+  },
+  {
+   "id": "atlasoyuncu",
+   "name": "AtlasOyuncu",
+   "address": "mc.atlasoyuncu.com",
+   "country": "tr",
+   "languages": [
+    "tr"
+   ],
+   "tags": [
+    "SkyBlock",
+    "Towny",
+    "SMP",
+    "BoxPvP",
+    "Cross-Play"
+   ],
+   "versions": "1.8–26.3",
+   "description": {
+    "en": "Java and Bedrock network with SkyBlock, Towny and SMP.",
+    "tr": "SkyBlock, Towny ve SMP sunan Java/Bedrock ağı."
+   }
+  },
+  {
+   "id": "ultimis",
+   "name": "UltimisMC",
+   "address": "play.ultimis.net",
+   "country": "tr",
+   "languages": [
+    "tr"
+   ],
+   "tags": [
+    "BedWars",
+    "Prison",
+    "OneBlock",
+    "LifeSteal",
+    "Factions"
+   ],
+   "versions": "1.8–26.3",
+   "description": {
+    "en": "Turkish network with custom game modes.",
+    "tr": "Özgün oyun modlarına sahip Türk ağı."
+   }
+  },
+  {
+   "id": "melonya",
+   "name": "Melonya Network",
+   "address": "play.melonya.net",
+   "country": "tr",
+   "languages": [
+    "tr"
+   ],
+   "tags": [
+    "SkyBlock",
+    "Towny",
+    "Survival",
+    "BoxPvP"
+   ],
+   "versions": "1.8–26.3",
+   "description": {
+    "en": "Towny, SkyBlock, Survival and BoxPvP.",
+    "tr": "Towny, SkyBlock, Survival ve BoxPvP."
+   }
+  },
+  {
+   "id": "dugecraft",
+   "name": "DugeCraft",
+   "address": "play.dugecraft.com.tr",
+   "country": "tr",
+   "languages": [
+    "tr"
+   ],
+   "tags": [
+    "Towny",
+    "SkyBlock",
+    "BoxPvP",
+    "Practice"
+   ],
+   "versions": "1.8–26.3",
+   "description": {
+    "en": "Turkish Towny and SkyBlock server.",
+    "tr": "Türk Towny ve SkyBlock sunucusu."
+   }
+  },
+  {
+   "id": "lfln",
+   "name": "LFLN Network",
+   "address": "oyna.lfln.net",
+   "country": "tr",
+   "languages": [
+    "tr"
+   ],
+   "tags": [
+    "SMP",
+    "Survival",
+    "Practice"
+   ],
+   "versions": "1.8–26.3",
+   "description": {
+    "en": "SMP-focused Turkish server with Practice.",
+    "tr": "SMP odaklı, Practice modlu Türk sunucusu."
+   }
+  },
+  {
+   "id": "hanedanmc",
+   "name": "HanedanMC",
+   "address": "play.hanedanmc.com",
+   "country": "tr",
+   "languages": [
+    "tr"
+   ],
+   "tags": [
+    "Towny",
+    "SMP",
+    "SkyBlock",
+    "OneBlock"
+   ],
+   "versions": "1.8–26.3",
+   "description": {
+    "en": "Turkish server running for six years on all platforms.",
+    "tr": "Altı yıldır açık, tüm platformlara açık Türk sunucusu."
+   }
+  },
+  {
+   "id": "genmc",
+   "name": "GenMC",
+   "address": "play.genmc.tr",
+   "country": "tr",
+   "languages": [
+    "tr"
+   ],
+   "tags": [
+    "SMP",
+    "Towny",
+    "Economy",
+    "Minigames"
+   ],
+   "versions": "1.21.11",
+   "description": {
+    "en": "GenSMP with spawners and economy.",
+    "tr": "Spawner sistemi ve ekonomili GenSMP."
+   }
+  },
+  {
+   "id": "ibandee",
+   "name": "iBandeeMC",
+   "address": "oyna.ibandeemc.com",
+   "country": "tr",
+   "languages": [
+    "tr"
+   ],
+   "tags": [
+    "Survival",
+    "SMP"
+   ],
+   "versions": "1.8–26.3",
+   "description": {
+    "en": "New multi-mode Turkish server.",
+    "tr": "Yeni, çok modlu Türk sunucusu."
+   }
+  },
+  {
+   "id": "atlantikmc",
+   "name": "AtlantikMC",
+   "address": "oyna.atlantikmc.com",
+   "country": "tr",
+   "languages": [
+    "tr"
+   ],
+   "tags": [
+    "Towny",
+    "SkyBlock",
+    "Survival",
+    "Cross-Play"
+   ],
+   "versions": "1.20.4–26.3",
+   "description": {
+    "en": "Towny, Survival and SkyBlock with Bedrock support.",
+    "tr": "Bedrock destekli Towny, Survival ve SkyBlock."
+   }
+  },
+  {
+   "id": "hypixel",
+   "name": "Hypixel",
+   "address": "mc.hypixel.net",
+   "country": "us",
+   "languages": [
+    "en"
+   ],
+   "tags": [
+    "Minigames",
+    "SkyBlock",
+    "BedWars",
+    "SkyWars",
+    "Network"
+   ],
+   "versions": "1.8–26.3",
+   "website": "https://hypixel.net/",
+   "description": {
+    "en": "The world's largest Minecraft network: SkyBlock, BedWars and dozens of minigames.",
+    "tr": "Dünyanın en büyük Minecraft ağı: SkyBlock, BedWars ve onlarca mini oyun."
+   },
+   "featured": true
+  },
+  {
+   "id": "donutsmp",
+   "name": "DonutSMP",
+   "address": "donutsmp.net",
+   "country": "us",
+   "languages": [
+    "en"
+   ],
+   "tags": [
+    "SMP",
+    "PvP",
+    "Economy",
+    "Survival"
+   ],
+   "versions": "1.21–26.3",
+   "website": "https://donutsmp.net/",
+   "description": {
+    "en": "Huge competitive SMP with player economy.",
+    "tr": "Oyuncu ekonomili dev rekabetçi SMP."
+   },
+   "featured": true
+  },
+  {
+   "id": "complex",
+   "name": "Complex Gaming",
+   "address": "hub.mc-complex.com",
+   "country": "us",
+   "languages": [
+    "en"
+   ],
+   "tags": [
+    "SkyBlock",
+    "Prison",
+    "Factions",
+    "Survival",
+    "Network"
+   ],
+   "versions": "1.8–26.3",
+   "website": "https://www.mc-complex.com/",
+   "description": {
+    "en": "Large crossplay network with SkyBlock, Prison, Factions and Survival.",
+    "tr": "SkyBlock, Prison, Factions ve Survival sunan büyük çapraz platform ağı."
+   },
+   "featured": true
+  },
+  {
+   "id": "minehut",
+   "name": "Minehut",
+   "address": "mc.minehut.com",
+   "country": "us",
+   "languages": [
+    "en"
+   ],
+   "tags": [
+    "Network",
+    "Minigames",
+    "Creative"
+   ],
+   "versions": "1.8–26.3",
+   "website": "https://minehut.com/",
+   "description": {
+    "en": "Hub of thousands of free player-made servers.",
+    "tr": "Oyuncuların kurduğu binlerce ücretsiz sunucunun merkezi."
+   }
+  },
+  {
+   "id": "wynncraft",
+   "name": "Wynncraft",
+   "address": "play.wynncraft.com",
+   "country": "us",
+   "languages": [
+    "en"
+   ],
+   "tags": [
+    "RPG",
+    "Adventure",
+    "Quests"
+   ],
+   "versions": "1.12–26.3",
+   "website": "https://wynncraft.com/",
+   "description": {
+    "en": "The biggest MMORPG in Minecraft with hundreds of quests.",
+    "tr": "Yüzlerce görevli, Minecraft'ın en büyük MMORPG'si."
+   },
+   "featured": true
+  },
+  {
+   "id": "pika",
+   "name": "PikaNetwork",
+   "address": "play.pika-network.net",
+   "country": "us",
+   "languages": [
+    "en"
+   ],
+   "tags": [
+    "BedWars",
+    "Factions",
+    "Prison",
+    "SkyBlock",
+    "Network"
+   ],
+   "versions": "1.8–26.3",
+   "website": "https://pika-network.net/",
+   "description": {
+    "en": "All-in-one network with BedWars, Factions, Prison and more.",
+    "tr": "BedWars, Factions, Prison ve daha fazlası tek ağda."
+   }
+  },
+  {
+   "id": "opblocks",
+   "name": "OPBlocks",
+   "address": "fun.opblocks.com",
+   "country": "us",
+   "languages": [
+    "en"
+   ],
+   "tags": [
+    "Prison",
+    "SkyBlock",
+    "SMP",
+    "Survival"
+   ],
+   "versions": "1.8–26.3",
+   "description": {
+    "en": "Prison, SkyBlock and Survival SMP network.",
+    "tr": "Prison, SkyBlock ve Survival SMP ağı."
+   }
+  },
+  {
+   "id": "talonmc",
+   "name": "TalonMC",
+   "address": "play.talonmc.net",
+   "country": "us",
+   "languages": [
+    "en"
+   ],
+   "tags": [
+    "Prison",
+    "SkyBlock",
+    "SMP",
+    "Cross-Play"
+   ],
+   "versions": "1.8–1.21.10",
+   "description": {
+    "en": "Prison and SkyBlock network.",
+    "tr": "Prison ve SkyBlock ağı."
+   }
+  },
+  {
+   "id": "mineberry",
+   "name": "MineBerry",
+   "address": "go.mineberry.org",
+   "country": "us",
+   "languages": [
+    "en"
+   ],
+   "tags": [
+    "BedWars",
+    "SkyWars",
+    "KitPvP",
+    "Minigames",
+    "Anarchy"
+   ],
+   "versions": "1.8–26.3",
+   "description": {
+    "en": "Minigames network with BedWars and SkyWars.",
+    "tr": "BedWars ve SkyWars sunan mini oyun ağı."
+   }
+  },
+  {
+   "id": "minepeak",
+   "name": "MinePeak",
+   "address": "go.minepeak.org",
+   "country": "us",
+   "languages": [
+    "en"
+   ],
+   "tags": [
+    "BedWars",
+    "LifeSteal",
+    "KitPvP",
+    "Minigames",
+    "SMP"
+   ],
+   "versions": "1.8–26.3",
+   "description": {
+    "en": "Lag-free minigames and LifeSteal network.",
+    "tr": "Takılmasız mini oyun ve LifeSteal ağı."
+   }
+  },
+  {
+   "id": "hoplite",
+   "name": "Hoplite",
+   "address": "hoplite.gg",
+   "country": "us",
+   "languages": [
+    "en"
+   ],
+   "tags": [
+    "Battle Royale",
+    "PvP",
+    "Minigames"
+   ],
+   "versions": "1.8–26.3",
+   "website": "https://hoplite.gg/",
+   "description": {
+    "en": "Battle royale PvP in Minecraft.",
+    "tr": "Minecraft'ta battle royale PvP."
+   }
+  },
+  {
+   "id": "minemen",
+   "name": "Minemen Club",
+   "address": "geo.minemen.club",
+   "country": "us",
+   "languages": [
+    "en"
+   ],
+   "tags": [
+    "Practice",
+    "PvP"
+   ],
+   "versions": "1.7–1.8",
+   "description": {
+    "en": "The classic competitive Practice PvP server.",
+    "tr": "Klasik rekabetçi Practice PvP sunucusu."
+   }
+  },
+  {
+   "id": "2b2t",
+   "name": "2b2t",
+   "address": "connect.2b2t.org",
+   "country": "us",
+   "languages": [
+    "en"
+   ],
+   "tags": [
+    "Anarchy",
+    "Survival",
+    "Vanilla"
+   ],
+   "versions": "1.12–26.3",
+   "website": "https://2b2t.org/",
+   "description": {
+    "en": "The oldest anarchy server: no rules, no resets since 2010.",
+    "tr": "En eski anarşi sunucusu: 2010'dan beri kural yok, sıfırlama yok."
+   }
+  },
+  {
+   "id": "manacube",
+   "name": "ManaCube",
+   "address": "play.manacube.com",
+   "country": "us",
+   "languages": [
+    "en"
+   ],
+   "tags": [
+    "SkyBlock",
+    "Parkour",
+    "Prison",
+    "Survival",
+    "Network"
+   ],
+   "versions": "1.8–26.3",
+   "website": "https://manacube.com/",
+   "description": {
+    "en": "Parkour, SkyBlock, Prison and RPG modes.",
+    "tr": "Parkour, SkyBlock, Prison ve RPG modları."
+   }
+  },
+  {
+   "id": "jartex",
+   "name": "JartexNetwork",
+   "address": "play.jartexnetwork.com",
+   "country": "us",
+   "languages": [
+    "en"
+   ],
+   "tags": [
+    "BedWars",
+    "SkyBlock",
+    "Prison",
+    "Factions",
+    "Network"
+   ],
+   "versions": "1.8–26.3",
+   "description": {
+    "en": "Minigames, SkyBlock and Prison network.",
+    "tr": "Mini oyun, SkyBlock ve Prison ağı."
+   }
+  },
+  {
+   "id": "archmc",
+   "name": "ArchMC",
+   "address": "gateway.arch.mc",
+   "country": "us",
+   "languages": [
+    "en"
+   ],
+   "tags": [
+    "BedWars",
+    "KitPvP",
+    "SkyWars",
+    "Minigames"
+   ],
+   "versions": "1.8–1.21",
+   "description": {
+    "en": "One of the biggest North American minigame networks.",
+    "tr": "Kuzey Amerika'nın büyük mini oyun ağlarından biri."
+   }
+  },
+  {
+   "id": "earthmc",
+   "name": "EarthMC",
+   "address": "play.earthmc.net",
+   "country": "us",
+   "languages": [
+    "en"
+   ],
+   "tags": [
+    "Towny",
+    "Earth",
+    "Roleplay",
+    "Economy"
+   ],
+   "versions": "1.8–26.3",
+   "website": "https://earthmc.net/",
+   "description": {
+    "en": "Towny on a 1:1000 Earth map with nations and wars.",
+    "tr": "Dünya haritasında uluslar ve savaşlarla Towny."
+   }
+  },
+  {
+   "id": "bagelsmp",
+   "name": "BagelSMP",
+   "address": "java.bagelsmp.com",
+   "country": "us",
+   "languages": [
+    "en"
+   ],
+   "tags": [
+    "SMP",
+    "Economy",
+    "PvP",
+    "Survival"
+   ],
+   "versions": "1.8–26.3",
+   "description": {
+    "en": "Competitive grinding SMP.",
+    "tr": "Rekabetçi kasılmalı SMP."
+   }
+  },
+  {
+   "id": "purpleprison",
+   "name": "Purple Prison",
+   "address": "purpleprison.net",
+   "country": "us",
+   "languages": [
+    "en"
+   ],
+   "tags": [
+    "Prison",
+    "PvP",
+    "Economy"
+   ],
+   "versions": "1.8–26.3",
+   "description": {
+    "en": "Long-running classic Prison server.",
+    "tr": "Köklü klasik Prison sunucusu."
+   }
+  },
+  {
+   "id": "skyblocknet",
+   "name": "Skyblock.net",
+   "address": "server.skyblock.net",
+   "country": "us",
+   "languages": [
+    "en"
+   ],
+   "tags": [
+    "SkyBlock",
+    "Economy",
+    "Parkour"
+   ],
+   "versions": "1.8–26.3",
+   "description": {
+    "en": "The original SkyBlock server by Noobcrew.",
+    "tr": "SkyBlock'un yaratıcısı Noobcrew'un orijinal sunucusu."
+   }
+  },
+  {
+   "id": "blossomcraft",
+   "name": "BlossomCraft",
+   "address": "play.blossomcraft.org",
+   "country": "us",
+   "languages": [
+    "en"
+   ],
+   "tags": [
+    "Survival",
+    "Economy",
+    "Jobs",
+    "Cross-Play"
+   ],
+   "versions": "1.21–26.3",
+   "description": {
+    "en": "Java and Bedrock economy survival.",
+    "tr": "Java ve Bedrock ekonomili survival."
+   }
+  },
+  {
+   "id": "fadecloud",
+   "name": "FadeCloud",
+   "address": "hub.fadecloud.com",
+   "country": "us",
+   "languages": [
+    "en"
+   ],
+   "tags": [
+    "Dungeons",
+    "RPG",
+    "Survival",
+    "Cross-Play"
+   ],
+   "versions": "1.8–26.3",
+   "description": {
+    "en": "Dungeon and RPG network with Bedrock support.",
+    "tr": "Bedrock destekli zindan ve RPG ağı."
+   }
+  },
+  {
+   "id": "pixelblock",
+   "name": "PixelBlock",
+   "address": "mc.pixelblockmc.com",
+   "country": "us",
+   "languages": [
+    "en"
+   ],
+   "tags": [
+    "Survival",
+    "SMP",
+    "Economy"
+   ],
+   "versions": "1.8–26.3",
+   "description": {
+    "en": "Survival network.",
+    "tr": "Survival ağı."
+   }
+  },
+  {
+   "id": "zetrex",
+   "name": "ZetrexMC",
+   "address": "play.zetrex.net",
+   "country": "us",
+   "languages": [
+    "en"
+   ],
+   "tags": [
+    "Survival",
+    "LifeSteal",
+    "Earth",
+    "Cross-Play"
+   ],
+   "versions": "1.16–26.3",
+   "description": {
+    "en": "Survival, LifeSteal and BedWars with crossplay.",
+    "tr": "Çapraz platform Survival, LifeSteal ve BedWars."
+   }
+  },
+  {
+   "id": "minepiece",
+   "name": "Minepiece",
+   "address": "play.minepiece.net",
+   "country": "us",
+   "languages": [
+    "en"
+   ],
+   "tags": [
+    "RPG",
+    "Adventure",
+    "PvP"
+   ],
+   "versions": "1.8–26.3",
+   "description": {
+    "en": "One Piece inspired MMORPG.",
+    "tr": "One Piece esintili MMORPG."
+   }
+  },
+  {
+   "id": "lotc",
+   "name": "Lord of the Craft",
+   "address": "mc.lotc.co",
+   "country": "us",
+   "languages": [
+    "en"
+   ],
+   "tags": [
+    "Roleplay",
+    "Survival",
+    "Economy"
+   ],
+   "versions": "1.21–1.21.5",
+   "description": {
+    "en": "Medieval fantasy roleplay community.",
+    "tr": "Orta çağ fantastik rol yapma topluluğu."
+   }
+  },
+  {
+   "id": "havoc",
+   "name": "Havoc Games",
+   "address": "hub.havoc.games",
+   "country": "us",
+   "languages": [
+    "en"
+   ],
+   "tags": [
+    "Zombie",
+    "Survival",
+    "PvP",
+    "Roleplay"
+   ],
+   "versions": "26.2–26.3",
+   "description": {
+    "en": "Walking Dead themed zombie survival.",
+    "tr": "Walking Dead temalı zombi survival."
+   }
+  },
+  {
+   "id": "mellowcraft",
+   "name": "MellowCraft",
+   "address": "play.mellowcraft.org",
+   "country": "us",
+   "languages": [
+    "en"
+   ],
+   "tags": [
+    "Survival",
+    "SMP",
+    "Cross-Play"
+   ],
+   "versions": "1.8–26.3",
+   "description": {
+    "en": "Survival network for Java and Bedrock.",
+    "tr": "Java ve Bedrock için survival ağı."
+   }
+  },
+  {
+   "id": "originrealms",
+   "name": "Origin Realms",
+   "address": "play.originrealms.com",
+   "country": "us",
+   "languages": [
+    "en"
+   ],
+   "tags": [
+    "RPG",
+    "Adventure",
+    "Survival"
+   ],
+   "versions": "1.21–26.3",
+   "website": "https://originrealms.com/",
+   "description": {
+    "en": "Fantasy survival MMO with custom content.",
+    "tr": "Özgün içerikli fantastik survival MMO."
+   }
+  },
+  {
+   "id": "cubecraft",
+   "name": "CubeCraft",
+   "address": "play.cubecraft.net",
+   "country": "gb",
+   "languages": [
+    "en"
+   ],
+   "tags": [
+    "Minigames",
+    "SkyWars",
+    "BedWars",
+    "Parkour",
+    "Network"
+   ],
+   "versions": "1.8–26.3",
+   "website": "https://www.cubecraft.net/",
+   "description": {
+    "en": "Huge minigame network, 24/7 games.",
+    "tr": "Günün her saati oyun dolu dev mini oyun ağı."
+   },
+   "featured": true
+  },
+  {
+   "id": "mccisland",
+   "name": "MCC Island",
+   "address": "play.mccisland.net",
+   "country": "gb",
+   "languages": [
+    "en"
+   ],
+   "tags": [
+    "Minigames",
+    "Events",
+    "Parkour"
+   ],
+   "versions": "1.21.11+",
+   "website": "https://mccisland.net/",
+   "description": {
+    "en": "The official Minecraft Championship island with party games.",
+    "tr": "Minecraft Championship'in resmi adası; parti oyunları."
+   },
+   "featured": true
+  },
+  {
+   "id": "lifestealsmp",
+   "name": "LifeSteal SMP",
+   "address": "play.lifestealsmp.com",
+   "country": "gb",
+   "languages": [
+    "en"
+   ],
+   "tags": [
+    "LifeSteal",
+    "SMP",
+    "PvP",
+    "Cross-Play"
+   ],
+   "versions": "1.8–26.3",
+   "description": {
+    "en": "Semi-vanilla SMP where you steal hearts.",
+    "tr": "Kalp çalmalı yarı-vanilla SMP."
+   }
+  },
+  {
+   "id": "unstable",
+   "name": "Unstable Network",
+   "address": "unstable.sh",
+   "country": "gb",
+   "languages": [
+    "en"
+   ],
+   "tags": [
+    "KitPvP",
+    "Practice",
+    "PvP"
+   ],
+   "versions": "1.7–26.3",
+   "description": {
+    "en": "Semi-FFA PvP arenas with 50+ kits.",
+    "tr": "50'den fazla kitli yarı-FFA PvP arenaları."
+   }
+  },
+  {
+   "id": "cyt",
+   "name": "CraftYourTown",
+   "address": "play.cyt.gg",
+   "country": "gb",
+   "languages": [
+    "en"
+   ],
+   "tags": [
+    "Towny",
+    "SkyBlock",
+    "SMP",
+    "Slimefun"
+   ],
+   "versions": "1.8–26.3",
+   "description": {
+    "en": "Towny and SkyBlock community since 2017.",
+    "tr": "2017'den beri Towny ve SkyBlock topluluğu."
+   }
+  },
+  {
+   "id": "roleplayhub",
+   "name": "Roleplay Hub",
+   "address": "mc.roleplayhub.net",
+   "country": "gb",
+   "languages": [
+    "en"
+   ],
+   "tags": [
+    "Roleplay",
+    "City"
+   ],
+   "versions": "1.8–26.3",
+   "description": {
+    "en": "Roleplay hub with school and city RP.",
+    "tr": "Okul ve şehir rol yapma merkezi."
+   }
+  },
+  {
+   "id": "gommehd",
+   "name": "GommeHD.net",
+   "address": "gommehd.net",
+   "country": "de",
+   "languages": [
+    "de"
+   ],
+   "tags": [
+    "Minigames",
+    "BedWars",
+    "SkyWars",
+    "Network"
+   ],
+   "versions": "1.8–26.3",
+   "website": "https://www.gommehd.net/",
+   "description": {
+    "en": "Germany's biggest minigame network.",
+    "tr": "Almanya'nın en büyük mini oyun ağı."
+   },
+   "featured": true
+  },
+  {
+   "id": "griefergames",
+   "name": "GrieferGames",
+   "address": "connect.griefergames.net",
+   "country": "de",
+   "languages": [
+    "de"
+   ],
+   "tags": [
+    "CityBuild",
+    "Economy",
+    "Survival"
+   ],
+   "versions": "1.8–26.3",
+   "description": {
+    "en": "Popular German CityBuild server.",
+    "tr": "Popüler Alman CityBuild sunucusu."
+   }
+  },
+  {
+   "id": "twerion",
+   "name": "Twerion",
+   "address": "twerion.net",
+   "country": "de",
+   "languages": [
+    "de"
+   ],
+   "tags": [
+    "BedWars",
+    "OneBlock",
+    "LifeSteal",
+    "Minigames"
+   ],
+   "versions": "1.8–26.3",
+   "description": {
+    "en": "Large German network open to all accounts.",
+    "tr": "Tüm hesaplara açık büyük Alman ağı."
+   }
+  },
+  {
+   "id": "4blocks",
+   "name": "4Blocks",
+   "address": "play.4blocks.gg",
+   "country": "de",
+   "languages": [
+    "de"
+   ],
+   "tags": [
+    "RPG",
+    "Roleplay",
+    "Minigames",
+    "Cross-Play"
+   ],
+   "versions": "1.8–26.2",
+   "description": {
+    "en": "MMORPG, roleplay and party games.",
+    "tr": "MMORPG, rol yapma ve parti oyunları."
+   }
+  },
+  {
+   "id": "maceful",
+   "name": "Maceful",
+   "address": "play.maceful.net",
+   "country": "de",
+   "languages": [
+    "de"
+   ],
+   "tags": [
+    "PvP",
+    "SMP",
+    "Practice",
+    "Anarchy"
+   ],
+   "versions": "1.8–26.3",
+   "description": {
+    "en": "Mace and crystal vanilla PvP SMP.",
+    "tr": "Gürz ve kristal odaklı vanilla PvP SMP."
+   }
+  },
+  {
+   "id": "mvndicraft",
+   "name": "Mvndicraft",
+   "address": "mc.mvndicraft.net",
+   "country": "de",
+   "languages": [
+    "de"
+   ],
+   "tags": [
+    "Towny",
+    "Earth",
+    "Roleplay",
+    "Economy"
+   ],
+   "versions": "1.8–26.3",
+   "description": {
+    "en": "Medieval soft-RP geopolitical server.",
+    "tr": "Orta çağ temalı jeopolitik sunucu."
+   }
+  },
+  {
+   "id": "cubeside",
+   "name": "Cubeside",
+   "address": "server.cubeside.de",
+   "country": "de",
+   "languages": [
+    "de"
+   ],
+   "tags": [
+    "Survival",
+    "SkyBlock",
+    "Economy",
+    "Minigames"
+   ],
+   "versions": "26.1–26.3",
+   "description": {
+    "en": "One of Germany's oldest servers, since 2011.",
+    "tr": "2011'den beri Almanya'nın en eski sunucularından."
+   }
+  },
+  {
+   "id": "universocraft",
+   "name": "UniversoCraft",
+   "address": "mc.universocraft.com",
+   "country": "cl",
+   "languages": [
+    "es"
+   ],
+   "tags": [
+    "Minigames",
+    "SkyWars",
+    "BedWars",
+    "Network"
+   ],
+   "versions": "1.8–26.3",
+   "website": "https://universocraft.com/",
+   "description": {
+    "en": "The biggest Spanish-speaking minigame network.",
+    "tr": "İspanyolca konuşulan en büyük mini oyun ağı."
+   },
+   "featured": true
+  },
+  {
+   "id": "supercraft",
+   "name": "SuperCraft",
+   "address": "play.supercraft.es",
+   "country": "es",
+   "languages": [
+    "es"
+   ],
+   "tags": [
+    "Survival",
+    "SkyBlock",
+    "Creative",
+    "Economy"
+   ],
+   "versions": "1.8–26.3",
+   "description": {
+    "en": "Spanish-speaking network since 2020.",
+    "tr": "2020'den beri İspanyolca ağ."
+   }
+  },
+  {
+   "id": "librecraft",
+   "name": "LibreCraft",
+   "address": "mc.librecraft.org",
+   "country": "es",
+   "languages": [
+    "es"
+   ],
+   "tags": [
+    "Minigames",
+    "Factions",
+    "Prison",
+    "SkyBlock"
+   ],
+   "versions": "1.8–26.2",
+   "description": {
+    "en": "Spanish network with many minigames.",
+    "tr": "Çok sayıda mini oyunlu İspanyol ağı."
+   }
+  },
+  {
+   "id": "survivaldub",
+   "name": "Survivaldub",
+   "address": "mc.survivaldub.com",
+   "country": "es",
+   "languages": [
+    "es"
+   ],
+   "tags": [
+    "Survival",
+    "SkyBlock",
+    "KitPvP",
+    "Prison"
+   ],
+   "versions": "1.8–26.3",
+   "description": {
+    "en": "Spanish network running for 14 years.",
+    "tr": "14 yıldır açık İspanyol ağı."
+   }
+  },
+  {
+   "id": "pixelmc",
+   "name": "PixelMC",
+   "address": "pixel-mc.net",
+   "country": "fr",
+   "languages": [
+    "fr"
+   ],
+   "tags": [
+    "Minigames",
+    "OneBlock",
+    "Practice",
+    "SMP"
+   ],
+   "versions": "1.20–26.3",
+   "description": {
+    "en": "French community network.",
+    "tr": "Fransız topluluk ağı."
+   }
+  },
+  {
+   "id": "firemc",
+   "name": "FireMC",
+   "address": "play.firemc.fun",
+   "country": "in",
+   "languages": [
+    "en"
+   ],
+   "tags": [
+    "LifeSteal",
+    "PvP",
+    "Survival"
+   ],
+   "versions": "1.13–26.3",
+   "description": {
+    "en": "Indian LifeSteal and PvP network.",
+    "tr": "Hindistan'dan LifeSteal ve PvP ağı."
+   }
+  },
+  {
+   "id": "ashsmp",
+   "name": "AshSMP",
+   "address": "play.ashsmp.in",
+   "country": "in",
+   "languages": [
+    "en"
+   ],
+   "tags": [
+    "SMP",
+    "LifeSteal",
+    "BoxPvP",
+    "Cross-Play"
+   ],
+   "versions": "1.21–26.3",
+   "description": {
+    "en": "Java and Bedrock SMP from India.",
+    "tr": "Hindistan'dan Java ve Bedrock SMP."
+   }
+  },
+  {
+   "id": "universalmc",
+   "name": "UniversalMC",
+   "address": "universalmc.fun",
+   "country": "in",
+   "languages": [
+    "en"
+   ],
+   "tags": [
+    "LifeSteal",
+    "Economy",
+    "Practice",
+    "SMP"
+   ],
+   "versions": "1.21–26.3",
+   "description": {
+    "en": "LifeSteal, economy and Practice PvP.",
+    "tr": "LifeSteal, ekonomi ve Practice PvP."
+   }
+  },
+  {
+   "id": "rapy",
+   "name": "Rapy.pl",
+   "address": "proxy.rapy.pl",
+   "country": "pl",
+   "languages": [
+    "pl"
+   ],
+   "tags": [
+    "Survival",
+    "Minigames",
+    "SkyBlock",
+    "Network"
+   ],
+   "versions": "1.8–26.3",
+   "description": {
+    "en": "Poland's busiest network.",
+    "tr": "Polonya'nın en kalabalık ağı."
+   },
+   "featured": true
+  },
+  {
+   "id": "craftmc",
+   "name": "CraftMC.pl",
+   "address": "mc.craftmc.pl",
+   "country": "pl",
+   "languages": [
+    "pl"
+   ],
+   "tags": [
+    "BedWars",
+    "SkyWars",
+    "OneBlock",
+    "Prison",
+    "Minigames"
+   ],
+   "versions": "1.8–26.3",
+   "description": {
+    "en": "Large Polish minigame network.",
+    "tr": "Büyük Polonya mini oyun ağı."
+   }
+  },
+  {
+   "id": "bfsmc",
+   "name": "bfsmc.pl",
+   "address": "mc.bfsmc.pl",
+   "country": "pl",
+   "languages": [
+    "pl"
+   ],
+   "tags": [
+    "OneBlock",
+    "SkyBlock",
+    "Survival",
+    "BedWars"
+   ],
+   "versions": "1.8–26.3",
+   "description": {
+    "en": "OneBlock, SkyBlock and Survival.",
+    "tr": "OneBlock, SkyBlock ve Survival."
+   }
+  },
+  {
+   "id": "blokowo",
+   "name": "Blokowo.pl",
+   "address": "graj.blokowo.pl",
+   "country": "pl",
+   "languages": [
+    "pl"
+   ],
+   "tags": [
+    "Survival",
+    "OneBlock",
+    "BoxPvP",
+    "LifeSteal"
+   ],
+   "versions": "1.21–26.3",
+   "description": {
+    "en": "Polish Survival, OneBlock and BoxPvP.",
+    "tr": "Polonya'dan Survival, OneBlock ve BoxPvP."
+   }
+  },
+  {
+   "id": "kociakmc",
+   "name": "KociakMC",
+   "address": "mc.kociakmc.pl",
+   "country": "pl",
+   "languages": [
+    "pl"
+   ],
+   "tags": [
+    "Survival",
+    "UHC",
+    "Events",
+    "Vanilla"
+   ],
+   "versions": "1.8–26.3",
+   "description": {
+    "en": "Events, building contests and PvP tournaments.",
+    "tr": "Etkinlikler, inşa yarışmaları ve PvP turnuvaları."
+   }
+  },
+  {
+   "id": "goodplay",
+   "name": "GoodPlay.pl",
+   "address": "play.goodplay.pl",
+   "country": "pl",
+   "languages": [
+    "pl"
+   ],
+   "tags": [
+    "Anarchy",
+    "BedWars",
+    "SkyBlock",
+    "Survival"
+   ],
+   "versions": "1.18–26.2",
+   "description": {
+    "en": "Three popular modes in one network.",
+    "tr": "Üç popüler mod tek ağda."
+   }
+  },
+  {
+   "id": "rederevo",
+   "name": "Rede Revo",
+   "address": "jogar.rederevo.com",
+   "country": "br",
+   "languages": [
+    "pt"
+   ],
+   "tags": [
+    "Survival",
+    "SMP",
+    "Economy",
+    "PvP"
+   ],
+   "versions": "1.12–26.2",
+   "description": {
+    "en": "Brazilian survival network.",
+    "tr": "Brezilya survival ağı."
+   }
+  },
+  {
+   "id": "spotgames",
+   "name": "Spot Games",
+   "address": "spotgames.net",
+   "country": "br",
+   "languages": [
+    "pt"
+   ],
+   "tags": [
+    "Minigames",
+    "BedWars",
+    "Parkour",
+    "PvP"
+   ],
+   "versions": "1.8–26.2",
+   "description": {
+    "en": "Brazilian minigames network, 12+ years.",
+    "tr": "12 yılı aşkın Brezilya mini oyun ağı."
+   }
+  },
+  {
+   "id": "brasilcraft",
+   "name": "BrasilCraft",
+   "address": "jogarbrasilcraft.com",
+   "country": "br",
+   "languages": [
+    "pt"
+   ],
+   "tags": [
+    "Survival",
+    "SkyBlock",
+    "Slimefun",
+    "Economy"
+   ],
+   "versions": "1.8–26.3",
+   "description": {
+    "en": "Survival and Slimefun.",
+    "tr": "Survival ve Slimefun."
+   }
+  },
+  {
+   "id": "armamc",
+   "name": "Armageddon",
+   "address": "armamc.com",
+   "country": "br",
+   "languages": [
+    "pt"
+   ],
+   "tags": [
+    "Survival",
+    "Economy",
+    "Jobs",
+    "PvP"
+   ],
+   "versions": "1.14–1.21",
+   "description": {
+    "en": "Brazilian survival with jobs and economy.",
+    "tr": "Meslek ve ekonomili Brezilya survival'ı."
+   }
+  },
+  {
+   "id": "sparklypower",
+   "name": "SparklyPower",
+   "address": "mc.sparklypower.net",
+   "country": "br",
+   "languages": [
+    "pt"
+   ],
+   "tags": [
+    "Survival",
+    "Economy",
+    "Roleplay",
+    "Cross-Play"
+   ],
+   "versions": "1.8–26.3",
+   "description": {
+    "en": "Survival since 2014 with PC and mobile crossplay.",
+    "tr": "2014'ten beri PC ve mobil ortak survival."
+   }
+  },
+  {
+   "id": "funtime",
+   "name": "FunTime",
+   "address": "mc.funtime.su",
+   "country": "ru",
+   "languages": [
+    "ru"
+   ],
+   "tags": [
+    "Survival",
+    "Anarchy",
+    "PvP",
+    "Network"
+   ],
+   "versions": "1.8–26.3",
+   "description": {
+    "en": "One of the biggest Russian-speaking networks.",
+    "tr": "Rusça konuşulan en büyük ağlardan biri."
+   },
+   "featured": true
+  },
+  {
+   "id": "holyworld",
+   "name": "HolyWorld",
+   "address": "mc.holyworld.ru",
+   "country": "ru",
+   "languages": [
+    "ru"
+   ],
+   "tags": [
+    "Anarchy",
+    "Survival",
+    "PvP"
+   ],
+   "versions": "1.8–26.3",
+   "description": {
+    "en": "Popular Russian anarchy and survival.",
+    "tr": "Popüler Rus anarşi ve survival sunucusu."
+   }
+  },
+  {
+   "id": "mineland",
+   "name": "MineLand",
+   "address": "mc.mineland.net",
+   "country": "ru",
+   "languages": [
+    "ru"
+   ],
+   "tags": [
+    "Minigames",
+    "SkyBlock",
+    "Survival",
+    "Network"
+   ],
+   "versions": "1.8–26.3",
+   "description": {
+    "en": "Russian minigame network.",
+    "tr": "Rus mini oyun ağı."
+   }
+  },
+  {
+   "id": "justmc",
+   "name": "JustMC",
+   "address": "play.justmc.io",
+   "country": "ru",
+   "languages": [
+    "ru"
+   ],
+   "tags": [
+    "Creative",
+    "Minigames",
+    "SkyBlock"
+   ],
+   "versions": "1.21.11",
+   "description": {
+    "en": "Creative builds and many custom modes.",
+    "tr": "Yaratıcı yapılar ve özgün modlar."
+   }
+  },
+  {
+   "id": "vanillasquad",
+   "name": "VanillaSquad",
+   "address": "mc.vanillasquad.com",
+   "country": "ru",
+   "languages": [
+    "ru"
+   ],
+   "tags": [
+    "SMP",
+    "Vanilla",
+    "Survival"
+   ],
+   "versions": "1.8–26.3",
+   "description": {
+    "en": "Vanilla-feel SMP.",
+    "tr": "Vanilla hissiyatlı SMP."
+   }
+  },
+  {
+   "id": "harmserver",
+   "name": "Harm Server",
+   "address": "play.harmserver.nl",
+   "country": "nl",
+   "languages": [
+    "en"
+   ],
+   "tags": [
+    "SkyBlock",
+    "Survival",
+    "Parkour"
+   ],
+   "versions": "1.7–26.3",
+   "description": {
+    "en": "YouTuber Harm's Dutch server.",
+    "tr": "YouTuber Harm'ın Hollanda sunucusu."
+   }
+  },
+  {
+   "id": "chickencraft",
+   "name": "ChickenCraft LifeSteal",
+   "address": "play.chickencraft.nl",
+   "country": "nl",
+   "languages": [
+    "en"
+   ],
+   "tags": [
+    "LifeSteal",
+    "Anarchy",
+    "PvP",
+    "Cross-Play"
+   ],
+   "versions": "1.8–26.3",
+   "description": {
+    "en": "Public LifeSteal SMP for Java and Bedrock.",
+    "tr": "Java ve Bedrock için herkese açık LifeSteal SMP."
+   }
+  },
+  {
+   "id": "koeksmp",
+   "name": "KoekSMP",
+   "address": "play.koeksmp.nl",
+   "country": "nl",
+   "languages": [
+    "en"
+   ],
+   "tags": [
+    "SMP",
+    "PvP",
+    "Economy"
+   ],
+   "versions": "1.21.11–26.3",
+   "description": {
+    "en": "Dutch raid SMP without claims.",
+    "tr": "Arazi korumasız Hollanda raid SMP'si."
+   }
+  },
+  {
+   "id": "contentveen",
+   "name": "ContentVeen",
+   "address": "play.contentveen.nl",
+   "country": "nl",
+   "languages": [
+    "en"
+   ],
+   "tags": [
+    "Survival",
+    "SkyBlock",
+    "Creative",
+    "Parkour"
+   ],
+   "versions": "1.8–26.3",
+   "description": {
+    "en": "Survival, SkyBlock, Blockhunt and Creative.",
+    "tr": "Survival, SkyBlock, Blockhunt ve Creative."
+   }
+  },
+  {
+   "id": "minestad",
+   "name": "MineStad",
+   "address": "play.minestad.nl",
+   "country": "nl",
+   "languages": [
+    "en"
+   ],
+   "tags": [
+    "SkyBlock",
+    "SMP",
+    "Survival",
+    "BedWars"
+   ],
+   "versions": "1.8–26.3",
+   "description": {
+    "en": "Dutch BedWars, Survival and SkyBlock.",
+    "tr": "Hollanda'dan BedWars, Survival ve SkyBlock."
+   }
+  },
+  {
+   "id": "alwination",
+   "name": "AlwiNation",
+   "address": "java.alwination.id",
+   "country": "id",
+   "languages": [
+    "en"
+   ],
+   "tags": [
+    "Survival",
+    "SkyBlock",
+    "SMP",
+    "Earth"
+   ],
+   "versions": "1.8–26.3",
+   "description": {
+    "en": "Indonesia's biggest server.",
+    "tr": "Endonezya'nın en büyük sunucusu."
+   },
+   "featured": true
+  },
+  {
+   "id": "kandangalwi",
+   "name": "KandangAlwi",
+   "address": "kalwi.id",
+   "country": "id",
+   "languages": [
+    "en"
+   ],
+   "tags": [
+    "SkyBlock",
+    "OneBlock",
+    "Survival",
+    "Cross-Play"
+   ],
+   "versions": "1.8–26.2",
+   "description": {
+    "en": "Indonesian SkyBlock and OneBlock.",
+    "tr": "Endonezya'dan SkyBlock ve OneBlock."
+   }
+  },
+  {
+   "id": "minesive",
+   "name": "Minesive",
+   "address": "minesive.com",
+   "country": "id",
+   "languages": [
+    "en"
+   ],
+   "tags": [
+    "SMP",
+    "OneBlock",
+    "Practice",
+    "Events"
+   ],
+   "versions": "1.8–26.3",
+   "description": {
+    "en": "Indonesian SMP and Practice network.",
+    "tr": "Endonezya SMP ve Practice ağı."
+   }
+  },
+  {
+   "id": "kaizen",
+   "name": "Kaizen Network",
+   "address": "play.kaizenmc.id",
+   "country": "id",
+   "languages": [
+    "en"
+   ],
+   "tags": [
+    "SkyBlock",
+    "Survival",
+    "Roleplay",
+    "Cross-Play"
+   ],
+   "versions": "1.21.6–26.3",
+   "description": {
+    "en": "Indonesian network.",
+    "tr": "Endonezya ağı."
+   }
+  }
+ ]
+}

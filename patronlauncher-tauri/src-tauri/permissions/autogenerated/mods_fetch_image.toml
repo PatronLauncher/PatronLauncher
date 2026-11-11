@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-mods-fetch-image"
+description = "Enables the mods_fetch_image command without any pre-configured scope."
+commands.allow = ["mods_fetch_image"]
+
+[[permission]]
+identifier = "deny-mods-fetch-image"
+description = "Denies the mods_fetch_image command without any pre-configured scope."
+commands.deny = ["mods_fetch_image"]

@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-install-profile"
+description = "Enables the install_profile command without any pre-configured scope."
+commands.allow = ["install_profile"]
+
+[[permission]]
+identifier = "deny-install-profile"
+description = "Denies the install_profile command without any pre-configured scope."
+commands.deny = ["install_profile"]

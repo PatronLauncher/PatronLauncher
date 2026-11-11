@@ -1,0 +1,4 @@
+.side .logo{justify-content:center}
+.brand-wordmark{display:block;width:170px;height:auto;flex:none}
+.brand-icon{display:none;width:34px;height:34px;object-fit:contain;flex:none}
+@media(max-width:860px){.brand-wordmark{display:none}.brand-icon{display:block}}

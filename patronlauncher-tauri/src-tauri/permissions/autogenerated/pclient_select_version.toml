@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-pclient-select-version"
+description = "Enables the pclient_select_version command without any pre-configured scope."
+commands.allow = ["pclient_select_version"]
+
+[[permission]]
+identifier = "deny-pclient-select-version"
+description = "Denies the pclient_select_version command without any pre-configured scope."
+commands.deny = ["pclient_select_version"]

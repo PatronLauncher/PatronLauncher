@@ -1,0 +1,12 @@
+target/
+.tools/
+data/
+dist/
+.cache/
+.smoke-data/
+*.log
+.secrets/
+.remember/
+# Kaynak görseller ve yerel denemeler depoya girmez; derlemede kullanılan sürümleri src altında.
+Docs/KapakFotograflari/
+Docs/*.mp3

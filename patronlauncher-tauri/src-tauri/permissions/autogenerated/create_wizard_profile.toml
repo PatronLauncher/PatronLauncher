@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-create-wizard-profile"
+description = "Enables the create_wizard_profile command without any pre-configured scope."
+commands.allow = ["create_wizard_profile"]
+
+[[permission]]
+identifier = "deny-create-wizard-profile"
+description = "Denies the create_wizard_profile command without any pre-configured scope."
+commands.deny = ["create_wizard_profile"]

@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-preview-performance-pack"
+description = "Enables the preview_performance_pack command without any pre-configured scope."
+commands.allow = ["preview_performance_pack"]
+
+[[permission]]
+identifier = "deny-preview-performance-pack"
+description = "Denies the preview_performance_pack command without any pre-configured scope."
+commands.deny = ["preview_performance_pack"]

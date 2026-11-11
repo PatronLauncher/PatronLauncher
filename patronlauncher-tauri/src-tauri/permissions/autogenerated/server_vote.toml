@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-server-vote"
+description = "Enables the server_vote command without any pre-configured scope."
+commands.allow = ["server_vote"]
+
+[[permission]]
+identifier = "deny-server-vote"
+description = "Denies the server_vote command without any pre-configured scope."
+commands.deny = ["server_vote"]

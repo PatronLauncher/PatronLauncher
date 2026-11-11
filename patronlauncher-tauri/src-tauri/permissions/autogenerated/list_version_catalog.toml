@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-list-version-catalog"
+description = "Enables the list_version_catalog command without any pre-configured scope."
+commands.allow = ["list_version_catalog"]
+
+[[permission]]
+identifier = "deny-list-version-catalog"
+description = "Denies the list_version_catalog command without any pre-configured scope."
+commands.deny = ["list_version_catalog"]

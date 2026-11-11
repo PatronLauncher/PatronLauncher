@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-install-java"
+description = "Enables the install_java command without any pre-configured scope."
+commands.allow = ["install_java"]
+
+[[permission]]
+identifier = "deny-install-java"
+description = "Denies the install_java command without any pre-configured scope."
+commands.deny = ["install_java"]

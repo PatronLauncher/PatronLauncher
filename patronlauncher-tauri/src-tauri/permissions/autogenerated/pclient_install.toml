@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-pclient-install"
+description = "Enables the pclient_install command without any pre-configured scope."
+commands.allow = ["pclient_install"]
+
+[[permission]]
+identifier = "deny-pclient-install"
+description = "Denies the pclient_install command without any pre-configured scope."
+commands.deny = ["pclient_install"]

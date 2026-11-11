@@ -1,0 +1,3 @@
+/* Native chrome only; prototype CSS is unchanged. */
+.desktop-shell{height:100%;display:flex;flex-direction:column}.prototype-viewport{position:relative;flex:1;min-height:0;isolation:isolate;contain:layout paint}
+.titlebar{height:30px;flex:none;display:flex;align-items:center;justify-content:space-between;padding-left:14px;background:var(--bg);color:var(--muted);font-size:12px;user-select:none}.window-controls{display:flex;height:100%}.window-controls button{width:46px;border:0;background:transparent;cursor:pointer}.window-controls button:hover{background:var(--tone-24)}.window-controls .window-close:hover{background:var(--red2);color:var(--text)}

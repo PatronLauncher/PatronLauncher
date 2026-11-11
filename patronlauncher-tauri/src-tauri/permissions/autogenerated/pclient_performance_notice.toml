@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-pclient-performance-notice"
+description = "Enables the pclient_performance_notice command without any pre-configured scope."
+commands.allow = ["pclient_performance_notice"]
+
+[[permission]]
+identifier = "deny-pclient-performance-notice"
+description = "Denies the pclient_performance_notice command without any pre-configured scope."
+commands.deny = ["pclient_performance_notice"]

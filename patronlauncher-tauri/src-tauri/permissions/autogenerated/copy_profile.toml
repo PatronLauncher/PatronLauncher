@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-copy-profile"
+description = "Enables the copy_profile command without any pre-configured scope."
+commands.allow = ["copy_profile"]
+
+[[permission]]
+identifier = "deny-copy-profile"
+description = "Denies the copy_profile command without any pre-configured scope."
+commands.deny = ["copy_profile"]

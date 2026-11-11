@@ -1,0 +1,313 @@
+.profiles-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(290px, 100%), 1fr));
+  align-items: stretch;
+}
+.profile-card {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-wrap: anywhere;
+}
+.profile-card h4,
+.profile-card p {
+  margin: 0;
+}
+.profile-card .ic {
+  margin-bottom: 0;
+}
+.profile-card .actions {
+  margin-top: auto;
+  gap: 8px;
+}
+.profile-card .btn {
+  height: auto;
+  min-height: 38px;
+  padding: 8px 12px;
+  max-width: 100%;
+  white-space: normal;
+}
+.profile-badges {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.profile-badges .bd {
+  margin: 0;
+  letter-spacing: 0;
+}
+.profile-ready {
+  color: var(--green);
+  background: var(--tone-7);
+}
+.profile-modal {
+  width: min(480px, calc(100vw - 32px));
+  max-height: calc(100vh - 48px);
+  overflow: auto;
+}
+.profile-modal .modal-heading {
+  justify-content: space-between;
+  flex-wrap: nowrap;
+  margin-bottom: 16px;
+}
+.profile-modal h2 {
+  font-size: 21px;
+}
+.profile-modal form > .actions {
+  margin-top: 18px;
+}
+.wizard-options {
+  display: grid;
+  gap: 12px;
+  margin-top: 18px;
+}
+.wizard-options .btn {
+  height: auto;
+  min-height: 52px;
+  justify-content: flex-start;
+  white-space: normal;
+  text-align: left;
+}
+.wizard-options .btn > span:last-child {
+  margin-left: auto;
+  flex: none;
+}
+.sidebar-create {
+  flex: none;
+  justify-content: flex-start;
+}
+.side {
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+.side nav,
+.side .logo,
+.side .cur {
+  flex-shrink: 0;
+}
+@media (max-width: 860px) {
+  .sidebar-create {
+    padding: 0;
+    justify-content: center;
+  }
+  .sidebar-create .t {
+    display: none;
+  }
+}
+.home-modes {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 22px;
+}
+.home-launch-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 280px);
+  gap: 24px;
+  align-items: center;
+}
+.home-game-choice > .lbl {
+  display: block;
+  margin: 12px 0 8px;
+}
+.home-game-choice .actions select {
+  flex: 1;
+  min-width: 180px;
+  width: auto;
+}
+.home-play-buttons {
+  display: flex;
+  gap: 8px;
+}
+.home-play-buttons .play {
+  flex: 1;
+  min-width: 0;
+}
+.home-play-buttons > .btn {
+  height: 68px;
+}
+.home-play-detail {
+  text-align: center;
+  margin-top: 10px;
+  overflow-wrap: anywhere;
+}
+.home-profile {
+  height: auto;
+  min-height: 72px;
+  padding: 12px;
+  flex-wrap: wrap;
+}
+.home-profile > div {
+  flex: 1;
+  min-width: 100px;
+}
+.home-profile small {
+  display: block;
+}
+.home-ready {
+  margin-top: 12px;
+}
+.home-ready .btn {
+  margin-top: 8px;
+}
+.home-launch .meta {
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.home-launch .meta svg {
+  width: 15px;
+  height: 15px;
+  vertical-align: middle;
+}
+@media (max-width: 1000px) {
+  .home-launch-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.profiles-toolbar {
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+.profile-card {
+  position: relative;
+  isolation: isolate;
+  overflow: visible;
+}
+.profile-background {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+  opacity: 0.18;
+  z-index: -1;
+  pointer-events: none;
+}
+.profile-icon {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  border-radius: 10px;
+}
+.profile-description {
+  font-size: 12px;
+  white-space: pre-wrap;
+  color: var(--muted);
+  max-height: 80px;
+  overflow: auto;
+}
+.profile-card .actions {
+  display: flex;
+  flex-wrap: nowrap;
+}
+.profile-card .profile-play {
+  order: -1;
+  flex: 1;
+  min-height: 44px;
+  font-weight: 700;
+}
+.profile-menu {
+  position: relative;
+}
+.profile-menu summary {
+  list-style: none;
+  cursor: pointer;
+  font-size: 22px;
+}
+.profile-menu summary::-webkit-details-marker {
+  display: none;
+}
+.profile-menu[open] {
+  z-index: 20;
+}
+.profile-menu-items {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 8px);
+  min-width: 190px;
+  padding: 8px;
+  display: grid;
+  gap: 4px;
+  background: var(--tone-8);
+  border: 1px solid var(--tone-9);
+  border-radius: 12px;
+  box-shadow: 0 4px 10px var(--tone-10);
+}
+.profile-menu-items .btn {
+  justify-content: flex-start;
+  width: 100%;
+  text-align: left;
+}
+.wizard-option span:first-of-type {
+  display: grid;
+  gap: 5px;
+}
+.wizard-option small {
+  font-size: 11px;
+  font-weight: 400;
+  opacity: 0.65;
+}
+.wizard-steps {
+  list-style: none;
+  display: flex;
+  gap: 8px;
+  padding: 0;
+  margin: 8px 0 24px;
+}
+.wizard-steps li {
+  flex: 1;
+  padding: 10px 5px;
+  border-bottom: 2px solid var(--tone-11);
+  font-size: 12px;
+  color: var(--tone-12);
+}
+.wizard-steps .active {
+  color: var(--tone-13);
+  border-color: var(--red, var(--tone-14));
+}
+.wizard-fields {
+  display: grid;
+  gap: 18px;
+}
+.wizard-fields .lbl {
+  display: grid;
+  gap: 8px;
+}
+.wizard-fields label:has(input[type="checkbox"]) {
+  display: flex;
+  align-items: center;
+}
+.wizard-fields textarea {
+  height: auto;
+  resize: vertical;
+  min-height: 85px;
+}
+.wizard-fields input[type="file"] {
+  width: 100%;
+  font-size: 12px;
+}
+.wizard-preview {
+  max-width: 100%;
+  object-fit: cover;
+  border-radius: 10px;
+}
+.wizard-preview.icon {
+  width: 80px;
+  height: 80px;
+}
+.wizard-preview.background {
+  width: 100%;
+  height: 140px;
+}
+.wizard-footer {
+  justify-content: space-between;
+}
+.profile-card:has(.profile-menu[open]) {
+  z-index: 21;
+}
+.profile-menu-items {
+  bottom: auto;
+  top: calc(100% + 8px);
+}

@@ -1,0 +1,40 @@
+{
+  "name": "patronlauncher-tauri",
+  "version": "1.0.0",
+  "license": "AGPL-3.0-only",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "node scripts/i18n.mjs && tsc -b && vite build",
+    "i18n": "node scripts/i18n.mjs --write",
+    "preview": "vite preview --host 127.0.0.1",
+    "tauri": "tauri",
+    "test": "playwright test",
+    "desktop:dev": "tauri dev -- --no-default-features",
+    "desktop:build": "tauri build --no-bundle",
+    "desktop:preview": "tauri build --debug --no-bundle",
+    "test:native": "node scripts/native-smoke.mjs",
+    "test:core-native": "node scripts/core-smoke.mjs",
+    "test:migration-native": "node scripts/migration-smoke.mjs"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^2",
+    "react": "^19",
+    "react-dom": "^19",
+    "react-markdown": "^10.1.0",
+    "rehype-raw": "^7.0.0",
+    "rehype-sanitize": "^6.0.0",
+    "remark-gfm": "^4.0.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.64.1",
+    "@tauri-apps/cli": "^2",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@vitejs/plugin-react": "^4",
+    "prettier": "^3.9.10",
+    "typescript": "~5.8.3",
+    "vite": "^6"
+  }
+}

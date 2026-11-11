@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-recover-profiles"
+description = "Enables the recover_profiles command without any pre-configured scope."
+commands.allow = ["recover_profiles"]
+
+[[permission]]
+identifier = "deny-recover-profiles"
+description = "Denies the recover_profiles command without any pre-configured scope."
+commands.deny = ["recover_profiles"]
