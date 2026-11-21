@@ -114,6 +114,8 @@ pub struct App {
     restore_confirm: bool,
     install_completion: Option<tokio::sync::oneshot::Sender<Result<(), String>>>,
     join: Option<game::ServerTarget>,
+    /// Java eksik olduğu için duran başlatma; Java kurulunca kaldığı yerden sürer.
+    java_retry: Option<(Message, Option<game::ServerTarget>)>,
     /// Çalışan oyun PClient ile mi açıldı.
     launch_pclient: bool,
     /// Oyun doğrudan bir sunucuya bağlanmak üzere açıldıysa o adres.
@@ -184,6 +186,7 @@ impl App {
             restore_confirm: false,
             install_completion: None,
             join: None,
+            java_retry: None,
             launch_pclient: false,
             launch_target: None,
             launch_target_pending: false,
@@ -500,6 +503,7 @@ impl App {
                         self.running = false;
                         self.game_ready = false;
                         crate::discord::game_stopped();
+                        self.java_retry = None;
                         match result {
                             Ok(()) => {}
                             Err(e) => self.status(e),
@@ -812,6 +816,7 @@ impl App {
                     self.status("Önce bir hesap ve oyun profili oluşturup seçin.".into());
                     return;
                 }
+                self.java_retry = Some((Message::Play, server.clone()));
                 self.start_game(self.state.clone(), version, server, Launch::Game);
             }
             Message::PlayPClient(install_only) => {
@@ -840,6 +845,7 @@ impl App {
                         return;
                     }
                 }
+                self.java_retry = Some((Message::PlayPClient(install_only), server.clone()));
                 self.start_game(self.state.clone(), version, server, Launch::PClient { install_only });
             }
             Message::PlayerName(_)
@@ -959,11 +965,15 @@ impl App {
                             path.display()
                         ));
                     }
-                    JavaStatus::Missing { reason, .. } => self.status(format!(
-                        "{reason} Aşağıdaki Java yönetimi bölümünden seçim yapabilirsiniz."
-                    )),
+                    JavaStatus::Missing { reason, .. } => self.status(reason.clone()),
                 }
+                let ready = matches!(status, JavaStatus::Ready { .. });
                 self.java_status = Some(status);
+                // Java eksik olduğu için duran başlatma, Java kurulunca kaldığı yerden sürer.
+                if installed && ready && let Some((message, server)) = self.java_retry.take() {
+                    self.join = server;
+                    self.update(message);
+                }
             }
             Err(error) => self.status(error),
         }
@@ -972,10 +982,20 @@ impl App {
         if !self.save_settings() {
             return;
         }
-        let Some(version) = self.selected_version.clone() else {
+        // Başlatma sırasında eksik bulunan Java (ör. PClient için 25) seçili sürümün
+        // istediğinden farklı olabilir; kurulum her zaman eksik bulunan sürüme yapılır.
+        let wanted = match (&self.java_status, install) {
+            (Some(JavaStatus::Missing { major, .. }), true) => Some(*major),
+            _ => None,
+        };
+        if !install {
+            self.java_retry = None;
+        }
+        let version = self.selected_version.clone();
+        if wanted.is_none() && version.is_none() {
             self.status("Önce bir Minecraft sürümü seçin.".into());
             return;
-        };
+        }
         self.busy = true;
         self.cancel = Arc::new(AtomicBool::new(false));
         let root = self.root.clone();
@@ -994,11 +1014,17 @@ impl App {
         std::thread::spawn(move || {
             let _lease = lease;
             let result = (|| -> anyhow::Result<JavaStatus> {
-                let status = game::java_status(&root, &custom, &version)?;
-                if !install {
-                    return Ok(status);
-                }
-                let major = status.major();
+                let major = match (wanted, &version) {
+                    (Some(major), _) => major,
+                    (None, Some(version)) => {
+                        let status = game::java_status(&root, &custom, version)?;
+                        if !install {
+                            return Ok(status);
+                        }
+                        status.major()
+                    }
+                    (None, None) => anyhow::bail!("Önce bir Minecraft sürümü seçin."),
+                };
                 let path = runtime::install(&root, major, &cancel, |s| {
                     let _ = tx.send(Event::Status(s));
                 })?;
@@ -1648,6 +1674,11 @@ impl App {
             Action::InstallPClient => {
                 job_expected = true;
                 Message::PlayPClient(true)
+            }
+            // Başlatmada eksik bulunan Java, seçili sürüm olmadan da (ör. PClient) kurulabilir.
+            Action::InstallJava if matches!(self.java_status, Some(JavaStatus::Missing { .. })) => {
+                job_expected = true;
+                Message::InstallJava
             }
             Action::CheckJava | Action::InstallJava | Action::Launch => {
                 let selected = self.selected_version.as_ref().ok_or("Bir sürüm seçin.")?;
@@ -2322,6 +2353,7 @@ mod tests {
             restore_confirm: false,
             install_completion: None,
             join: None,
+            java_retry: None,
             launch_pclient: false,
             launch_target: None,
             launch_target_pending: false,

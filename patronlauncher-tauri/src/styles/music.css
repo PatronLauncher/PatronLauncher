@@ -131,3 +131,10 @@
 /* Hata çubuğu açıkken bildirim onun üstünde durur; düğmeler örtülmez. */
 :root:has(.status-error) #toast{bottom:84px}
 #toast:not(.show){pointer-events:none}
+/* Yeni sürüm bildirimi (sol alt) */
+.update-notice{position:fixed;left:16px;bottom:16px;z-index:62;display:flex;align-items:center;gap:12px;max-width:min(460px,calc(100% - 32px));padding:10px 10px 10px 14px;border:1px solid color-mix(in srgb,var(--c) 45%,transparent);border-radius:14px;background:color-mix(in srgb,var(--panel) 94%,#000);color:var(--text);font-size:12.5px;line-height:1.4;box-shadow:0 14px 40px color-mix(in srgb,var(--shadow) 65%,transparent);animation:update-notice-in .3s cubic-bezier(.2,1.2,.4,1)}
+.update-notice>.i{flex:none;width:20px;height:20px;color:var(--c)}
+.update-notice p{margin:0;display:grid;gap:2px;min-width:0}
+.update-notice small{color:var(--muted);font-size:11.5px}
+.update-notice .btn{flex:none;white-space:nowrap}
+@keyframes update-notice-in{from{opacity:0;transform:translateY(10px)}}

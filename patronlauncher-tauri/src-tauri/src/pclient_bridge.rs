@@ -1,4 +1,4 @@
-//! PClient köprüsü: oyun içi arayüzün launcher'daki hesap ve Spotify işlevlerine ulaştığı yerel kanal.
+//! PClient köprüsü: oyun içi arayüzün launcher'daki hesap ve müzik işlevlerine ulaştığı yerel kanal.
 //!
 //! Yenileme anahtarları Windows Kimlik Bilgisi Yöneticisi'nde kalır; oyuna yalnızca kısa ömürlü
 //! Minecraft oturumu verilir. Sunucu yalnızca 127.0.0.1 üzerinde dinler, her açılışta rastgele bir
@@ -10,8 +10,8 @@ use crate::{
         CoreService,
         types::{Action, Snapshot},
     },
+    media,
     model::Account,
-    spotify,
 };
 use anyhow::{Context, Result, anyhow, ensure};
 use base64::{Engine, engine::general_purpose::STANDARD};
@@ -34,7 +34,7 @@ use uuid::Uuid;
 const MAX_HEAD: usize = 16 * 1024;
 const MAX_BODY: usize = 8 * 1024;
 const MAX_CONNECTIONS: usize = 16;
-/// Oyundaki HUD ve müzik ekranı aynı anda sorsa da Spotify'a tek istek gider.
+/// Oyundaki HUD ve müzik ekranı aynı anda sorsa da medya oturumu bir kez okunur.
 const NOW_PLAYING_TTL: Duration = Duration::from_millis(1500);
 
 #[derive(Default)]
@@ -234,7 +234,7 @@ fn now_playing(bridge: &Bridge) -> Result<Value> {
             return Ok(value.clone());
         }
     }
-    let value = serde_json::to_value(spotify::now_playing()?)?;
+    let value = serde_json::to_value(media::now_playing()?)?;
     *cache = Some((Instant::now(), value.clone()));
     Ok(value)
 }
@@ -283,15 +283,11 @@ fn route(bridge: &Arc<Bridge>, head: &Head, body: &[u8]) -> Result<Value> {
         }
         ("GET", "/v1/news") => news(bridge),
         ("POST", "/v1/iris/install") => install_iris(bridge),
-        ("GET", "/v1/spotify/status") => Ok(serde_json::to_value(spotify::status()?)?),
-        ("GET", "/v1/spotify/now") => now_playing(bridge),
-        ("POST", "/v1/spotify/login") => {
-            spotify::login()?;
-            Ok(json!({ "ok": true }))
-        }
-        ("POST", "/v1/spotify/control") => {
+        ("GET", "/v1/media/now") => now_playing(bridge),
+        ("POST", "/v1/media/cover") => Ok(json!({ "png": media::cover(&text_field(&parsed, "key")?)? })),
+        ("POST", "/v1/media/control") => {
             let action = text_field(&parsed, "action")?;
-            spotify::control(&action, parsed["value"].as_i64())?;
+            media::control(&action, parsed["value"].as_i64())?;
             *bridge.now_playing.lock().map_err(|_| anyhow!("kilit"))? = None;
             Ok(json!({ "ok": true }))
         }

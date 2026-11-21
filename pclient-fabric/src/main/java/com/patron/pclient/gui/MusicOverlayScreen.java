@@ -1,7 +1,7 @@
 package com.patron.pclient.gui;
 
 import com.patron.pclient.L;
-import com.patron.pclient.bridge.Spotify;
+import com.patron.pclient.bridge.Media;
 import com.patron.pclient.module.ModuleManager;
 import com.patron.pclient.modules.MusicModule;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -24,13 +24,13 @@ public final class MusicOverlayScreen extends PcScreen {
 	}
 
 	@Override protected void draw(GuiGraphicsExtractor g, int mx, int my) {
-		Spotify.poll(1500);
+		Media.poll(1500);
 		int w = Math.min(width - 16, 280), h = 80, x = (width - w) / 2, y = height - h - 58;
 		Theme.notched(g, x, y, x + w, y + h, 5, 0xF00A0B10);
 		Theme.notchedOutline(g, x, y, x + w, y + h, 5, Theme.withAlpha(MusicPanel.GREEN, 0x90));
-		Spotify.Track track = Spotify.track();
+		Media.Track track = Media.track();
 		if (track != null) panel.draw(g, track, x + 9, y + 10, x + w - 10, 60, false);
-		else g.centeredText(font, Theme.ellipsize(L.t(!Spotify.reachable() ? "music.launcher" : Spotify.connected() ? "music.nothing" : "music.notConnected"), w - 20), x + w / 2, y + 36, Theme.MUTED);
+		else g.centeredText(font, Theme.ellipsize(L.t(!Media.reachable() ? "music.launcher" : "music.nothing"), w - 20), x + w / 2, y + 36, Theme.MUTED);
 		String hint = L.t("music.overlayHint", ModuleManager.get(MusicModule.class).controlsKey.display());
 		g.centeredText(font, hint, width / 2, y - 12, Theme.TEXT);
 	}

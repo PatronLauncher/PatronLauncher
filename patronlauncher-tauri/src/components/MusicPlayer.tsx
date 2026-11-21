@@ -3,12 +3,12 @@ import { invoke } from "@tauri-apps/api/core";
 import { t } from "../i18n";
 import { useAppearance, type MusicPrefs } from "../appearance";
 import { formatTime, music, noTrack, tracks } from "../music";
-import { spotifyGuard } from "../spotify";
+import { mediaGuard } from "../media";
 import Icon from "./Icon";
 import { Toggle } from "./Controls";
 
 export const useMusic = () => useSyncExternalStore(music.subscribe, music.getState);
-const useSpotify = () => useSyncExternalStore(spotifyGuard.subscribe, spotifyGuard.getSnapshot);
+const useMedia = () => useSyncExternalStore(mediaGuard.subscribe, mediaGuard.getSnapshot);
 
 /** Çalardaki hata satırı; çarpıyla kapatılır. */
 function MusicError({ text, close }: { text: string; close: () => void }) {
@@ -22,35 +22,30 @@ function MusicError({ text, close }: { text: string; close: () => void }) {
   );
 }
 
-/** Launcher müziği Spotify yüzünden durunca nedenini anlatan küçük bildirim. */
+/** Launcher müziği dış oynatıcı yüzünden durunca nedenini anlatan küçük bildirim. */
 function MusicNotice() {
-  const { notice } = useSpotify();
+  const { notice } = useMedia();
   const id = notice?.id;
   useEffect(() => {
     if (id === undefined) return;
-    const timer = setTimeout(() => spotifyGuard.dismissNotice(), 8000);
+    const timer = setTimeout(() => mediaGuard.dismissNotice(), 8000);
     return () => clearTimeout(timer);
   }, [id]);
   if (!notice) return null;
   return (
     <div className="music-notice" role="status" key={notice.id}>
-      <span className="spotify-logo" aria-hidden="true" />
+      <Icon name="music" />
       <p>
-        {notice.reason === "changed"
-          ? t("Spotify'da başka bir şarkıya geçtiğin için launcher müziği durduruldu.")
-          : t("Spotify'da müzik çaldığı için launcher müziği durduruldu.")}
+        {(notice.reason === "changed"
+          ? t("{app} üzerinde başka bir şarkıya geçtiğin için launcher müziği durduruldu.")
+          : t("{app} üzerinde müzik çaldığı için launcher müziği durduruldu.")
+        ).replace("{app}", notice.app || t("Başka bir oynatıcı"))}
       </p>
-      <button className="alert-close" aria-label={t("Kapat")} title={t("Kapat")} onClick={() => spotifyGuard.dismissNotice()}>
+      <button className="alert-close" aria-label={t("Kapat")} title={t("Kapat")} onClick={() => mediaGuard.dismissNotice()}>
         <Icon name="close" />
       </button>
     </div>
   );
-}
-
-interface SpotifyStatus {
-  connected: boolean;
-  name: string | null;
-  redirect_uri: string;
 }
 /** Müzik tercihlerini güncelleyen kısa yol. */
 export function useMusicPrefs() {
@@ -204,7 +199,7 @@ function LauncherTab() {
       <div className="mp-body">
         <div className="mp-meta">
           <strong className="mp-title">{t("Launcher müzikleri yakında")}</strong>
-          <small>{t("Şimdilik müziğini Spotify sekmesinden bağlayıp çalabilirsin.")}</small>
+          <small>{t("Şimdilik Medya sekmesinden bilgisayarında çalan müziği yönetebilirsin.")}</small>
         </div>
       </div>
     );
@@ -313,96 +308,53 @@ function LauncherTab() {
   );
 }
 
-function SpotifyArt({ src }: { src: string | null }) {
+function MediaArt({ cover }: { cover: string | null }) {
   const [data, setData] = useState("");
   useEffect(() => {
-    setData("");
-    if (!src) return;
+    if (!cover) return setData("");
     let alive = true;
-    void invoke<{ mime: string; data: string }>("mods_fetch_image", { url: src })
-      .then((img) => alive && img && setData(`data:${img.mime};base64,${img.data}`))
-      .catch(() => {});
+    void invoke<string | null>("media_cover", { key: cover })
+      .then((png) => alive && setData(png ? `data:image/png;base64,${png}` : ""))
+      .catch(() => alive && setData(""));
     return () => {
       alive = false;
     };
-  }, [src]);
+  }, [cover]);
   return (
     <div className="mp-art">
-      {data ? <img src={data} alt="" /> : <span className="spotify-logo" aria-hidden="true" />}
+      {data ? <img src={data} alt="" /> : <Icon name="music" />}
     </div>
   );
 }
 
-function SpotifyTab({ visible }: { visible: boolean }) {
-  const [status, setStatus] = useState<SpotifyStatus | null | undefined>(undefined);
-  const { now, syncedAt, error: pollError } = useSpotify();
-  const [busy, setBusy] = useState(false);
+function MediaTab({ visible }: { visible: boolean }) {
+  const { now, syncedAt, ready, error: pollError } = useMedia();
   const [actionError, setError] = useState("");
   const error = actionError || pollError;
   const clearError = () => {
     setError("");
-    spotifyGuard.clearError();
+    mediaGuard.clearError();
   };
   const [tick, setTick] = useState(0);
   const volumeTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const [volume, setVolume] = useState<number | null>(null);
-  const refreshStatus = () =>
-    invoke<SpotifyStatus | undefined>("spotify_status")
-      .then((s) => setStatus(s ?? { connected: false, name: null, redirect_uri: "" }))
-      .catch((e) => {
-        setStatus({ connected: false, name: null, redirect_uri: "" });
-        setError(String(e));
-      });
+  // Yoklama mediaGuard'dadır; burada yalnızca ilerleme çubuğu akıtılır.
   useEffect(() => {
-    void refreshStatus();
-  }, []);
-  // Yoklama spotifyGuard'dadır; burada yalnızca ilerleme çubuğu akıtılır.
-  useEffect(() => {
-    if (!visible || !status?.connected) return;
+    if (!visible || !now?.is_playing) return;
     const tickId = setInterval(() => setTick((v) => v + 1), 500);
     return () => clearInterval(tickId);
-  }, [visible, status?.connected]);
+  }, [visible, now?.is_playing]);
   const act = async (action: string, value?: number) => {
     setError("");
     try {
-      if (action === "play") spotifyGuard.yieldToSpotify();
-      await invoke("spotify_control", { action, value: value ?? null });
-      setTimeout(() => void spotifyGuard.poll(), 350);
+      if (action === "play") mediaGuard.yieldToPlayer();
+      await invoke("media_control", { action, value: value ?? null });
+      setTimeout(() => void mediaGuard.poll(), 350);
     } catch (e) {
       setError(String(e));
     }
   };
-  if (status === undefined) return <p className="mp-note">{t("Spotify kontrol ediliyor…")}</p>;
-  if (!status?.connected)
-    return (
-      <div className="mp-body mp-spotify-connect">
-        <span className="spotify-logo big" aria-hidden="true" />
-        <strong>{t("Spotify hesabını bağla")}</strong>
-        <p className="mp-note">
-          {t("Çalan şarkıyı launcher içinde gör ve yönet.")}
-        </p>
-        <button
-          className="btn primary mp-spotify-btn"
-          disabled={busy}
-          onClick={async () => {
-            setBusy(true);
-            setError("");
-            try {
-              await invoke("spotify_login");
-              await refreshStatus();
-              await spotifyGuard.refresh();
-            } catch (e) {
-              setError(String(e));
-            } finally {
-              setBusy(false);
-            }
-          }}
-        >
-          {busy ? t("Tarayıcıda izin ver…") : t("Spotify ile bağlan")}
-        </button>
-        {error && <MusicError text={error} close={clearError} />}
-      </div>
-    );
+  if (!ready) return <p className="mp-note">{t("Çalan müzik aranıyor…")}</p>;
   const progress = now
     ? Math.min(now.duration_ms, now.progress_ms + (now.is_playing ? performance.now() - syncedAt : 0)) / 1000
     : 0;
@@ -412,7 +364,7 @@ function SpotifyTab({ visible }: { visible: boolean }) {
       {now ? (
         <>
           <div className="mp-spotify-now">
-            <SpotifyArt src={now.image} />
+            <MediaArt cover={now.image} />
             <div className="mp-meta">
               <strong className="mp-title">{now.title}</strong>
               <small>{now.artists}</small>
@@ -452,15 +404,6 @@ function SpotifyTab({ visible }: { visible: boolean }) {
             <button className="mp-icon" aria-label={t("Sonraki parça")} onClick={() => void act("next")}>
               <Icon name="next" />
             </button>
-            <button
-              className="mp-icon"
-              aria-label={t("Spotify'da aç")}
-              title={t("Spotify'da aç")}
-              disabled={!now.url}
-              onClick={() => now.url && void invoke("open_external", { url: now.url }).catch((e) => setError(String(e)))}
-            >
-              <Icon name="globe" />
-            </button>
           </div>
           {now.volume !== null && (
             <Volume
@@ -477,23 +420,10 @@ function SpotifyTab({ visible }: { visible: boolean }) {
           )}
         </>
       ) : (
-        <p className="mp-note">{t("Şu an Spotify'da bir şey çalmıyor. Spotify uygulamasını açıp bir şarkı başlat.")}</p>
+        <p className="mp-note">
+          {t("Şu an çalan bir şey yok. Spotify, YouTube Music, Deezer gibi bir oynatıcıda şarkı başlat; burada otomatik görünür.")}
+        </p>
       )}
-      <div className="mp-spotify-foot">
-        <small>
-          <span className="spotify-logo" aria-hidden="true" /> {status.name ?? "Spotify"}
-        </small>
-        <button
-          className="mp-link"
-          onClick={async () => {
-            await invoke("spotify_logout").catch(() => {});
-            await refreshStatus();
-            await spotifyGuard.refresh();
-          }}
-        >
-          {t("Bağlantıyı kes")}
-        </button>
-      </div>
       {error && <MusicError text={error} close={clearError} />}
     </div>
   );
@@ -576,6 +506,7 @@ export default function MusicPlayer({ running }: { running: boolean }) {
   const drag = useDrag();
   const place = { translate: `${drag.offset.x}px ${drag.offset.y}px` } as CSSProperties;
   const s = useMusic();
+  const media = useMedia();
   const track = tracks[s.index] ?? noTrack;
   const started = useRef(false);
   useEffect(() => {
@@ -586,19 +517,19 @@ export default function MusicPlayer({ running }: { running: boolean }) {
     const id = setTimeout(() => {
       if (started.current) return;
       started.current = true;
-      if (m.autoplay && m.source === "launcher" && !running) void spotifyGuard.startUnlessPlaying(() => void music.resume());
+      if (m.autoplay && m.source === "launcher" && !running) void mediaGuard.startUnlessPlaying(() => void music.resume());
     }, 900);
     return () => clearTimeout(id);
   }, []);
   useEffect(() => {
-    spotifyGuard.start();
-    return () => spotifyGuard.stop();
+    mediaGuard.start();
+    return () => mediaGuard.stop();
   }, []);
   useEffect(() => {
-    spotifyGuard.setBlocked(running && m.pause_in_game);
+    mediaGuard.setBlocked(running && m.pause_in_game);
     if (!m.pause_in_game) return;
     if (running) music.gameRunning(true);
-    else if (music.suspendedByGame) void spotifyGuard.startUnlessPlaying(() => music.gameRunning(false));
+    else if (music.suspendedByGame) void mediaGuard.startUnlessPlaying(() => music.gameRunning(false));
   }, [running, m.pause_in_game]);
   useEffect(() => () => music.stop(), []);
   if (!m.widget) return <MusicNotice />;
@@ -628,8 +559,8 @@ export default function MusicPlayer({ running }: { running: boolean }) {
           <i />
         </button>
         <span className="mp-mini-title">
-          <b>{m.source === "spotify" ? "Spotify" : track.title || "PatronLauncher"}</b>
-          <small>{m.source === "spotify" ? t("Spotify") : "PatronLauncher Radio"}</small>
+          <b>{m.source === "spotify" ? media.now?.title || t("Medya") : track.title || "PatronLauncher"}</b>
+          <small>{m.source === "spotify" ? media.now?.device || t("Medya") : "PatronLauncher Radio"}</small>
         </span>
         {m.source === "launcher" && (
           <>
@@ -687,7 +618,7 @@ export default function MusicPlayer({ running }: { running: boolean }) {
             className={m.source === "spotify" ? "active" : ""}
             onClick={() => set({ source: "spotify" })}
           >
-            <span className="spotify-logo" aria-hidden="true" /> Spotify
+            <Icon name="volume" /> {t("Medya")}
           </button>
         </div>
         <button
@@ -700,7 +631,7 @@ export default function MusicPlayer({ running }: { running: boolean }) {
         </button>
         {close}
       </header>
-      {m.source === "launcher" ? <LauncherTab /> : <SpotifyTab visible />}
+      {m.source === "launcher" ? <LauncherTab /> : <MediaTab visible />}
     </aside>
     </>
   );

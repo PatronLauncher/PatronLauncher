@@ -1,6 +1,7 @@
 import type { Snapshot } from "../types/core";
 import type { Run } from "../backend";
 import { t } from "../i18n";
+import { ORACLE_JAVA_URL } from "./JavaPrompt";
 export function JavaCard({
   s,
   run,
@@ -30,20 +31,16 @@ export function JavaCard({
         </button>
         <button
           className="btn"
-          disabled={s.busy || s.load_failed || !s.selected_version}
+          disabled={s.busy || s.load_failed || (!s.selected_version && s.java_status?.kind !== "missing")}
           onClick={() => void run("install_java", {})}
         >
           {t("PatronLauncher ile Java indir")}
         </button>
         <button
           className="btn"
-          onClick={() =>
-            void run("open_external", {
-              url: "https://adoptium.net/temurin/releases/",
-            })
-          }
+          onClick={() => void run("open_external", { url: ORACLE_JAVA_URL })}
         >
-          {t("Resmî Java indirme sayfası")}
+          {t("Resmî Java indirme sayfası (Oracle)")}
         </button>
       </div>
     </>

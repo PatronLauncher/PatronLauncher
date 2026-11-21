@@ -15,4 +15,5 @@ import "./styles/home.css";
 import "./styles/curseforge.css";
 import "./styles/polish.css";
 import "./styles/music.css";
+import "./styles/java.css";
 import "./styles/pclient.css";

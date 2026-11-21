@@ -17,8 +17,16 @@ import net.minecraft.network.chat.FontDescription;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 
-/** PClient oyuncularının TAB ve sohbette adının önünde piksel logo gösterir; yalnızca PClient'ta görünür. */
+/**
+ * PClient oyuncularının TAB'da, sohbette ve kafalarının üstündeki isim etiketinde adının önünde piksel
+ * logo gösterir. Başka oyuncuların PClient kullandığı varlık servisinden (Presence) öğrenilir;
+ * logo yalnızca PClient'ta görünür.
+ */
 public final class PClientBadge extends Module {
 	private static final Style GLYPH = Style.EMPTY
 		.withFont(new FontDescription.Resource(Identifier.fromNamespaceAndPath("pclient", "badge")))
@@ -55,6 +63,12 @@ public final class PClientBadge extends Module {
 
 	public static Component tab(PlayerInfo info, Component name) {
 		if (!active() || !isUser(info.getProfile().id())) return name;
+		return Component.empty().append(glyph()).append(" ").append(name);
+	}
+
+	/** Oyuncunun kafasının üstündeki isim etiketi (yalnızca gerçek oyuncular; NPC'lerin UUID'si listede olmaz). */
+	public static Component nameTag(Entity entity, Component name) {
+		if (name == null || !(entity instanceof Player) || !active() || !isUser(entity.getUUID())) return name;
 		return Component.empty().append(glyph()).append(" ").append(name);
 	}
 

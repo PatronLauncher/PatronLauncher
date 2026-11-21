@@ -84,6 +84,15 @@ public final class RenderLimitMixins {
 		}
 	}
 
+	/** Kafanın üstündeki isim etiketi: PClient kullanan oyuncuların adının önüne logo. */
+	@Mixin(EntityRenderer.class)
+	public abstract static class NameTag {
+		@Inject(method = "getNameTag(Lnet/minecraft/world/entity/Entity;)Lnet/minecraft/network/chat/Component;", at = @At("RETURN"), cancellable = true)
+		private void pclient$badge(Entity entity, CallbackInfoReturnable<net.minecraft.network.chat.Component> cir) {
+			cir.setReturnValue(com.patron.pclient.modules.PClientBadge.nameTag(entity, cir.getReturnValue()));
+		}
+	}
+
 	@Mixin(LivingEntityRenderer.class)
 	public abstract static class Names {
 		@Inject(method = "shouldShowName(Lnet/minecraft/world/entity/LivingEntity;D)Z", at = @At("HEAD"), cancellable = true)

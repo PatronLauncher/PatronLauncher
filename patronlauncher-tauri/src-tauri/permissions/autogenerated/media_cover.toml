@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-media-cover"
+description = "Enables the media_cover command without any pre-configured scope."
+commands.allow = ["media_cover"]
+
+[[permission]]
+identifier = "deny-media-cover"
+description = "Denies the media_cover command without any pre-configured scope."
+commands.deny = ["media_cover"]

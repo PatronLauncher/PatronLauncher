@@ -1,7 +1,7 @@
 package com.patron.pclient.gui;
 
 import com.patron.pclient.L;
-import com.patron.pclient.bridge.Spotify;
+import com.patron.pclient.bridge.Media;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.gui.screens.options.OptionsScreen;
@@ -65,8 +65,8 @@ public final class PClientPauseScreen extends PcScreen {
 
 	/** Çalan şarkı varsa sağ üstte oynatıcı; menüyle çakışmayacak genişliğe sığdırılır. */
 	private void drawMusic(GuiGraphicsExtractor g, int menuLeft) {
-		Spotify.poll(2000);
-		Spotify.Track track = Spotify.track();
+		Media.poll(2000);
+		Media.Track track = Media.track();
 		int w = Math.min(280, menuLeft - 16);
 		if (track == null || w < 150) return;
 		boolean narrow = w - 19 - 60 < 170;

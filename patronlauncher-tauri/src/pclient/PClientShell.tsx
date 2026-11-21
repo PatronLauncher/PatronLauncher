@@ -13,6 +13,7 @@ import LaunchOverlay from "./LaunchOverlay";
 import AccountMenu from "./AccountMenu";
 import PerformancePrompt from "./PerformancePrompt";
 import SupportDialog from "./SupportDialog";
+import CommunityLinks from "../components/CommunityLinks";
 
 const rail: [Page, string][] = [
   // PClient bir hizmettir: profil, sürüm, mod ve dosya sayfaları PatronLauncher arayüzünde kalır.
@@ -84,6 +85,7 @@ export default function PClientShell({
         </button>
         <nav className="pc-rail-nav">{nav(rail)}</nav>
         <div className="pc-rail-sp" />
+        <CommunityLinks layout="rail" />
         <nav className="pc-rail-nav">{nav(rail2)}</nav>
         <button
           className="pc-exit"

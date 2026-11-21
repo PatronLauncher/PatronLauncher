@@ -2874,3 +2874,10 @@ html:root[data-ui="pclient"][data-skin="amoled"] {
 .pc-stage-switch:hover .pc-portal-arrow {
   transform: translateX(-3px);
 }
+/* Sol raydaki Discord ve web sitesi simgeleri. */
+.pc-rail-community { margin-bottom: 4px; padding-top: 6px; border-top: 1px solid rgba(255, 255, 255, 0.06); }
+.pc-community img { width: 22px; height: 22px; object-fit: contain; image-rendering: pixelated; transition: transform 0.25s, filter 0.25s; }
+.pc-community:hover img { transform: translateY(-1px) scale(1.08); }
+.pc-community.discord:hover { color: #aab2ff; }
+.pc-community.discord:hover img { filter: drop-shadow(0 0 8px rgba(88, 101, 242, 0.8)); }
+.pc-community.web:hover img { filter: drop-shadow(0 0 8px color-mix(in srgb, var(--pc-red) 80%, transparent)); }

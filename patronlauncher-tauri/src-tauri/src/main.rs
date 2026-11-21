@@ -13,7 +13,7 @@ mod commands;
 mod content;
 mod core;
 mod curseforge;
-mod spotify;
+mod media;
 mod discord;
 mod fabric;
 mod forge;
@@ -51,6 +51,7 @@ fn main() {
         }
     }
     tauri::Builder::default()
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .setup(|app| {
             let handle = app.handle().clone();
             let prefs = appearance::Preferences::load(&model::data_root());
@@ -157,11 +158,11 @@ fn main() {
             commands::content_installed,
             commands::content_install,
             commands::curseforge_key_status,
-            commands::spotify_status,
-            commands::spotify_login,
-            commands::spotify_logout,
-            commands::spotify_now_playing,
-            commands::spotify_control,
+            commands::update_check,
+            commands::update_install,
+            commands::media_now_playing,
+            commands::media_control,
+            commands::media_cover,
             commands::curseforge_set_key,
             commands::curseforge_clear_key,
             commands::curseforge_search,

@@ -1,0 +1,33 @@
+/* Java gerekli penceresi: dikkat çekici, animasyonlu uyarı (iki arayüzde de). */
+.java-prompt{position:fixed;inset:0;margin:auto;width:min(480px,calc(100% - 32px));max-height:calc(100% - 32px);overflow:hidden auto;padding:30px 28px 20px;border:1px solid color-mix(in srgb,var(--c) 55%,transparent);border-radius:22px;background:radial-gradient(120% 80% at 50% 0%,color-mix(in srgb,var(--c) 22%,var(--panel)) 0%,var(--panel) 55%,color-mix(in srgb,var(--panel) 80%,#000) 100%);color:var(--text);text-align:center;box-shadow:0 0 0 1px color-mix(in srgb,var(--c) 20%,transparent),0 30px 80px color-mix(in srgb,var(--shadow) 80%,transparent),0 0 60px color-mix(in srgb,var(--c) 30%,transparent);animation:java-pop .45s cubic-bezier(.2,1.4,.4,1) both,java-attention 2.6s ease-in-out .6s 2}
+.java-prompt::backdrop{background:color-mix(in srgb,#000 62%,transparent);backdrop-filter:blur(6px);animation:java-fade .3s ease both}
+.java-prompt-glow{position:absolute;inset:-40% -20% auto;height:70%;background:radial-gradient(closest-side,color-mix(in srgb,var(--c) 40%,transparent),transparent);opacity:.55;pointer-events:none;animation:java-breathe 3.2s ease-in-out infinite}
+.java-prompt-icon{position:relative;display:grid;place-items:center;width:84px;height:84px;margin:0 auto 14px;border-radius:50%;background:color-mix(in srgb,var(--c) 18%,var(--panel2));color:var(--c);animation:java-bob 2.4s ease-in-out infinite}
+.java-prompt-icon .i{width:42px;height:42px;stroke-width:1.8}
+.java-prompt-ring{position:absolute;inset:-6px;border-radius:50%;border:2px solid color-mix(in srgb,var(--c) 70%,transparent);animation:java-ring 1.8s ease-out infinite}
+.java-prompt-icon.busy .java-prompt-ring{inset:-4px;border-color:var(--c) transparent transparent transparent;animation:java-spin 1s linear infinite}
+.java-prompt-kicker{margin:0 0 4px;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--c)}
+.java-prompt h2{position:relative;margin:0 0 10px;font-size:26px;line-height:1.15}
+.java-prompt-text{position:relative;margin:0 auto 18px;max-width:390px;color:var(--muted);font-size:13.5px;line-height:1.55}
+.java-prompt-actions{position:relative;display:grid;gap:8px}
+.java-prompt-actions .btn{justify-content:center;width:100%}
+.java-prompt-main{min-height:46px;font-size:14.5px;font-weight:700;background:linear-gradient(135deg,var(--c),color-mix(in srgb,var(--c) 65%,#000))!important;color:#fff!important;border:0!important;box-shadow:0 10px 30px color-mix(in srgb,var(--c) 45%,transparent);overflow:hidden;position:relative}
+.java-prompt-main::after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.28) 50%,transparent 70%);transform:translateX(-120%);animation:java-shine 2.8s ease-in-out 1s infinite}
+.java-prompt-main .i{width:18px;height:18px}
+.java-prompt .btn.ghost{background:none;border-color:transparent;color:var(--muted)}
+.java-prompt-progress{position:relative;display:grid;gap:8px;margin-bottom:6px}
+.java-prompt-bar{height:10px;border-radius:99px;background:color-mix(in srgb,var(--text) 10%,transparent);overflow:hidden}
+.java-prompt-bar i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--c),color-mix(in srgb,var(--c) 55%,#fff));transition:width .4s ease}
+.java-prompt-bar i.indeterminate{width:35%!important;animation:java-slide 1.2s ease-in-out infinite}
+.java-prompt-progress small{color:var(--muted);font-size:12px}
+.java-prompt-foot{position:relative;display:block;margin-top:14px;color:var(--muted);font-size:11px;opacity:.8}
+@keyframes java-pop{from{opacity:0;transform:translateY(24px) scale(.9)}}
+@keyframes java-fade{from{opacity:0}}
+@keyframes java-attention{0%,100%{transform:none}10%{transform:translateX(-6px) rotate(-.6deg)}20%{transform:translateX(6px) rotate(.6deg)}30%{transform:translateX(-4px)}40%{transform:translateX(3px)}50%{transform:none}}
+@keyframes java-breathe{50%{opacity:.85;transform:scale(1.08)}}
+@keyframes java-bob{50%{transform:translateY(-4px)}}
+@keyframes java-ring{from{transform:scale(.9);opacity:.9}to{transform:scale(1.35);opacity:0}}
+@keyframes java-spin{to{transform:rotate(360deg)}}
+@keyframes java-shine{0%,60%{transform:translateX(-120%)}100%{transform:translateX(120%)}}
+@keyframes java-slide{0%{transform:translateX(-100%)}100%{transform:translateX(300%)}}
+@media (prefers-reduced-motion:reduce){.java-prompt,.java-prompt *,.java-prompt::backdrop{animation:none!important}}

@@ -11,17 +11,6 @@
   .cm-links.cm-row .cm-mark img { width: 18px; height: 18px; }
   .cm-links.cm-row .cm-mark img.cm-discord { width: 22px; height: 22px; }
 }
-.cm-links.cm-stack {
-  position: absolute;
-  left: 22px;
-  bottom: 16px;
-  z-index: 3;
-  width: 188px;
-  flex-direction: column;
-}
-@media (max-width: 1040px) {
-  .cm-links.cm-stack { display: none; }
-}
 .cm-link {
   --cm: var(--pc-red, #ff2a3d);
   position: relative;
@@ -101,8 +90,10 @@
 .cm-text { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
 .cm-text b { font: 800 12px/1 var(--pc-font, inherit); letter-spacing: 0.06em; white-space: nowrap; }
 .cm-text small { color: #b4bccb; font-size: 10.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.side.collapsed .cm-links.cm-row { flex-direction: column; }
-.side.collapsed .cm-link { justify-content: center; padding: 7px; }
+/* Daraltılmış kenar çubuğunda kare simge düğmeleri (dikey dizilince basılmasın diye flex: none). */
+.side.collapsed .cm-links.cm-row { flex-direction: column; gap: 6px; }
+.side.collapsed .cm-links.cm-row .cm-link { flex: none; width: 100%; height: 46px; justify-content: center; padding: 0; }
+.side.collapsed .cm-links.cm-row .cm-mark { width: 30px; height: 30px; }
 .side.collapsed .cm-text { display: none; }
 @keyframes cm-shine {
   0%, 55% { left: -35%; }

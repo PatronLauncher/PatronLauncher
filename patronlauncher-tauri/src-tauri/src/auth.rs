@@ -52,8 +52,13 @@ fn form(
         && body["error"] != "authorization_pending"
         && body["error"] != "slow_down"
     {
+        // error_description "AADSTS…" koduyla başlar; teşhis için ilk satırı yeterli.
+        let detail = body["error_description"]
+            .as_str()
+            .and_then(|d| d.lines().next())
+            .unwrap_or("");
         bail!(
-            "Microsoft girişi başarısız ({}). Uygulama kimliğini ve hesap izinlerini kontrol edin.",
+            "Microsoft girişi başarısız ({}). {detail}",
             body["error"].as_str().unwrap_or("bilinmeyen hata")
         );
     }

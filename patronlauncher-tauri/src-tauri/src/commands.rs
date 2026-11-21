@@ -1083,34 +1083,55 @@ pub async fn curseforge_content_install(
     .await
 }
 
+#[derive(serde::Serialize)]
+pub struct UpdateInfo {
+    version: String,
+    notes: Option<String>,
+}
+/// GitHub'daki son sürümü (latest.json) sorar; yeni sürüm yoksa ya da çevrimdışıysa yok döner.
 #[tauri::command]
-pub async fn spotify_status() -> Result<crate::spotify::Status, String> {
-    tauri::async_runtime::spawn_blocking(crate::spotify::status)
+pub async fn update_check(app: tauri::AppHandle) -> Result<Option<UpdateInfo>, String> {
+    use tauri_plugin_updater::UpdaterExt;
+    let update = app.updater().map_err(|e| e.to_string())?.check().await.map_err(|e| e.to_string())?;
+    Ok(update.map(|u| UpdateInfo { version: u.version, notes: u.body }))
+}
+/// İmzası doğrulanan kurulum dosyasını indirip çalıştırır. Kurulum launcher'ı kapatır,
+/// günceller ve yeniden açar; oyun açıkken çağrılmaz.
+#[tauri::command]
+pub async fn update_install(app: tauri::AppHandle, state: tauri::State<'_, CoreService>) -> Result<(), String> {
+    use tauri_plugin_updater::UpdaterExt;
+    let snapshot = state.call(Action::Read).await?.state;
+    if snapshot.running || snapshot.busy {
+        return Err("Önce oyunu kapat ve devam eden işlemin bitmesini bekle.".into());
+    }
+    let update = app
+        .updater()
+        .map_err(|e| e.to_string())?
+        .check()
+        .await
+        .map_err(|e| e.to_string())?
+        .ok_or("Yeni sürüm bulunamadı.")?;
+    update.download_and_install(|_, _| {}, || {}).await.map_err(|e| format!("Güncelleme kurulamadı: {e}"))
+}
+
+#[tauri::command]
+pub async fn media_now_playing() -> Result<Option<crate::media::NowPlaying>, String> {
+    tauri::async_runtime::spawn_blocking(crate::media::now_playing)
         .await
         .map_err(|e| e.to_string())?
         .map_err(|e| format!("{e:#}"))
 }
 #[tauri::command]
-pub async fn spotify_login() -> Result<(), String> {
-    tauri::async_runtime::spawn_blocking(crate::spotify::login)
+pub async fn media_control(action: String, value: Option<i64>) -> Result<(), String> {
+    tauri::async_runtime::spawn_blocking(move || crate::media::control(&action, value))
         .await
         .map_err(|e| e.to_string())?
         .map_err(|e| format!("{e:#}"))
 }
+/// Kapak resmi, base64 PNG. Şarkı o arada değiştiyse yok döner.
 #[tauri::command]
-pub fn spotify_logout() -> Result<(), String> {
-    crate::spotify::logout().map_err(|e| format!("{e:#}"))
-}
-#[tauri::command]
-pub async fn spotify_now_playing() -> Result<Option<crate::spotify::NowPlaying>, String> {
-    tauri::async_runtime::spawn_blocking(crate::spotify::now_playing)
-        .await
-        .map_err(|e| e.to_string())?
-        .map_err(|e| format!("{e:#}"))
-}
-#[tauri::command]
-pub async fn spotify_control(action: String, value: Option<i64>) -> Result<(), String> {
-    tauri::async_runtime::spawn_blocking(move || crate::spotify::control(&action, value))
+pub async fn media_cover(key: String) -> Result<Option<String>, String> {
+    tauri::async_runtime::spawn_blocking(move || crate::media::cover(&key))
         .await
         .map_err(|e| e.to_string())?
         .map_err(|e| format!("{e:#}"))

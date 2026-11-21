@@ -1450,39 +1450,34 @@ test("custom theme applies CSS variables, persists and ambience plays procedural
   expect(await brand()).toBe("");
 });
 
-test("music player popup shows the empty launcher list, collapses, closes and connects Spotify", async ({ page }) => {
+test("music player popup shows the empty launcher list, collapses, closes and controls the media player", async ({ page }) => {
   await setup(page, false, "tr", true);
   await page.evaluate(() => {
     const w = window as any, original = w.__TAURI_INTERNALS__.invoke;
-    w.spotifyConnected = false;
     w.__TAURI_INTERNALS__.invoke = async (command: string, args: any = {}) => {
-      if (command === "spotify_status")
-        return { connected: w.spotifyConnected, name: "Can", premium: true, redirect_uri: "http://127.0.0.1:43821/callback" };
-      if (command === "spotify_login") { w.spotifyConnected = true; return null; }
-      if (command === "spotify_now_playing")
-        return { title: "Sweden", artists: "C418", album: "Volume Alpha", image: null, url: "https://open.spotify.com/track/x", duration_ms: 215000, progress_ms: 30000, is_playing: true, shuffle: false, device: "PC", volume: 60 };
-      if (command === "spotify_control") { w.commands.push({ command, args }); return null; }
+      if (command === "media_now_playing")
+        return { title: "Sweden", artists: "C418", album: "Volume Alpha", image: null, duration_ms: 215000, progress_ms: 30000, is_playing: true, shuffle: false, device: "Spotify", volume: 60 };
+      if (command === "media_control") { w.commands.push({ command, args }); return null; }
       return original(command, args);
     };
   });
   const player = page.getByRole("complementary", { name: "Müzik çalar" });
   await expect(player).toBeVisible();
   await page.screenshot({ path: "test-results/music-player.png" });
-  // Lisanslı parçalar eklenene kadar launcher listesi boştur ve Spotify'a yönlendirir.
+  // Lisanslı parçalar eklenene kadar launcher listesi boştur ve Medya sekmesine yönlendirir.
   await expect(player.locator(".mp-title")).toHaveText("Launcher müzikleri yakında");
   await expect(player.getByRole("button", { name: "Sonraki parça" })).toHaveCount(0);
   await player.getByRole("button", { name: "Müzik çaları küçült" }).click();
   await expect(player).toHaveClass(/compact/);
   await page.screenshot({ path: "test-results/music-compact.png" });
   await player.getByRole("button", { name: "Müzik çaları genişlet" }).first().click();
-  await player.getByRole("tab", { name: "Spotify" }).click();
-  await player.getByRole("button", { name: "Spotify ile bağlan" }).click();
+  await player.getByRole("tab", { name: "Medya" }).click();
   await expect(player.getByText("Sweden")).toBeVisible();
   await expect(player.getByText("C418")).toBeVisible();
-  await page.screenshot({ path: "test-results/music-spotify.png" });
+  await page.screenshot({ path: "test-results/music-media.png" });
   await player.getByRole("button", { name: "Duraklat" }).click();
   const control = await page.evaluate(() =>
-    (window as any).commands.filter((c: any) => c.command === "spotify_control").pop(),
+    (window as any).commands.filter((c: any) => c.command === "media_control").pop(),
   );
   expect(control.args.action).toBe("pause");
   await player.getByRole("button", { name: "Müzik çaları kapat" }).click();
@@ -1499,9 +1494,7 @@ test.skip("launcher music yields to Spotify, honours a manual restart and return
     const w = window as any, original = w.__TAURI_INTERNALS__.invoke;
     w.spotifyNow = null;
     w.__TAURI_INTERNALS__.invoke = async (command: string, args: any = {}) => {
-      if (command === "spotify_status") return { connected: !!w.spotifyConnected, name: "Can", premium: true, redirect_uri: "" };
-      if (command === "spotify_login") { w.spotifyConnected = true; return null; }
-      if (command === "spotify_now_playing") return w.spotifyNow;
+      if (command === "media_now_playing") return w.spotifyNow;
       return original(command, args);
     };
   });

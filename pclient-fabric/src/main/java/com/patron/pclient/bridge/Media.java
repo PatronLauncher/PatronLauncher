@@ -2,13 +2,16 @@ package com.patron.pclient.bridge;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import java.io.IOException;
+import java.util.Base64;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Oyun içi Spotify durumu. Tek bir sorgu sürer; müzik ekranı ve HUD aynı durumu okur. Spotify
- * anahtarları launcher'da kalır, oyun yalnızca şarkı bilgisini ve kontrol sonucunu görür.
+ * Oyun içi müzik durumu. Launcher, bilgisayarda çalan oynatıcıyı (Spotify, YouTube Music, Deezer…)
+ * Windows medya oturumundan okur; hesap bağlamak gerekmez. Tek bir sorgu sürer; müzik ekranı ve
+ * HUD aynı durumu okur.
  */
-public final class Spotify {
+public final class Media {
 	public record Track(String title, String artists, String image, long durationMs, long progressMs, boolean playing, boolean shuffle,
 		String device, int volume, long receivedAt) {
 		/** İki sorgu arasında ilerleme çubuğu akıcı kalsın diye tahmini konum. */
@@ -18,24 +21,18 @@ public final class Spotify {
 		}
 	}
 
-	private static final long STATUS_RETRY_MS = 15_000;
 	private static final AtomicBoolean POLLING = new AtomicBoolean();
-	private static volatile boolean reachable = true, connected, known, connecting;
-	private static volatile String accountName, error;
+	private static volatile boolean reachable = true, known;
+	private static volatile String error;
 	private static volatile Track track;
-	private static volatile long lastPoll, lastStatus;
+	private static volatile long lastPoll;
 
-	private Spotify() {}
+	private Media() {}
 
 	public static boolean reachable() { return reachable; }
 
+	/** İlk yanıt geldi mi. */
 	public static boolean known() { return known; }
-
-	public static boolean connected() { return connected; }
-
-	public static boolean connecting() { return connecting; }
-
-	public static String accountName() { return accountName; }
 
 	public static String error() { return error; }
 
@@ -64,6 +61,7 @@ public final class Spotify {
 		String message = Bridge.message(t);
 		if (message == null) reachable = false;
 		else error = message;
+		known = true;
 		POLLING.set(false);
 	}
 
@@ -72,32 +70,10 @@ public final class Spotify {
 		long now = System.currentTimeMillis();
 		if (now - lastPoll < intervalMs || !POLLING.compareAndSet(false, true)) return;
 		lastPoll = now;
-		if (!connected) {
-			if (known && now - lastStatus < STATUS_RETRY_MS) {
-				POLLING.set(false);
-				return;
-			}
-			lastStatus = now;
-			Bridge.get("/v1/spotify/status").thenAccept(json -> {
-				JsonObject o = json.getAsJsonObject();
-				connected = o.get("connected").getAsBoolean();
-				accountName = text(o, "name");
-				known = true;
-				reachable = true;
-				error = null;
-				// Bağlıysa şarkı bilgisi hemen bir sonraki karede istenir.
-				if (connected) lastPoll = 0;
-				POLLING.set(false);
-			}).exceptionally(t -> {
-				fail(t);
-				known = true;
-				return null;
-			});
-			return;
-		}
-		Bridge.get("/v1/spotify/now").thenAccept(json -> {
+		Bridge.get("/v1/media/now").thenAccept(json -> {
 			track = parse(json);
 			reachable = true;
+			known = true;
 			error = null;
 			POLLING.set(false);
 		}).exceptionally(t -> {
@@ -106,20 +82,13 @@ public final class Spotify {
 		});
 	}
 
-	public static void connect() {
-		if (connecting) return;
-		connecting = true;
-		error = null;
-		Bridge.post("/v1/spotify/login", null, 190_000).thenRun(() -> {
-			connected = true;
-			connecting = false;
-			lastPoll = 0;
-			known = false;
-		}).exceptionally(t -> {
-			fail(t);
-			connecting = false;
-			return null;
-		});
+	/** Kapak resmi (PNG). Şarkı o arada değiştiyse hata verir; bir sonraki şarkıda yeni anahtar gelir. */
+	public static byte[] cover(String key) throws IOException {
+		JsonObject body = new JsonObject();
+		body.addProperty("key", key);
+		JsonElement png = Bridge.post("/v1/media/cover", body, 15_000).join().getAsJsonObject().get("png");
+		if (png == null || png.isJsonNull()) throw new IOException("Kapak resmi yok.");
+		return Base64.getDecoder().decode(png.getAsString());
 	}
 
 	public static void control(String action, Long value) {
@@ -140,7 +109,7 @@ public final class Spotify {
 			};
 		}
 		error = null;
-		Bridge.post("/v1/spotify/control", body, 15_000).thenRun(() -> lastPoll = System.currentTimeMillis() - 100_000).exceptionally(e -> {
+		Bridge.post("/v1/media/control", body, 15_000).thenRun(() -> lastPoll = System.currentTimeMillis() - 100_000).exceptionally(e -> {
 			fail(e);
 			return null;
 		});

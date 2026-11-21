@@ -1,13 +1,13 @@
 package com.patron.pclient.gui;
 
 import com.patron.pclient.L;
-import com.patron.pclient.bridge.Spotify;
+import com.patron.pclient.bridge.Media;
 import com.patron.pclient.modules.MusicModule;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.input.MouseButtonEvent;
 
-/** Spotify oynatıcı denetimleri: müzik ekranı, ESC menüsü ve oyun içi kontrol katmanı aynı paneli kullanır. */
+/** Bilgisayarda çalan oynatıcının denetimleri: müzik ekranı, ESC menüsü ve oyun içi kontrol katmanı aynı paneli kullanır. */
 final class MusicPanel {
 	static final int GREEN = 0xFF1ED760;
 	private final PcScreen s;
@@ -18,7 +18,7 @@ final class MusicPanel {
 	MusicPanel(PcScreen screen) { s = screen; }
 
 	/** Çizer; cover kapak boyutu, kompakt olmayan düzende cihaz adı da gösterilir. */
-	void draw(GuiGraphicsExtractor g, Spotify.Track t, int x1, int y, int x2, int size, boolean full) {
+	void draw(GuiGraphicsExtractor g, Media.Track t, int x1, int y, int x2, int size, boolean full) {
 		Font font = Theme.font();
 		PcTextures.Image cover = t.image().isEmpty() ? null : MusicModule.cover(t.image());
 		if (cover != null) cover.blit(g, x1, y, size, size);
@@ -53,18 +53,18 @@ final class MusicPanel {
 		int fill = t.durationMs() > 0 ? (int) ((x2 - tx) * Math.min(1, position / (double) t.durationMs())) : 0;
 		g.fill(tx, by, tx + fill, by + 3, GREEN);
 		if (hov || seeking) g.fill(tx + fill - 2, by - 2, tx + fill + 3, by + 5, 0xFFFFFFFF);
-		g.text(font, Spotify.time(position), tx, by + 7, Theme.FAINT, false);
-		String duration = Spotify.time(t.durationMs());
+		g.text(font, Media.time(position), tx, by + 7, Theme.FAINT, false);
+		String duration = Media.time(t.durationMs());
 		g.text(font, duration, x2 - font.width(duration), by + 7, Theme.FAINT, false);
 
 		int b = full ? 22 : 18, gap = full ? 6 : 4, cy = full ? y + 70 : y + 42;
 		int cx = full ? (tx + x2) / 2 - 30 : tx + (b + gap) * 2;
-		if (control(g, cx - (b + gap) * 2, cy, b, "shuffle", t.shuffle(), () -> Spotify.control("shuffle", t.shuffle() ? 0L : 1L))) s.tipNow(L.t("music.shuffle"));
-		if (control(g, cx - b - gap, cy, b, "prev", false, () -> Spotify.control("previous", null))) s.tipNow(L.t("music.previous"));
-		boolean play = s.hit(cx, cy, cx + b, cy + b, () -> Spotify.control(t.playing() ? "pause" : "play", null));
+		if (control(g, cx - (b + gap) * 2, cy, b, "shuffle", t.shuffle(), () -> Media.control("shuffle", t.shuffle() ? 0L : 1L))) s.tipNow(L.t("music.shuffle"));
+		if (control(g, cx - b - gap, cy, b, "prev", false, () -> Media.control("previous", null))) s.tipNow(L.t("music.previous"));
+		boolean play = s.hit(cx, cy, cx + b, cy + b, () -> Media.control(t.playing() ? "pause" : "play", null));
 		Theme.notched(g, cx, cy, cx + b, cy + b, 3, play ? Theme.mix(GREEN, 0xFFFFFFFF, 0.2f) : GREEN);
 		PixelIcons.drawCentered(g, t.playing() ? "pause" : "play", cx + b / 2, cy + b / 2, 1, 0xFF06120A);
-		if (control(g, cx + b + gap, cy, b, "next", false, () -> Spotify.control("next", null))) s.tipNow(L.t("music.next"));
+		if (control(g, cx + b + gap, cy, b, "next", false, () -> Media.control("next", null))) s.tipNow(L.t("music.next"));
 
 		if (t.volume() >= 0) {
 			// Dar panelde ses çubuğu düğmelerin altına iner.
@@ -91,7 +91,7 @@ final class MusicPanel {
 		return hov;
 	}
 
-	private long seekValue(double x, Spotify.Track t) {
+	private long seekValue(double x, Media.Track t) {
 		return (long) (t.durationMs() * Math.max(0, Math.min(1, (x - seekX1) / (double) Math.max(1, seekX2 - seekX1))));
 	}
 
@@ -100,7 +100,7 @@ final class MusicPanel {
 	}
 
 	boolean mouseDragged(MouseButtonEvent e) {
-		Spotify.Track t = Spotify.track();
+		Media.Track t = Media.track();
 		if (seeking && t != null) {
 			value = seekValue(e.x(), t);
 			return true;
@@ -113,8 +113,8 @@ final class MusicPanel {
 	}
 
 	void mouseReleased() {
-		if (seeking) Spotify.control("seek", value);
-		if (changingVolume) Spotify.control("volume", value);
+		if (seeking) Media.control("seek", value);
+		if (changingVolume) Media.control("volume", value);
 		seeking = changingVolume = false;
 	}
 }

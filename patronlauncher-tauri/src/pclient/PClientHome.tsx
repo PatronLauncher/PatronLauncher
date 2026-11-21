@@ -10,7 +10,6 @@ import logo from "../assets/patronlauncher3transparent-mark.png";
 import Avatar from "./Avatar";
 import { PcIcon } from "./icons";
 import HomeServers from "./HomeServers";
-import CommunityLinks from "../components/CommunityLinks";
 import { announceLaunch } from "./launch";
 import { ensurePerformanceChoice } from "./PerformancePrompt";
 
@@ -161,7 +160,6 @@ export default function PClientHome({
               ←
             </i>
           </button>
-          <CommunityLinks layout="stack" />
           <div className="pc-character">
             <button
               className="pc-nametag"

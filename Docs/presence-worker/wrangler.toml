@@ -1,6 +1,11 @@
 name = "pclient-presence"
 main = "worker.js"
 compatibility_date = "2026-10-01"
+# workers.dev adresi kapalı; servis yalnızca kendi alan adımızdan sunulur.
+workers_dev = false
+
+# patronlauncher.net bu Cloudflare hesabında; alt alan adı yayınlamada otomatik bağlanır.
+routes = [{ pattern = "presence.patronlauncher.net", custom_domain = true }]
 
 [[durable_objects.bindings]]
 name = "ROOM"

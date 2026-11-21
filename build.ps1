@@ -88,14 +88,43 @@ try {
     }
     $artifactPath = Join-Path $metadata.target_directory "release/$($package[0].name).exe"
     if (-not (Test-Path -LiteralPath $artifactPath -PathType Leaf)) { throw 'Release çıktısı bulunamadı.' }
+    # Otomatik güncelleme imzası: anahtar git dışındaki .secrets klasöründedir. Anahtar yoksa
+    # kurulum imzasız kalır ve yüklü launcher'lar bu sürümü güncelleme olarak kabul etmez.
+    $updaterKey = Join-Path $projectRoot '.secrets/updater.key'
+    $updaterPassword = Join-Path $projectRoot '.secrets/updater.key.password'
+    if (-not (Test-Path -LiteralPath $updaterKey -PathType Leaf)) {
+        throw 'Güncelleme imza anahtarı (.secrets/updater.key) yok; kurulum imzalanamaz.'
+    }
+    $env:TAURI_SIGNING_PRIVATE_KEY = (Get-Content -LiteralPath $updaterKey -Raw).Trim()
+    $env:TAURI_SIGNING_PRIVATE_KEY_PASSWORD = if (Test-Path -LiteralPath $updaterPassword -PathType Leaf) {
+        (Get-Content -LiteralPath $updaterPassword -Raw).Trim()
+    } else { '' }
     # Oyunculara dağıtılan kurulum sihirbazı (NSIS); derlenmiş EXE yeniden derlenmeden paketlenir.
     Invoke-Native 'npx.cmd' @('tauri', 'bundle', '--bundles', 'nsis')
     if ($LASTEXITCODE -ne 0) { throw "Kurulum paketi oluşturulamadı: $LASTEXITCODE" }
     $setupBuilt = Join-Path $metadata.target_directory "release/bundle/nsis/PatronLauncher_$($version)_x64-setup.exe"
     if (-not (Test-Path -LiteralPath $setupBuilt -PathType Leaf)) { throw 'Kurulum dosyası bulunamadı.' }
+    $signatureBuilt = "$setupBuilt.sig"
+    if (-not (Test-Path -LiteralPath $signatureBuilt -PathType Leaf)) { throw 'Kurulum imzası (.sig) oluşturulamadı.' }
     $distRoot = Join-Path $projectRoot 'dist'
     New-Item -ItemType Directory -Force -Path $distRoot | Out-Null
-    Copy-Item -LiteralPath $setupBuilt -Destination (Join-Path $distRoot "PatronLauncher-$version-setup.exe") -Force
+    $setupName = "PatronLauncher-$version-setup.exe"
+    Copy-Item -LiteralPath $setupBuilt -Destination (Join-Path $distRoot $setupName) -Force
+    # GitHub sürümüne kurulum dosyasıyla birlikte yüklenecek güncelleme bildirimi. Yüklü
+    # launcher'lar releases/latest/download/latest.json adresini okur.
+    $manifest = [ordered]@{
+        version   = $version
+        notes     = "PatronLauncher $version"
+        pub_date  = [DateTime]::UtcNow.ToString('yyyy-MM-ddTHH:mm:ssZ')
+        platforms = [ordered]@{
+            'windows-x86_64' = [ordered]@{
+                signature = (Get-Content -LiteralPath $signatureBuilt -Raw).Trim()
+                url       = "https://github.com/PatronLauncher/PatronLauncher/releases/download/v$version/$setupName"
+            }
+        }
+    }
+    $utf8 = New-Object System.Text.UTF8Encoding($false)
+    [System.IO.File]::WriteAllText((Join-Path $distRoot 'latest.json'), ($manifest | ConvertTo-Json -Depth 5), $utf8)
     $archiveRoot = Join-Path $distRoot 'archive'
     New-Item -ItemType Directory -Force -Path $archiveRoot | Out-Null
     $latestPath = Join-Path $distRoot 'PatronLauncher-latest.exe'

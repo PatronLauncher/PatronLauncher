@@ -1,7 +1,7 @@
 package com.patron.pclient.gui;
 
 import com.patron.pclient.L;
-import com.patron.pclient.bridge.Spotify;
+import com.patron.pclient.bridge.Media;
 import com.patron.pclient.module.ModuleManager;
 import com.patron.pclient.modules.MusicModule;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -9,7 +9,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.FormattedText;
 
-/** Oyun içi Spotify: çalan şarkı, kapak, oynatma kontrolleri, ses ve HUD ayarları. */
+/** Oyun içi müzik (bilgisayarda çalan oynatıcı): çalan şarkı, kapak, oynatma kontrolleri, ses ve HUD ayarları. */
 public final class PClientMusicScreen extends PcScreen {
 	private final MusicPanel panel = new MusicPanel(this);
 
@@ -18,17 +18,15 @@ public final class PClientMusicScreen extends PcScreen {
 	@Override protected String dock() { return "music"; }
 
 	@Override protected void draw(GuiGraphicsExtractor g, int mx, int my) {
-		Spotify.poll(1500);
+		Media.poll(1500);
 		frame(g, 430, 230, L.up("music.title"));
 		int x1 = fx + 16, x2 = fx + fw - 16, top = fy + FRAME_HEADER + 14;
-		if (!Spotify.reachable()) notice(g, "music.launcher", null, null);
-		else if (!Spotify.known()) notice(g, "music.loading", null, null);
-		else if (!Spotify.connected()) notice(g, Spotify.connecting() ? "music.connecting" : "music.notConnected",
-			Spotify.connecting() ? null : L.up("music.connect"), Spotify::connect);
-		else if (Spotify.track() == null) notice(g, "music.nothing", null, null);
+		if (!Media.reachable()) notice(g, "music.launcher", null, null);
+		else if (!Media.known()) notice(g, "music.loading", null, null);
+		else if (Media.track() == null) notice(g, "music.nothing", null, null);
 		else {
-			panel.draw(g, Spotify.track(), x1, top, x2, 92, true);
-			if (Spotify.error() != null) g.text(font, Theme.ellipsize(Spotify.error(), x2 - x1), x1, top + 100, 0xFFE5A04D, false);
+			panel.draw(g, Media.track(), x1, top, x2, 92, true);
+			if (Media.error() != null) g.text(font, Theme.ellipsize(Media.error(), x2 - x1), x1, top + 100, 0xFFE5A04D, false);
 		}
 		footer(g, x1, x2);
 	}
@@ -52,7 +50,7 @@ public final class PClientMusicScreen extends PcScreen {
 		MusicModule module = ModuleManager.get(MusicModule.class);
 		int y = fy + fh - 24;
 		String name = module.isEnabled() ? L.t("music.keyHint", module.controlsKey.display())
-			: Spotify.connected() && Spotify.accountName() != null && !Spotify.accountName().isEmpty() ? L.t("music.account", Spotify.accountName()) : L.t("music.hud");
+			: L.t("music.hud");
 		g.text(font, Theme.ellipsize(name, x2 - x1 - 170), x1, y + 4, Theme.FAINT, false);
 		String settings = L.up("card.settings");
 		int sw = Theme.spacedWidth(settings, 1) + 18;

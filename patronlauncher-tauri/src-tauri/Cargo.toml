@@ -1,6 +1,6 @@
 [package]
 name = "patronlauncher-tauri"
-version = "1.0.0"
+version = "1.0.1"
 license = "AGPL-3.0-only"
 edition = "2024"
 [features]
@@ -10,6 +10,7 @@ custom-protocol = ["tauri/custom-protocol"]
 tauri-build = { version = "2", features = [] }
 [dependencies]
 tauri = { version = "2", features = [] }
+tauri-plugin-updater = "2"
 
 
 anyhow = "1"
@@ -23,7 +24,7 @@ md-5 = "0.10"
 uuid = { version = "1", features = ["v4", "serde"] }
 zip = { version = "2", default-features = false, features = ["deflate"] }
 keyring = { version = "3", features = ["windows-native"] }
-windows = { version = "0.62", features = ["Foundation", "Foundation_Collections", "Media_Control"] }
+windows = { version = "0.62", features = ["Foundation", "Foundation_Collections", "Media_Control", "Storage_Streams", "Win32_Foundation", "Win32_Media_Audio", "Win32_System_Com", "Win32_System_Threading"] }
 webbrowser = "1"
 regex = "1"
 discord-rich-presence = "1.1"

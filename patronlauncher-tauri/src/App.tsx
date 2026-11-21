@@ -29,8 +29,9 @@ import TitleBar from "./components/TitleBar";
 import ProfileWizard from "./components/ProfileWizard";
 import ServerPanel from "./components/ServerPanel";
 import MusicPlayer from "./components/MusicPlayer";
+import UpdateNotice from "./components/UpdateNotice";
+import JavaPrompt from "./components/JavaPrompt";
 import { loaderLabel } from "./profile";
-import { JavaCard } from "./components/Management";
 import SettingsPage from "./components/SettingsPage";
 import StoragePage from "./components/StoragePage";
 import { useAppearance } from "./appearance";
@@ -53,6 +54,7 @@ export default function App() {
     [profileWorking, setProfileWorking] = useState(false),
     [articles, setArticles] = useState<Article[]>([]),
     [error, setError] = useState(""),
+    [javaAsk, setJavaAsk] = useState(false),
     [message, setMessage] = useState(""),
     [visible, setVisible] = useState(false),
     [progress, setProgress] = useState<number | null>(null),
@@ -143,6 +145,14 @@ export default function App() {
               e.kind === "account"
             )
               setProgress(null);
+            // Giriş arka planda biter; sonucu görünür kıl (aksi halde hata sessizce kaybolur).
+            // Başlatmada Java eksik çıkarsa dikkat çekici Java penceresi açılır.
+            if (e.kind === "java_checked" && "Ok" in e.result && e.result.Ok.kind === "missing") setJavaAsk(true);
+            if (e.kind === "java_installed" && "Err" in e.result) setError(e.result.Err);
+            if (e.kind === "account") {
+              if ("Err" in e.result) setError(e.result.Err);
+              else toast(t("Hesap eklendi: ") + e.result.Ok.name);
+            }
             if (e.kind === "news" && "Ok" in e.result) setArticles(e.result.Ok);
           },
         );
@@ -433,9 +443,6 @@ export default function App() {
                           setMode={setGameMode}
                         />
                       </Hero>
-                      {state.java_status?.kind === "missing" && (
-                        <JavaCard s={state} run={run} />
-                      )}
                       <NewsGrid articles={articles} s={state} run={run} />
                     </div>
                     <ServerPanel s={state} run={run} notice={notice} />
@@ -475,6 +482,8 @@ export default function App() {
         </Modal>
       )}
       <MusicPlayer running={state?.running ?? false} />
+      <UpdateNotice blocked={!!state?.running} />
+      {javaAsk && state && <JavaPrompt s={state} run={run} close={() => setJavaAsk(false)} />}
       <Toast message={message} visible={visible} close={() => setVisible(false)} />
       {wizard && state && (
         <ProfileWizard s={state} run={run} close={() => setWizard(false)} />

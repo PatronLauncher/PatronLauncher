@@ -20,6 +20,7 @@
 		"RenderLimitMixins$BlockEntities",
 		"RenderLimitMixins$Entities",
 		"RenderLimitMixins$Hands",
+		"RenderLimitMixins$NameTag",
 		"RenderLimitMixins$Names",
 		"RenderLimitMixins$Outline",
 		"RenderLimitMixins$Particles",

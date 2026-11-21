@@ -2,7 +2,7 @@ package com.patron.pclient.modules;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import com.patron.pclient.L;
-import com.patron.pclient.bridge.Spotify;
+import com.patron.pclient.bridge.Media;
 import com.patron.pclient.gui.PcTextures;
 import com.patron.pclient.gui.Theme;
 import com.patron.pclient.module.Category;
@@ -12,7 +12,7 @@ import com.patron.pclient.module.setting.KeySetting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 
-/** Çalan Spotify şarkısını ekranda gösterir. Kontroller alt çubuktaki müzik ekranındadır. */
+/** Bilgisayarda çalan şarkıyı (Spotify, YouTube Music, Deezer…) ekranda gösterir. Kontroller alt çubuktaki müzik ekranındadır. */
 public final class MusicModule extends HudModule {
 	private static final int WIDTH = 156, HEIGHT = 38;
 	public final BoolSetting showCover = add(new BoolSetting("cover", "setting.musicCover", true));
@@ -23,22 +23,22 @@ public final class MusicModule extends HudModule {
 	public MusicModule() { super("music", Category.HUD, "music", false, 0.004, 0.62); }
 
 	/** Yalnızca son şarkının kapağı bellekte tutulur. */
-	public static PcTextures.Image cover(String url) {
-		String key = "cover:" + url;
+	public static PcTextures.Image cover(String image) {
+		String key = "cover:" + image;
 		if (!key.equals(coverKey)) {
 			if (coverKey != null) PcTextures.release(coverKey);
 			coverKey = key;
 		}
-		return PcTextures.get(key, () -> PcTextures.download(url));
+		return PcTextures.get(key, () -> Media.cover(image));
 	}
 
-	@Override public void tick() { Spotify.poll(4000); }
+	@Override public void tick() { Media.poll(4000); }
 
-	@Override public boolean visible(boolean preview) { return preview || Spotify.track() != null; }
+	@Override public boolean visible(boolean preview) { return preview || Media.track() != null; }
 
 	@Override protected void draw(GuiGraphicsExtractor g, boolean preview) {
 		var font = Minecraft.getInstance().font;
-		Spotify.Track t = Spotify.track();
+		Media.Track t = Media.track();
 		String title = t != null ? t.title() : L.t("music.previewTitle"), artists = t != null ? t.artists() : L.t("music.previewArtist");
 		w = WIDTH;
 		h = HEIGHT;

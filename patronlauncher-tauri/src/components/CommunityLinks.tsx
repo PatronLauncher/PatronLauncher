@@ -45,12 +45,37 @@ function Link({ kind, url, title, subtitle }: { kind: "discord" | "web"; url: st
   );
 }
 
+/** PClient sol rayında, diğer menü öğeleriyle aynı biçimde duran simge düğmeleri. */
+function RailLinks() {
+  const links = [
+    { kind: "discord", url: support.discord, label: "Discord", hint: t("Discord sunucumuza katıl"), icon: discordPixel },
+    { kind: "web", url: support.website, label: t("Web sitesi"), hint: t("patronlauncher.net'i ziyaret et"), icon: mark },
+  ].filter((l) => l.url);
+  if (!links.length) return null;
+  return (
+    <nav className="pc-rail-nav pc-rail-community" aria-label={t("Topluluk")}>
+      {links.map((l) => (
+        <button
+          key={l.kind}
+          className={`pc-nav pc-community ${l.kind}`}
+          title={l.hint}
+          onClick={() => void invoke("open_external", { url: l.url }).catch(() => {})}
+        >
+          <img src={l.icon} alt="" />
+          <span>{l.label}</span>
+        </button>
+      ))}
+    </nav>
+  );
+}
+
 /** Patron logolu, animasyonlu Discord ve web sitesi düğmeleri. */
-export default function CommunityLinks({ layout }: { layout: "row" | "stack" }) {
+export default function CommunityLinks({ layout }: { layout: "row" | "rail" }) {
+  if (layout === "rail") return <RailLinks />;
   return (
     <div className={`cm-links cm-${layout}`}>
-      <Link kind="discord" url={support.discord} title="Discord" subtitle={t("Topluluğa katıl")} />
-      <Link kind="web" url={support.website} title={t("Web sitesi")} subtitle={t("Web sitemiz")} />
+      <Link kind="discord" url={support.discord} title="Discord" subtitle={t("Sunucumuza katıl")} />
+      <Link kind="web" url={support.website} title={t("Web sitesi")} subtitle={t("Ziyaret et")} />
     </div>
   );
 }
