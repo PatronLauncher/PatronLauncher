@@ -128,7 +128,7 @@ async function setup(page: Page, empty = false, language: string | null = "tr", 
             w.commands.push({ command, args });
             const old = (w.votes ??= {})[args.id] ?? { votes: 0, last_vote: 0, rating: null, favorite: false };
             const next = { ...old };
-            if (command === "server_vote") Object.assign(next, { votes: old.votes + 1, last_vote: Math.floor(Date.now() / 1000) });
+            if (command === "server_vote") return null;
             if (command === "server_rate") next.rating = args.stars || null;
             if (command === "server_favorite") next.favorite = args.favorite;
             return (w.votes[args.id] = next);
@@ -1228,20 +1228,20 @@ test("home server list recommends by language, searches the world and joins thro
   });
 });
 
-test("server browser votes once a day, rates and keeps favorites", async ({ page }) => {
+test("server browser opens the site vote page, rates and keeps favorites", async ({ page }) => {
   await setup(page);
   const panel = page.locator(".server-panel");
   await panel.getByRole("button", { name: /Tümünü gör/ }).click();
   const browser = page.getByRole("dialog", { name: "Sunucu tarayıcısı" });
+  // Oylar sitede verilir: buton sayfayı açar, yerel sayaç tutulmaz.
   await browser.getByRole("button", { name: /Oy ver/ }).click();
-  await expect(browser.getByRole("button", { name: /Oy verildi/ })).toBeDisabled();
-  await expect(browser.locator(".sbd-vote small")).toHaveText("1");
+  await expect(browser.getByRole("button", { name: /Oy ver/ })).toBeEnabled();
   await browser.getByRole("radio", { name: "4 yıldız" }).click();
   await expect(browser.getByRole("radio", { name: "4 yıldız" })).toHaveAttribute("aria-checked", "true");
   await browser.getByRole("button", { name: "Favorilere ekle" }).click();
   await expect(browser.getByRole("button", { name: "Favorilerde" })).toHaveAttribute("aria-pressed", "true");
   const sent = await page.evaluate(() => (window as any).commands);
-  expect(sent).toContainEqual({ command: "server_vote", args: { id: "alpha" } });
+  expect(sent).toContainEqual({ command: "server_vote", args: { id: "alpha", lang: "tr" } });
   expect(sent).toContainEqual({ command: "server_rate", args: { id: "alpha", stars: 4 } });
   expect(sent).toContainEqual({ command: "server_favorite", args: { id: "alpha", favorite: true } });
   await browser.getByRole("button", { name: "Favoriler", exact: true }).click();
@@ -1276,6 +1276,72 @@ test("discover tabs search other content types and install packs into a profile"
     command: "content_install",
     args: { profile: "p", kind: "resourcepack", project: "pack1", version: "v1", world: null },
   });
+});
+
+test("installed library groups, filters, searches and favorites mods, shaders and packs", async ({ page }) => {
+  await setup(page);
+  await page.evaluate(() => {
+    const w = window as any, original = w.__TAURI_INTERNALS__.invoke;
+    w.setState({ profiles: [{ id: "p", name: "Fabric alanı", version: "1.21.11", loader: "Fabric" }] });
+    localStorage.removeItem("patron-mod-favorites");
+    localStorage.removeItem("patron-library-view");
+    let items = [
+      { kind: "mod", filename: "sodium.jar", world: null, project_id: "AANobbMI", version_id: "v1", enabled: true, managed: true, size: 1048576, added: 1763700000 },
+      { kind: "mod", filename: "handmade.jar", world: null, project_id: null, version_id: null, enabled: false, managed: false, size: 2048, added: 1763600000 },
+      { kind: "shader", filename: "ComplementaryReimagined.zip", world: null, project_id: "HVnmMxH1", version_id: "v2", enabled: true, managed: true, size: 512000, added: 1763800000 },
+      { kind: "resourcepack", filename: "FreshAnimations.zip", world: null, project_id: "50dA9Sha", version_id: "v3", enabled: true, managed: true, size: 4096, added: 1763500000 },
+    ];
+    w.__TAURI_INTERNALS__.invoke = async (command: string, args: any = {}) => {
+      if (command === "content_library") return items;
+      if (command === "mods_projects")
+        return [
+          { id: "AANobbMI", title: "Sodium", description: "Rendering engine", icon_url: null, downloads: 9, categories: ["optimization"] },
+          { id: "HVnmMxH1", title: "Complementary Shaders", description: "Nice light", icon_url: null, downloads: 9, categories: [] },
+          { id: "50dA9Sha", title: "Fresh Animations", description: "Mobs move", icon_url: null, downloads: 9, categories: [] },
+        ];
+      if (command === "content_remove") {
+        w.commands.push({ command, args });
+        items = items.filter((i) => i.filename !== args.filename);
+        return null;
+      }
+      if (command === "mods_list") return { managed: [], external: [] };
+      if (command === "mods_search") return { hits: [], total_hits: 0 };
+      return original(command, args);
+    };
+  });
+  await page.locator('[data-p="mods"]').click();
+  await page.getByRole("tab", { name: "Kurulu (4)" }).click();
+  const lib = page.locator(".mod-library");
+  await expect(lib.locator(".mod-library-group h3")).toHaveCount(3);
+  await expect(lib.locator(".mod-library-item")).toHaveCount(4);
+  await expect(lib).toContainText("Complementary Shaders");
+  await expect(lib).toContainText("Elle eklendi");
+  await lib.getByRole("tab", { name: /Shaderlar/ }).click();
+  await expect(lib.locator(".mod-library-item")).toHaveCount(1);
+  await lib.getByRole("tab", { name: /Tümü/ }).click();
+  await lib.getByPlaceholder("Kurulu içerikte ara…").fill("fresh");
+  await expect(lib.locator(".mod-library-item")).toHaveCount(1);
+  await lib.locator(".mod-library-item").getByRole("button", { name: "Favorilere ekle" }).click();
+  await lib.getByPlaceholder("Kurulu içerikte ara…").fill("");
+  await lib.getByRole("button", { name: "Favoriler", exact: true }).click();
+  await expect(lib.locator(".mod-library-item")).toHaveCount(1);
+  await expect(lib.locator(".mod-library-item")).toContainText("Fresh Animations");
+  await lib.getByRole("button", { name: "Favoriler", exact: true }).click();
+  // Paketler iki adımda silinir.
+  const shader = lib.locator(".mod-library-item", { hasText: "Complementary Shaders" });
+  await shader.getByRole("button", { name: "Kaldır" }).click();
+  expect(await page.evaluate(() => (window as any).commands.some((c: any) => c.command === "content_remove"))).toBe(false);
+  await shader.getByRole("button", { name: "Silmeyi onayla" }).click();
+  await expect(lib.locator(".mod-library-item")).toHaveCount(3);
+  expect(await page.evaluate(() => (window as any).commands)).toContainEqual({
+    command: "content_remove",
+    args: { profile: "p", kind: "shader", filename: "ComplementaryReimagined.zip", world: null, confirmed: true },
+  });
+  await lib.locator(".mod-library-bar").scrollIntoViewIfNeeded();
+  await page.screenshot({ path: "test-results/mod-library.png" });
+  await page.getByRole("tab", { name: "Favoriler (1)" }).click();
+  await expect(page.locator(".mod-card")).toHaveCount(1);
+  await expect(page.locator(".mod-card")).toContainText("Fresh Animations");
 });
 
 test("CurseForge source searches with the key and installs a mod plan after approval", async ({ page }) => {

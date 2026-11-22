@@ -33,6 +33,8 @@ pub fn allowed(src: &str) -> bool {
                     | "i.imgur.com"
                     | "user-images.githubusercontent.com",
                 ) => true,
+                // Sunucu banner'ları: yalnızca sitenin onaylı banner adresi.
+                Some("patronlauncher.net") => u.path().starts_with("/api/servers/banner-"),
                 Some("github.com") => u
                     .path_segments()
                     .is_some_and(|mut s| s.any(|x| x == "assets")),

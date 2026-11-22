@@ -18,7 +18,9 @@ export function allowedImage(src: string) {
         "user-images.githubusercontent.com",
       ].includes(u.hostname) ||
         (u.hostname === "github.com" &&
-          u.pathname.split("/").includes("assets")))
+          u.pathname.split("/").includes("assets")) ||
+        (u.hostname === "patronlauncher.net" &&
+          u.pathname.startsWith("/api/servers/banner-")))
     );
   } catch {
     return false;

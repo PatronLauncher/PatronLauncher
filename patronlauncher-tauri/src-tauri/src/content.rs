@@ -2,7 +2,7 @@
 //! indirilir, boyut ve SHA özetleri doğrulanır, yalnızca profilin ilgili klasörüne yazılır.
 use crate::{model::Profile, modrinth, performance};
 use anyhow::{Context, Result, bail, ensure};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use std::{
     fs,
     path::{Path, PathBuf},
@@ -16,6 +16,13 @@ pub enum Kind {
     DataPack,
 }
 impl Kind {
+    fn key(self) -> &'static str {
+        match self {
+            Self::ResourcePack => "resourcepack",
+            Self::Shader => "shader",
+            Self::DataPack => "datapack",
+        }
+    }
     pub fn parse(kind: &str) -> Result<Self> {
         Ok(match kind {
             "resourcepack" => Self::ResourcePack,
@@ -172,6 +179,7 @@ pub fn install(
             crate::net::digest_file(&path, false).is_ok_and(|d| d.eq_ignore_ascii_case(h))
         });
         ensure!(same, "Aynı adlı farklı bir dosya zaten var: {}", file.filename);
+        remember(root, profile, kind, project, version, &file.filename, world);
         return Ok(file.filename);
     }
     let response = performance::client(true)?
@@ -179,7 +187,191 @@ pub fn install(
         .send()?
         .error_for_status()?;
     performance::receive_with(response, &file, &path, &AtomicBool::new(false), |_| {}, &[".zip", ".jar"])?;
+    remember(root, profile, kind, project, version, &file.filename, world);
     Ok(file.filename)
+}
+
+/// Modrinth'ten kurulan içeriklerin kaydı (`content.lock.json`): kütüphanede dosyanın hangi projeye
+/// ait olduğunu göstermek için. Yalnızca bilgi amaçlıdır; dosyalar her zaman klasörden okunur.
+const INDEX: &str = "content.lock.json";
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+struct Indexed {
+    kind: String,
+    project_id: String,
+    version_id: String,
+    filename: String,
+    #[serde(default)]
+    world: Option<String>,
+    #[serde(default)]
+    installed_at: u64,
+}
+fn index_path(root: &Path, profile: &Profile) -> PathBuf {
+    crate::profiles::dir(root, profile).join(INDEX)
+}
+fn read_index(root: &Path, profile: &Profile) -> Vec<Indexed> {
+    fs::read(index_path(root, profile))
+        .ok()
+        .filter(|b| b.len() <= 2 * 1024 * 1024)
+        .and_then(|b| serde_json::from_slice::<Vec<Indexed>>(&b).ok())
+        .unwrap_or_default()
+        .into_iter()
+        .filter(|e| modrinth::id(&e.project_id).is_ok() && Kind::parse(&e.kind).is_ok())
+        .take(5000)
+        .collect()
+}
+fn write_index(root: &Path, profile: &Profile, list: &[Indexed]) {
+    if let Ok(bytes) = serde_json::to_vec_pretty(list) {
+        let _ = crate::profiles::atomic_write(&index_path(root, profile), &bytes);
+    }
+}
+fn remember(root: &Path, profile: &Profile, kind: Kind, project: &str, version: &str, filename: &str, world: Option<&str>) {
+    let mut list = read_index(root, profile);
+    list.retain(|e| !(e.kind == kind.key() && e.filename == filename && e.world.as_deref() == world));
+    list.push(Indexed {
+        kind: kind.key().into(),
+        project_id: project.into(),
+        version_id: version.into(),
+        filename: filename.into(),
+        world: world.map(str::to_string),
+        installed_at: std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map(|d| d.as_secs())
+            .unwrap_or(0),
+    });
+    write_index(root, profile, &list);
+}
+
+/// Kütüphanede gösterilen bir dosya: mod, shader, kaynak paketi ya da veri paketi.
+#[derive(Debug, Serialize, PartialEq, Eq)]
+pub struct LibraryItem {
+    pub kind: &'static str,
+    pub filename: String,
+    pub world: Option<String>,
+    pub project_id: Option<String>,
+    pub version_id: Option<String>,
+    pub enabled: bool,
+    /// Modlarda: launcher'ın mod manifestinde mi (kaldırma/devre dışı bırakma yalnızca bunlarda).
+    pub managed: bool,
+    pub size: u64,
+    /// Kurulum ya da son değişiklik zamanı (Unix saniye).
+    pub added: u64,
+}
+fn stamp(meta: &fs::Metadata) -> u64 {
+    meta.modified()
+        .ok()
+        .and_then(|t| t.duration_since(std::time::UNIX_EPOCH).ok())
+        .map(|d| d.as_secs())
+        .unwrap_or(0)
+}
+fn entries(dir: &Path) -> Vec<(String, fs::Metadata)> {
+    let Ok(meta) = fs::symlink_metadata(dir) else { return vec![] };
+    if meta.file_type().is_symlink() {
+        return vec![];
+    }
+    fs::read_dir(dir)
+        .into_iter()
+        .flatten()
+        .flatten()
+        .filter_map(|e| Some((e.file_name().into_string().ok()?, e.metadata().ok()?)))
+        .filter(|(name, _)| !name.starts_with('.'))
+        .collect()
+}
+/// Profilde kurulu tüm içerik. Modlar `mods.lock.json` ve mods klasöründen, diğerleri kendi klasörlerinden.
+pub fn library(root: &Path, profile: &Profile) -> Vec<LibraryItem> {
+    let mut out = Vec::new();
+    if let Ok(dir) = crate::mods::directory(root, profile)
+        && let Ok(manifest) = crate::mods::read(&dir)
+    {
+        let found: std::collections::HashMap<_, _> = entries(&dir.join("mods")).into_iter().collect();
+        let mut known = std::collections::HashSet::new();
+        for e in manifest.entries {
+            let file = if e.enabled { e.filename.clone() } else { format!("{}.disabled", e.filename) };
+            known.insert(file.clone());
+            let Some(meta) = found.get(&file) else { continue };
+            out.push(LibraryItem {
+                kind: "mod",
+                filename: e.filename,
+                world: None,
+                project_id: Some(e.project_id),
+                version_id: Some(e.version_id),
+                enabled: e.enabled,
+                managed: true,
+                size: meta.len(),
+                added: if e.installed_at > 0 { e.installed_at } else { stamp(meta) },
+            });
+        }
+        for (name, meta) in &found {
+            if known.contains(name) || !(name.ends_with(".jar") || name.ends_with(".jar.disabled")) {
+                continue;
+            }
+            out.push(LibraryItem {
+                kind: "mod",
+                filename: name.trim_end_matches(".disabled").to_string(),
+                world: None,
+                project_id: None,
+                version_id: None,
+                enabled: !name.ends_with(".disabled"),
+                managed: false,
+                size: meta.len(),
+                added: stamp(meta),
+            });
+        }
+    }
+    let index = read_index(root, profile);
+    let mut push = |kind: Kind, world: Option<String>| {
+        let Ok(dir) = target(root, profile, kind, world.as_deref()) else { return };
+        for (name, meta) in entries(&dir) {
+            if !(meta.is_dir() || name.ends_with(".zip") || name.ends_with(".jar")) {
+                continue;
+            }
+            let known = index
+                .iter()
+                .find(|e| e.kind == kind.key() && e.filename == name && e.world == world);
+            out.push(LibraryItem {
+                kind: kind.key(),
+                world: world.clone(),
+                project_id: known.map(|e| e.project_id.clone()),
+                version_id: known.map(|e| e.version_id.clone()),
+                enabled: true,
+                managed: true,
+                size: if meta.is_dir() { 0 } else { meta.len() },
+                added: known.map(|e| e.installed_at).filter(|t| *t > 0).unwrap_or_else(|| stamp(&meta)),
+                filename: name,
+            });
+        }
+    };
+    push(Kind::ResourcePack, None);
+    push(Kind::Shader, None);
+    for world in worlds(root, profile) {
+        push(Kind::DataPack, Some(world));
+    }
+    out
+}
+
+fn file_ok(name: &str) -> bool {
+    !name.is_empty()
+        && name.len() <= 255
+        && !name.starts_with('.')
+        && !name.chars().any(|c| c.is_control() || "\\/:*?\"<>|".contains(c))
+}
+/// Kaynak paketi, shader ya da veri paketi dosyasını siler (modlar `mods::remove` ile kaldırılır).
+pub fn remove(root: &Path, profile: &Profile, kind: Kind, filename: &str, world: Option<&str>) -> Result<()> {
+    ensure!(file_ok(filename), "Dosya adı geçersiz.");
+    let path = target(root, profile, kind, world)?.join(filename);
+    let meta = fs::symlink_metadata(&path).context("Dosya bulunamadı.")?;
+    ensure!(!meta.file_type().is_symlink(), "Bağlantı dosyası reddedildi.");
+    if meta.is_dir() {
+        fs::remove_dir_all(&path)?;
+    } else {
+        fs::remove_file(&path)?;
+    }
+    let mut list = read_index(root, profile);
+    let before = list.len();
+    list.retain(|e| !(e.kind == kind.key() && e.filename == filename && e.world.as_deref() == world));
+    if list.len() != before {
+        write_index(root, profile, &list);
+    }
+    Ok(())
 }
 
 #[cfg(test)]
@@ -196,5 +388,9 @@ mod tests {
             assert!(!world_ok(bad), "{bad:?}");
         }
         assert!(world_ok("Yeni Dünya (2)"));
+        for bad in ["", ".hidden", "a/b", "..\\x", "c:x", "a\u{0}"] {
+            assert!(!file_ok(bad), "{bad:?}");
+        }
+        assert!(file_ok("BSL_v9.0.zip"));
     }
 }

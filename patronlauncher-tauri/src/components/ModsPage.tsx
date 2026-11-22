@@ -25,6 +25,8 @@ const kindCategories: Record<Kind, string[]> = {
   modpack: ["adventure", "optimization", "kitchen-sink", "lightweight", "multiplayer", "quests", "technology", "magic"],
 };
 import ModImage from "./ModImage";
+import Icon from "./Icon";
+import ModLibrary, { FavButton, readFavorites, writeFavorites, type Favorite, type LibraryKind } from "./ModLibrary";
 import { useEffect, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
@@ -77,7 +79,17 @@ export default function ModsPage({
     null,
   );
   const [installedOnly, setInstalledOnly] = useState(false);
-  const [installedHits, setInstalledHits] = useState<ModHit[]>([]);
+  const [favView, setFavView] = useState(false);
+  const [favorites, setFavorites] = useState<Record<string, Favorite>>(readFavorites);
+  const [libraryCount, setLibraryCount] = useState<number | null>(null);
+  const toggleFavorite = (f: Favorite) =>
+    setFavorites((old) => {
+      const next = { ...old };
+      if (next[f.project_id]) delete next[f.project_id];
+      else next[f.project_id] = f;
+      writeFavorites(next);
+      return next;
+    });
   const [installed, setInstalled] = useState<ModEntry[]>([]),
     [flow, setFlow] = useState<number | null>(null),
     [profileSearch, setProfileSearch] = useState(""),
@@ -128,8 +140,18 @@ export default function ModsPage({
     else if (!usesMods(current?.loader)) setInstalled([]);
   }, [target, s.busy]);
   useEffect(() => {
+    if (!target || s.busy) return;
+    let alive = true;
+    invoke<unknown[]>("content_library", { profile: target })
+      .then((l) => alive && setLibraryCount(Array.isArray(l) ? l.length : 0))
+      .catch(() => alive && setLibraryCount(null));
+    return () => {
+      alive = false;
+    };
+  }, [target, s.busy]);
+  useEffect(() => {
     let active = true;
-    if (installedOnly) {
+    if (installedOnly || favView) {
       setLoading(false);
       return;
     }
@@ -176,6 +198,7 @@ export default function ModsPage({
     offset,
     retry,
     installedOnly,
+    favView,
     loaderFilter,
     kind,
   ]);
@@ -309,54 +332,37 @@ export default function ModsPage({
       clearTimeout(timer);
     };
   }, [query, mc, environment, loaderFilter, kind]);
-  useEffect(() => {
-    if (!installedOnly) return;
-    let active = true;
-    setLoading(true);
-    setError("");
-    Promise.all(
-      installed.map((e) =>
-        invoke<any>("mods_project", { project: e.project_id }).then((v) => ({
-          project_id: e.project_id,
-          title: v.project.title,
-          description: v.project.description,
-          icon_url: v.project.icon_url,
-          downloads: v.project.downloads ?? 0,
-          follows: v.project.followers,
-          date_modified: v.project.updated ?? "",
-          author:
-            v.creators
-              ?.map((c: any) => c.user?.username)
-              .filter(Boolean)
-              .join(", ") ?? "",
-          categories: v.project.categories ?? [],
-          versions: v.project.game_versions ?? [],
-        })),
-      ),
-    )
-      .then((v) => {
-        if (active) setInstalledHits(v);
-      })
-      .catch((e) => {
-        if (active) setError(String(e));
-      })
-      .finally(() => {
-        if (active) setLoading(false);
-      });
-    return () => {
-      active = false;
-    };
-  }, [installedOnly, installed, target, retry]);
-  const visibleHits = (installedOnly ? installedHits : hits).filter(
-    (h) =>
-      !installedOnly ||
-      ((!query ||
-        h.title
-          .toLocaleLowerCase("tr")
-          .includes(query.toLocaleLowerCase("tr"))) &&
-        (!categories.length ||
-          categories.some((c) => h.categories.includes(c)))),
-  );
+
+  const favList = Object.values(favorites).sort((a, b) => b.added - a.added);
+  const favKind = (id: string) => favorites[id]?.kind ?? kind;
+  const visibleHits: ModHit[] = favView
+    ? favList
+        .filter(
+          (f) =>
+            !query ||
+            `${f.title} ${f.description}`.toLocaleLowerCase(locale()).includes(query.toLocaleLowerCase(locale())),
+        )
+        .map((f) => ({
+          project_id: f.project_id,
+          title: f.title,
+          description: f.description,
+          icon_url: f.icon_url,
+          downloads: 0,
+          date_modified: "",
+          author: f.author,
+          categories: [],
+        }))
+    : hits;
+  const favorite = (h: ModHit, k: Kind = kind) =>
+    toggleFavorite({
+      project_id: h.project_id,
+      kind: k,
+      title: h.title,
+      description: h.description,
+      icon_url: h.icon_url,
+      author: h.author,
+      added: Date.now(),
+    });
   const reset = () => {
     setQuery("");
     setCategories([]);
@@ -661,11 +667,12 @@ export default function ModsPage({
           <button
             key={key}
             role="tab"
-            aria-selected={!installedOnly && kind === key}
-            className={"btn " + (!installedOnly && kind === key ? "v-add" : "")}
+            aria-selected={!installedOnly && !favView && kind === key}
+            className={"btn " + (!installedOnly && !favView && kind === key ? "v-add" : "")}
             onClick={() => {
               setKind(key);
               setInstalledOnly(false);
+              setFavView(false);
               setProject(null);
               setCategories([]);
               setOffset(0);
@@ -674,14 +681,30 @@ export default function ModsPage({
             {t(label)}
           </button>
         ))}
-        {kind === "mod" && <button
-          className={"btn " + (installedOnly ? "v-add" : "")}
+        <span className="mod-view-sep" aria-hidden="true" />
+        <button
+          role="tab"
+          aria-selected={installedOnly}
+          className={"btn mod-tab-library " + (installedOnly ? "v-add" : "")}
+          title={t("Bu profile kurulu modlar, shaderlar ve paketler")}
           onClick={() => {
             setInstalledOnly(true);
+            setFavView(false);
             setProject(null);
           }}
-        >{t("Kurulu ({count})", { count: installed.length })}
-        </button>}
+        >{t("Kurulu ({count})", { count: libraryCount ?? installed.length })}
+        </button>
+        <button
+          role="tab"
+          aria-selected={favView}
+          className={"btn mod-tab-fav " + (favView ? "v-add" : "")}
+          onClick={() => {
+            setFavView(true);
+            setInstalledOnly(false);
+            setProject(null);
+          }}
+        ><Icon name="star" /> {t("Favoriler ({count})", { count: favList.length })}
+        </button>
       </div>
       {project && flow === null ? (
         <>
@@ -778,7 +801,10 @@ export default function ModsPage({
               <p>{t("Modlar şuraya kurulacak:")}{" "}
                 <b>{current?.name ?? t("Profil seçilmedi")}</b>
               </p>
-              <div className="actions">{buttons(project)}</div>
+              <div className="actions">
+                <FavButton on={!!favorites[project.project_id]} onClick={() => favorite(project)} />
+                {buttons(project)}
+              </div>
               <h4>{t("Desteklenen sürümler / yükleyiciler")}</h4>
               <p className="lbl">
                 {(detail?.project.game_versions ?? project.versions ?? []).join(
@@ -796,6 +822,22 @@ export default function ModsPage({
             </aside>
           </div>
         </>
+      ) : installedOnly ? (
+        <ModLibrary
+          s={s}
+          profile={target}
+          favorites={favorites}
+          toggleFavorite={toggleFavorite}
+          open={(hit, k: LibraryKind) => {
+            setKind(k);
+            setProject(hit);
+            setTab("Açıklama");
+          }}
+          removeMod={(id) => void requestRemove(id)}
+          notice={notice}
+          onState={onState}
+          onCount={setLibraryCount}
+        />
       ) : (
         <>
           <div className="v-toolbar">
@@ -897,7 +939,11 @@ export default function ModsPage({
                   ))}
                 </div>
               ) : !visibleHits.length ? (
-                <div className="glass">{t("Bu filtrelerle mod bulunamadı.")}</div>
+                <div className="glass">
+                  {favView
+                    ? t("Henüz favorin yok. Beğendiğin mod ve shaderları yıldızla, burada toplansın.")
+                    : t("Bu filtrelerle mod bulunamadı.")}
+                </div>
               ) : (
                 <div className="mods-grid">
                   {visibleHits.map((h, i) => (
@@ -968,21 +1014,23 @@ export default function ModsPage({
                           </span>
                         </div>
                         <div className="actions">
+                          <FavButton on={!!favorites[h.project_id]} onClick={() => favorite(h, favKind(h.project_id) as Kind)} />
                           <button
                             className="btn"
                             onClick={() => {
+                              if (favView) setKind(favKind(h.project_id) as Kind);
                               setProject(h);
                               setTab("Açıklama");
                             }}
                           >{t("Görüntüle")}</button>
-                          {buttons(h)}
+                          {!favView && buttons(h)}
                         </div>
                       </div>
                     </article>
                   ))}
                 </div>
               )}
-              <div className="actions mod-pagination" hidden={installedOnly}>
+              <div className="actions mod-pagination" hidden={installedOnly || favView}>
                 <button
                   className="btn"
                   disabled={!offset || loading}

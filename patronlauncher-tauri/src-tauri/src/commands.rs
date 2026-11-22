@@ -854,13 +854,15 @@ pub fn servers_votes() -> crate::servers::Votes {
 fn listed(store: &crate::servers::Store, id: &str) -> Result<(), String> {
     store.find(id).map(|_| ()).ok_or_else(|| "Sunucu listede bulunamadı.".to_string())
 }
+/// Sunucunun site sayfasını oy bölümünde açar; oylar sitede Turnstile ve 8 saatlik kilitle korunur.
 #[tauri::command]
 pub fn server_vote(
     store: tauri::State<'_, crate::servers::Store>,
     id: String,
-) -> Result<crate::servers::Vote, String> {
+    lang: String,
+) -> Result<(), String> {
     listed(&store, &id)?;
-    crate::servers::vote_now(&crate::model::data_root(), &id).map_err(|e| format!("{e:#}"))
+    webbrowser::open(&format!("{}#vote", crate::servers::page_url(&id, &lang))).map_err(|e| e.to_string())
 }
 #[tauri::command]
 pub fn server_rate(
@@ -935,6 +937,61 @@ pub async fn content_installed(
     let profile = content_profile(&state.call(Action::Read).await?.state, profile)?;
     let kind = crate::content::Kind::parse(&kind).map_err(|e| e.to_string())?;
     Ok(crate::content::installed(&crate::model::data_root(), &profile, kind, world.as_deref()))
+}
+/// Profilde kurulu modlar, shaderlar, kaynak ve veri paketleri (kütüphane görünümü).
+#[tauri::command]
+pub async fn content_library(
+    state: tauri::State<'_, CoreService>,
+    profile: uuid::Uuid,
+) -> Result<Vec<crate::content::LibraryItem>, String> {
+    let profile = content_profile(&state.call(Action::Read).await?.state, profile)?;
+    tauri::async_runtime::spawn_blocking(move || crate::content::library(&crate::model::data_root(), &profile))
+        .await
+        .map_err(|e| e.to_string())
+}
+#[tauri::command]
+pub async fn content_remove(
+    state: tauri::State<'_, CoreService>,
+    profile: uuid::Uuid,
+    kind: String,
+    filename: String,
+    world: Option<String>,
+    confirmed: bool,
+) -> Result<(), String> {
+    if !confirmed {
+        return Err("Silmek için açık onay gerekli.".into());
+    }
+    let snapshot = state.call(Action::Read).await?.state;
+    if snapshot.running {
+        return Err("Oyun açıkken içerik silinemez.".into());
+    }
+    let profile = content_profile(&snapshot, profile)?;
+    tauri::async_runtime::spawn_blocking(move || {
+        crate::content::remove(
+            &crate::model::data_root(),
+            &profile,
+            crate::content::Kind::parse(&kind)?,
+            &filename,
+            world.as_deref(),
+        )
+    })
+    .await
+    .map_err(|e| e.to_string())?
+    .map_err(|e| format!("{e:#}"))
+}
+/// Birden çok Modrinth projesinin özeti (kütüphane kartları için tek istek).
+#[tauri::command]
+pub async fn mods_projects(ids: Vec<String>) -> Result<serde_json::Value, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        let ids: Vec<String> = ids.into_iter().filter(|id| crate::modrinth::id(id).is_ok()).take(200).collect();
+        if ids.is_empty() {
+            return Ok(serde_json::json!([]));
+        }
+        crate::modrinth::get("projects", &[("ids", serde_json::to_string(&ids)?)])
+    })
+    .await
+    .map_err(|e| e.to_string())?
+    .map_err(|e: anyhow::Error| format!("{e:#}"))
 }
 #[tauri::command]
 pub async fn content_install(

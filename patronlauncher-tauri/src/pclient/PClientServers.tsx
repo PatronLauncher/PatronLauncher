@@ -6,6 +6,7 @@ import { getLanguage, locale, msg, t, type Language } from "../i18n";
 import { CountryFlag } from "../components/Flag";
 import { Select } from "../components/Controls";
 import type { Ping, Server } from "../components/ServerPanel";
+import ModImage from "../components/ModImage";
 import { PcIcon } from "./icons";
 import { announceLaunch } from "./launch";
 import { ensurePerformanceChoice } from "./PerformancePrompt";
@@ -50,7 +51,7 @@ const sorts: [Sort, string][] = [
   ["featured", msg("Önerilen")],
   ["players", msg("En kalabalık")],
   ["latency", msg("En düşük gecikme")],
-  ["votes", msg("En çok oyladıklarım")],
+  ["votes", msg("Bu ay en çok oy alan")],
   ["rating", msg("En yüksek puanım")],
   ["name", msg("A–Z")],
 ];
@@ -67,9 +68,6 @@ const describe = (sv: Server) =>
   sv.description[getLanguage()] ?? sv.description.en ?? sv.description.tr ?? Object.values(sv.description)[0] ?? "";
 export const num = (n: number) => n.toLocaleString(locale());
 export const latencyClass = (ms: number) => (ms < 70 ? "good" : ms < 160 ? "ok" : "bad");
-/** Kalan oy bekleme süresi (saniye); 0 ise oy verilebilir. */
-const voteWait = (v?: Vote) =>
-  v?.last_vote ? Math.max(0, v.last_vote + 86_400 - Math.floor(Date.now() / 1000)) : 0;
 
 export function Icon({ sv, ping, big }: { sv: Server; ping?: Ping; big?: boolean }) {
   return ping?.favicon ? (
@@ -197,7 +195,7 @@ export default function PClientServers({ s, run, notice }: { s: Snapshot; run: R
           : sort === "latency"
             ? latency(a) - latency(b)
             : sort === "votes"
-              ? (votes[b.id]?.votes ?? 0) - (votes[a.id]?.votes ?? 0) || players(b) - players(a)
+              ? (b.votes ?? 0) - (a.votes ?? 0) || players(b) - players(a)
               : sort === "rating"
                 ? (votes[b.id]?.rating ?? 0) - (votes[a.id]?.rating ?? 0) || players(b) - players(a)
                 : a.name.localeCompare(b.name, locale()),
@@ -253,7 +251,8 @@ export default function PClientServers({ s, run, notice }: { s: Snapshot; run: R
 
   const ping = sv ? pings[sv.id] : undefined;
   const mine = sv ? votes[sv.id] : undefined;
-  const wait = voteWait(mine);
+  const vote = (x: Server) =>
+    void invoke("server_vote", { id: x.id, lang: getLanguage() }).catch((e) => notice(String(e)));
   const fill = ping?.online && ping.max_players ? Math.min(100, ((ping.players ?? 0) / ping.max_players) * 100) : 0;
 
   return (
@@ -360,6 +359,7 @@ export default function PClientServers({ s, run, notice }: { s: Snapshot; run: R
                 <Icon sv={x} ping={p} />
                 <div className="pc-sv-row-main">
                   <b>
+                    {sort === "votes" && x.rank ? <i className={"pc-sv-rank r" + Math.min(x.rank, 4)}>#{x.rank}</i> : null}
                     {x.name}
                     <CountryFlag code={x.country} />
                     {votes[x.id]?.favorite && <PcIcon name="heart" className="pc-i fav" />}
@@ -393,6 +393,7 @@ export default function PClientServers({ s, run, notice }: { s: Snapshot; run: R
           <p className="pc-news-empty">{t("Bir sunucu seç.")}</p>
         ) : (
           <div key={sv.id} className="pc-sv-detail-in">
+            {sv.banner && <ModImage className="pc-sv-banner" src={sv.banner} alt={sv.name} silent />}
             <header>
               <Icon sv={sv} ping={ping} big />
               <div>
@@ -454,21 +455,11 @@ export default function PClientServers({ s, run, notice }: { s: Snapshot; run: R
             <div className="pc-sv-community">
               <button
                 className="pc-ghost-btn"
-                disabled={wait > 0}
-                title={
-                  wait > 0
-                    ? t("Yeniden oy verebilmen için {h} sa {m} dk kaldı", {
-                        h: Math.floor(wait / 3600),
-                        m: Math.ceil((wait % 3600) / 60),
-                      })
-                    : t("Bu sunucuya oy ver (günde bir kez)")
-                }
-                onClick={async () => {
-                  if (await record("server_vote", { id: sv.id }))
-                    notice(t("{name} için oyun kaydedildi. Teşekkürler!", { name: sv.name }));
-                }}
+                title={t("Oy sayfası tarayıcıda açılır; oyunu kullanıcı adınla verirsin.")}
+                onClick={() => vote(sv)}
               >
-                <PcIcon name="vote" /> {wait > 0 ? t("Oy verildi") : t("Oy ver")} <small>{mine?.votes ?? 0}</small>
+                <PcIcon name="vote" /> {t("Oy ver")} <small title={t("Bu ayki oylar")}>{num(sv.votes ?? 0)}</small>
+                <PcIcon name="external" />
               </button>
               <span className="pc-sv-stars" role="radiogroup" aria-label={t("Puanın")}>
                 {[1, 2, 3, 4, 5].map((n) => (

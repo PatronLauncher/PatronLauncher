@@ -9,6 +9,7 @@ import { Select } from "./Controls";
 import { CountryFlag } from "./Flag";
 import Icon from "./Icon";
 import Mascot from "./Mascot";
+import ModImage from "./ModImage";
 
 export type Server = {
   id: string;
@@ -24,6 +25,10 @@ export type Server = {
   discord: string | null;
   sponsored: boolean;
   featured: boolean;
+  /** Sitedeki bu ayın oyları ve sırası (eski önbellekte yoktur). */
+  votes?: number;
+  rank?: number | null;
+  banner?: string | null;
 };
 export type Ping = {
   online: boolean;
@@ -83,7 +88,7 @@ const readScope = (): Scope => {
 const sorts: [Sort, string][] = [
   ["featured", msg("Önerilen")],
   ["players", msg("En kalabalık")],
-  ["votes", msg("En çok oyladıklarım")],
+  ["votes", msg("Bu ay en çok oy alan")],
   ["rating", msg("En yüksek puanım")],
   ["latency", msg("En düşük gecikme")],
   ["name", msg("A–Z")],
@@ -124,9 +129,6 @@ function CountryMark({ country }: { country: string }) {
     </span>
   );
 }
-/** Kalan oy bekleme süresi (saniye); 0 ise oy verilebilir. */
-const voteWait = (v?: Vote) =>
-  v?.last_vote ? Math.max(0, v.last_vote + 86_400 - Math.floor(Date.now() / 1000)) : 0;
 function Stars({ value, onChange }: { value: number | null; onChange: (n: number) => void }) {
   const [hover, setHover] = useState(0);
   const shown = hover || value || 0;
@@ -407,7 +409,7 @@ export default function ServerPanel({
         : sort === "players"
           ? players(b) - players(a)
           : sort === "votes"
-            ? (votes[b.id]?.votes ?? 0) - (votes[a.id]?.votes ?? 0) || players(b) - players(a)
+            ? (b.votes ?? 0) - (a.votes ?? 0) || players(b) - players(a)
             : sort === "rating"
               ? (votes[b.id]?.rating ?? 0) - (votes[a.id]?.rating ?? 0) || players(b) - players(a)
               : sort === "latency"
@@ -428,10 +430,8 @@ export default function ServerPanel({
   };
   const community = {
     votes,
-    vote: async (sv: Server) => {
-      if (await record("server_vote", { id: sv.id }))
-        notice(t("{name} için oyun kaydedildi. Teşekkürler!", { name: sv.name }));
-    },
+    vote: (sv: Server) =>
+      void invoke("server_vote", { id: sv.id, lang: getLanguage() }).catch((e) => notice(String(e))),
     rate: (sv: Server, stars: number) => void record("server_rate", { id: sv.id, stars }),
     favorite: (sv: Server, on: boolean) => void record("server_favorite", { id: sv.id, favorite: on }),
   };
@@ -621,7 +621,7 @@ function ServerBrowser({
   favorites: number;
   community: {
     votes: Record<string, Vote>;
-    vote: (sv: Server) => Promise<void>;
+    vote: (sv: Server) => void;
     rate: (sv: Server, stars: number) => void;
     favorite: (sv: Server, on: boolean) => void;
   };
@@ -648,7 +648,6 @@ function ServerBrowser({
   const sv = servers.find((x) => x.id === selected) ?? visible[0] ?? null;
   const ping = sv ? pings[sv.id] : undefined;
   const mine = sv ? community.votes[sv.id] : undefined;
-  const wait = voteWait(mine);
   const fill =
     ping?.online && ping.max_players
       ? Math.min(100, ((ping.players ?? 0) / ping.max_players) * 100)
@@ -743,6 +742,7 @@ function ServerBrowser({
           </div>
           {sv && (
             <article className="server-browser-detail" key={sv.id}>
+              {sv.banner && <ModImage className="server-banner" src={sv.banner} alt={sv.name} silent />}
               <div className="sbd-hero">
                 <ServerIcon server={sv} ping={ping} />
                 <div>
@@ -813,19 +813,11 @@ function ServerBrowser({
               <div className="sbd-community">
                 <button
                   className="btn sbd-vote"
-                  disabled={wait > 0}
-                  title={
-                    wait > 0
-                      ? t("Tekrar oy verebilmek için {hours} sa {minutes} dk bekle.", {
-                          hours: Math.floor(wait / 3600),
-                          minutes: Math.floor((wait % 3600) / 60),
-                        })
-                      : t("Bu sunucuya oy ver")
-                  }
-                  onClick={() => void community.vote(sv)}
+                  title={t("Oy sayfası tarayıcıda açılır; oyunu kullanıcı adınla verirsin.")}
+                  onClick={() => community.vote(sv)}
                 >
-                  <Icon name="vote" /> {wait > 0 ? t("Oy verildi") : t("Oy ver")}
-                  <small>{mine?.votes ?? 0}</small>
+                  <Icon name="vote" /> {t("Oy ver")} ↗
+                  <small title={t("Bu ayki oylar")}>{(sv.votes ?? 0).toLocaleString(locale())}</small>
                 </button>
                 <Stars value={mine?.rating ?? null} onChange={(n) => community.rate(sv, n)} />
                 <button
@@ -837,9 +829,9 @@ function ServerBrowser({
                 </button>
               </div>
               <p className="lbl sbd-note">
-                {t(
-                  "Oyların, puanların ve favorilerin şimdilik yalnızca bu bilgisayarda saklanır. PatronLauncher'ın ortak sunucu listesi açıldığında herkesin oylarıyla sıralama yapılacak.",
-                )}
+                {sv.rank
+                  ? t("Bu ay #{rank} sırada. Oylar patronlauncher.net üzerinde verilir; puan ve favorilerin bu bilgisayarda kalır.", { rank: sv.rank })
+                  : t("Oylar patronlauncher.net üzerinde verilir; puan ve favorilerin bu bilgisayarda kalır.")}
               </p>
               <div className="sbd-actions">
                 <button

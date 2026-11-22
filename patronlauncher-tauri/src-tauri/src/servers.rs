@@ -12,8 +12,10 @@ use std::{
     time::{Duration, Instant},
 };
 
-/// Liste sahibinin yayınladığı JSON. Boşsa yalnızca önbellek ve gömülü liste kullanılır.
-pub const REMOTE_URL: &str = "";
+/// PatronLauncher sitesinin onaylı sunucu listesi. Ulaşılamazsa önbellek, o da yoksa gömülü liste kullanılır.
+pub const REMOTE_URL: &str = "https://patronlauncher.net/api/servers/launcher.json";
+/// Sunucu sayfaları (oy verme dahil) sitede açılır; oylar orada Turnstile ile korunur.
+pub const SITE: &str = "https://patronlauncher.net";
 const BUNDLED: &str = include_str!("../servers.json");
 const CACHE: &str = "servers-cache.json";
 const VOTES: &str = "server-votes.json";
@@ -22,11 +24,9 @@ pub const COUNTRIES: [&str; 15] = [
     "tr", "us", "gb", "de", "es", "cl", "fr", "in", "it", "pl", "br", "ru", "nl", "id", "pt",
 ];
 const PING_TTL: Duration = Duration::from_secs(60);
-/// Bir sunucuya aynı cihazdan iki oy arasında beklenen süre (sunucu listesi sitelerindeki gibi).
-pub const VOTE_COOLDOWN_SECS: u64 = 24 * 60 * 60;
 
+// Bilinmeyen alanlar yok sayılır: site yeni alan eklediğinde eski launcher'lar listeyi okumaya devam eder.
 #[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(deny_unknown_fields)]
 pub struct Server {
     pub id: String,
     pub name: String,
@@ -50,9 +50,17 @@ pub struct Server {
     pub sponsored: bool,
     #[serde(default)]
     pub featured: bool,
+    /// Sitedeki bu ayın oyları.
+    #[serde(default)]
+    pub votes: u32,
+    /// Sitedeki aylık sıra (1 = en çok oy).
+    #[serde(default)]
+    pub rank: Option<u32>,
+    /// Sunucu sahibinin onaylı banner'ı (yalnızca site adresi).
+    #[serde(default)]
+    pub banner: Option<String>,
 }
 #[derive(Debug, Deserialize)]
-#[serde(deny_unknown_fields)]
 struct Document {
     version: u32,
     servers: Vec<Server>,
@@ -95,6 +103,20 @@ fn link_ok(url: &Option<String>) -> bool {
     url.as_deref()
         .is_none_or(|u| u.starts_with("https://") && u.len() <= 200 && !u.contains(char::is_whitespace))
 }
+fn banner_ok(url: &str) -> bool {
+    url.len() <= 200
+        && url
+            .strip_prefix("https://patronlauncher.net/api/servers/banner-")
+            .is_some_and(|rest| rest.bytes().all(|b| b.is_ascii_alphanumeric() || b"-_.?=".contains(&b)))
+}
+/// Sitedeki sunucu sayfası; `lang` launcher dilidir (İngilizce önek almaz).
+pub fn page_url(id: &str, lang: &str) -> String {
+    let prefix = match lang {
+        "tr" | "de" | "es" | "fr" | "it" | "pl" | "pt" | "ru" | "hi" => format!("/{lang}"),
+        _ => String::new(),
+    };
+    format!("{SITE}{prefix}/servers/{id}")
+}
 fn validate(doc: Document) -> Result<Vec<Server>> {
     if doc.version != 2 {
         bail!("Desteklenmeyen sunucu listesi sürümü.");
@@ -118,6 +140,9 @@ fn validate(doc: Document) -> Result<Vec<Server>> {
             && s.versions.len() <= 40
             && link_ok(&s.website)
             && link_ok(&s.discord);
+        if s.banner.as_deref().is_some_and(|b| !banner_ok(b)) {
+            s.banner = None;
+        }
         if ok {
             servers.push(s);
         }
@@ -187,8 +212,8 @@ impl Store {
     }
 }
 
-/// Bir sunucu için bu cihazdaki oy, puan ve favori kaydı. Ortak (çevrimiçi) oy sistemi
-/// PatronLauncher sitesi açılınca bağlanacak; o zamana kadar veriler yalnızca yereldir.
+/// Bir sunucu için bu cihazdaki puan ve favori kaydı. Oylar sitede verilir (`page_url`);
+/// `votes`/`last_vote` eski sürümlerin yerel oy kayıtlarıdır ve yalnızca okunur.
 #[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq, Eq)]
 pub struct Vote {
     #[serde(default)]
@@ -204,12 +229,6 @@ pub struct Vote {
 }
 pub type Votes = HashMap<String, Vote>;
 
-fn now() -> u64 {
-    std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH)
-        .map(|d| d.as_secs())
-        .unwrap_or(0)
-}
 fn id_ok(id: &str) -> bool {
     (1..=40).contains(&id.len()) && id.bytes().all(|b| b.is_ascii_lowercase() || b.is_ascii_digit() || b == b'-')
 }
@@ -227,23 +246,6 @@ pub fn load_votes(root: &Path) -> Votes {
 }
 fn save_votes(root: &Path, votes: &Votes) -> Result<()> {
     crate::profiles::atomic_write(&root.join(VOTES), &serde_json::to_vec_pretty(votes)?)
-}
-/// Oy verir; aynı sunucuya 24 saatte bir oy verilebilir.
-pub fn vote(root: &Path, id: &str, at: u64) -> Result<Vote> {
-    let mut votes = load_votes(root);
-    let entry = votes.entry(id.to_string()).or_default();
-    let wait = (entry.last_vote + VOTE_COOLDOWN_SECS).saturating_sub(at);
-    if entry.last_vote > 0 && wait > 0 {
-        bail!("Bu sunucuya tekrar oy vermek için {} saat {} dakika bekle.", wait / 3600, wait % 3600 / 60);
-    }
-    entry.votes = entry.votes.saturating_add(1);
-    entry.last_vote = at;
-    let result = entry.clone();
-    save_votes(root, &votes)?;
-    Ok(result)
-}
-pub fn vote_now(root: &Path, id: &str) -> Result<Vote> {
-    vote(root, id, now())
 }
 /// 0 puanı kaldırır.
 pub fn rate(root: &Path, id: &str, stars: u8) -> Result<Vote> {
@@ -500,6 +502,17 @@ mod tests {
         let servers = parse(doc).unwrap();
         assert_eq!(servers.iter().map(|s| s.id.as_str()).collect::<Vec<_>>(), ["ok"]);
         assert!(parse(br#"{"version":1,"servers":[]}"#).is_err());
+        // Yeni alanlar eski sürümleri bozmaz; site dışı banner atılır.
+        let doc = br#"{"version":2,"future":1,"servers":[
+            {"id":"a","name":"A","address":"a.example.net","country":"de","votes":7,"rank":1,"extra":true,
+             "banner":"https://patronlauncher.net/api/servers/banner-a.gif?v=1"},
+            {"id":"b","name":"B","address":"b.example.net","country":"de","banner":"https://evil.example/x.gif"}
+        ]}"#;
+        let servers = parse(doc).unwrap();
+        assert_eq!((servers[0].votes, servers[0].rank), (7, Some(1)));
+        assert!(servers[0].banner.is_some() && servers[1].banner.is_none());
+        assert_eq!(page_url("a", "tr"), "https://patronlauncher.net/tr/servers/a");
+        assert_eq!(page_url("a", "en"), "https://patronlauncher.net/servers/a");
     }
     #[test]
     fn bundled_list_covers_every_launcher_language_country() {
@@ -510,20 +523,14 @@ mod tests {
         }
     }
     #[test]
-    fn votes_have_a_daily_cooldown_and_ratings_are_bounded() {
+    fn ratings_are_bounded_and_favorites_saved() {
         let root = std::env::temp_dir().join(format!("patron-votes-{}", uuid::Uuid::new_v4()));
         std::fs::create_dir_all(&root).unwrap();
-        let first = vote(&root, "hypixel", 1_000_000).unwrap();
-        assert_eq!(first.votes, 1);
-        assert!(vote(&root, "hypixel", 1_000_000 + 3600).is_err());
-        let second = vote(&root, "hypixel", 1_000_000 + VOTE_COOLDOWN_SECS).unwrap();
-        assert_eq!(second.votes, 2);
         assert_eq!(rate(&root, "hypixel", 4).unwrap().rating, Some(4));
         assert!(rate(&root, "hypixel", 6).is_err());
         assert_eq!(rate(&root, "hypixel", 0).unwrap().rating, None);
         assert!(favorite(&root, "hypixel", true).unwrap().favorite);
         let saved = load_votes(&root);
-        assert_eq!(saved["hypixel"].votes, 2);
         assert!(saved["hypixel"].favorite);
         // Bozuk ya da elle değiştirilmiş kayıtlar yok sayılır.
         std::fs::write(root.join(VOTES), br#"{"BAD ID":{"votes":9},"x":{"rating":9}}"#).unwrap();
@@ -579,6 +586,9 @@ mod tests {
             discord: None,
             sponsored: false,
             featured: false,
+            votes: 0,
+            rank: None,
+            banner: None,
         };
         // localhost.localdomain her sistemde çözülmeyebilir; doğrudan iç fonksiyonu IP ile dene.
         let server = Server { address: "127.0.0.1".into(), ..server };
