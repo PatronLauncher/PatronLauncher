@@ -6,11 +6,14 @@ import com.patron.pclient.bridge.Modrinth;
 import com.patron.pclient.bridge.Support;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -24,6 +27,9 @@ public final class PClientModrinthScreen extends PcScreen {
 	private enum Tab { RESOURCE, SHADER, INSTALLED }
 
 	private enum Page { BODY, GALLERY, VERSIONS }
+
+	/** İndirilenler sekmesinin görünüm filtresi. */
+	private enum Show { ALL, RESOURCE, SHADER, FAVORITE, ACTIVE }
 
 	private record Section(String key, List<String> tags) {}
 
@@ -50,9 +56,17 @@ public final class PClientModrinthScreen extends PcScreen {
 	private static String sort = "relevance";
 	private static final Map<Tab, Set<String>> FILTERS = new EnumMap<>(Tab.class);
 	private static final Set<String> COLLAPSED = new HashSet<>(Set.of("features"));
+	private static final List<String> LOCAL_SORTS = List.of("recent", "name", "active");
+	private static final int GOLD = 0xFFF5C451;
+	private static Show show = Show.ALL;
+	private static String localSort = "recent";
 
 	private final PcTextField search = new PcTextField(64, L.t("modrinth.search")).clearOnEscape();
+	private final PcTextField localSearch = new PcTextField(64, L.t("modrinth.searchInstalled")).clearOnEscape();
 	private final List<Modrinth.Hit> hits = new ArrayList<>();
+	/** İndirilenler sekmesinde filtrelenmemiş tam liste ve her görünümün sayısı. */
+	private final List<Modrinth.Hit> installedAll = new ArrayList<>();
+	private final Map<Show, Integer> showCounts = new EnumMap<>(Show.class);
 	private final Set<String> imageKeys = new HashSet<>();
 	private int total, generation, listY1, listY2, sideY1, sideY2;
 	private boolean loading, failed, showFilters;
@@ -70,7 +84,14 @@ public final class PClientModrinthScreen extends PcScreen {
 	public PClientModrinthScreen(Screen parent) {
 		super("title.modrinth", parent);
 		search.onChange(v -> searchAt = System.currentTimeMillis() + SEARCH_DELAY_MS);
+		// Yerel arama ağ kullanmaz; her tuşta hemen süzülür.
+		localSearch.onChange(v -> {
+			if (tab == Tab.INSTALLED) refilter();
+		});
 	}
+
+	/** Etkin sekmenin arama kutusu. */
+	private PcTextField field() { return tab == Tab.INSTALLED ? localSearch : search; }
 
 	/** Ana sayfadaki ön gösterimden doğrudan proje sayfasıyla açılır. */
 	public PClientModrinthScreen(Screen parent, Modrinth.Hit open) {
@@ -80,7 +101,7 @@ public final class PClientModrinthScreen extends PcScreen {
 	}
 
 	@Override protected void init() {
-		if (detail == null && zoom == null) focus(search);
+		if (detail == null && zoom == null) focus(field());
 	}
 
 	@Override protected String dock() { return "modrinth"; }
@@ -102,10 +123,11 @@ public final class PClientModrinthScreen extends PcScreen {
 
 	private void load(boolean append) {
 		if (tab == Tab.INSTALLED) {
-			hits.clear();
-			hits.addAll(Modrinth.installedHits());
-			total = hits.size();
+			installedAll.clear();
+			installedAll.addAll(Modrinth.installedHits());
 			loading = false;
+			failed = false;
+			refilter();
 			return;
 		}
 		int current = ++generation, offset = append ? hits.size() : 0;
@@ -128,6 +150,73 @@ public final class PClientModrinthScreen extends PcScreen {
 		}));
 	}
 
+	// --- İndirilenler: yerel arama, görünüm ve sıralama ---
+
+	private static boolean active(Modrinth.Hit h) {
+		String file = Modrinth.installedFile(h.id());
+		return file != null && (h.kind() == Modrinth.Kind.RESOURCE ? Modrinth.resourceActive(file) : Modrinth.shaderActive(file));
+	}
+
+	private static boolean shows(Show s, Modrinth.Hit h, boolean on) {
+		return switch (s) {
+			case ALL -> true;
+			case RESOURCE -> h.kind() == Modrinth.Kind.RESOURCE;
+			case SHADER -> h.kind() == Modrinth.Kind.SHADER;
+			case FAVORITE -> Modrinth.favorite(h.id());
+			case ACTIVE -> on;
+		};
+	}
+
+	private static boolean matches(Modrinth.Hit h, String query) {
+		if (query.isEmpty()) return true;
+		for (String text : new String[] {h.title(), h.author(), h.description(), Objects.requireNonNullElse(Modrinth.installedFile(h.id()), "")})
+			if (text.toLowerCase(Locale.ROOT).contains(query)) return true;
+		return false;
+	}
+
+	/**
+	 * Tam listeden görünür satırları üretir. Dosya ve etkinlik bilgisi burada bir kez okunur;
+	 * çizim sırasında sayılar yeniden hesaplanmaz. Favoriler her sıralamada en üstte kalır.
+	 */
+	private void refilter() {
+		String query = localSearch.value().strip().toLowerCase(Locale.ROOT);
+		Map<String, Boolean> on = new HashMap<>();
+		Map<String, Long> at = new HashMap<>();
+		for (Modrinth.Hit h : installedAll) {
+			on.put(h.id(), active(h));
+			at.put(h.id(), Modrinth.installedAt(h.id()));
+		}
+		showCounts.clear();
+		hits.clear();
+		for (Modrinth.Hit h : installedAll) {
+			boolean found = matches(h, query);
+			for (Show s : Show.values()) if (found && shows(s, h, on.get(h.id()))) showCounts.merge(s, 1, Integer::sum);
+			if (found && shows(show, h, on.get(h.id()))) hits.add(h);
+		}
+		Comparator<Modrinth.Hit> recent = Comparator.comparingLong((Modrinth.Hit h) -> at.get(h.id())).reversed();
+		Comparator<Modrinth.Hit> order = switch (localSort) {
+			case "name" -> Comparator.comparing((Modrinth.Hit h) -> h.title().toLowerCase(Locale.ROOT));
+			case "active" -> Comparator.comparing((Modrinth.Hit h) -> !on.get(h.id())).thenComparing(recent);
+			default -> recent;
+		};
+		hits.sort(Comparator.comparing((Modrinth.Hit h) -> !Modrinth.favorite(h.id())).thenComparing(order));
+		total = hits.size();
+	}
+
+	private void cycleLocalSort() {
+		localSort = LOCAL_SORTS.get((LOCAL_SORTS.indexOf(localSort) + 1) % LOCAL_SORTS.size());
+		refilter();
+	}
+
+	/** Bir işlemden sonra İndirilenler listesi güncel kalsın (etkinlik, favori, silme). */
+	private Runnable thenRefresh(Runnable action) {
+		if (action == null) return null;
+		return () -> {
+			action.run();
+			if (tab == Tab.INSTALLED) load(false);
+		};
+	}
+
 	private void select(Tab t) {
 		tab = t;
 		detail = null;
@@ -136,6 +225,7 @@ public final class PClientModrinthScreen extends PcScreen {
 		hits.clear();
 		scroll = scrollTarget = sideScroll = sideTarget = 0;
 		Modrinth.clearError();
+		focus(field());
 		load(false);
 	}
 
@@ -159,7 +249,9 @@ public final class PClientModrinthScreen extends PcScreen {
 		detail = null;
 		zoom = null;
 		scroll = scrollTarget = 0;
-		focus(search);
+		focus(field());
+		// Proje sayfasında favori/silme yapılmış olabilir.
+		if (tab == Tab.INSTALLED) load(false);
 	}
 
 	@Override public void onClose() {
@@ -237,7 +329,8 @@ public final class PClientModrinthScreen extends PcScreen {
 			g.text(font, Theme.ellipsize(error, room), x1, y, ORANGE, false);
 			return;
 		}
-		String note = detail != null ? "" : tab == Tab.INSTALLED ? L.t("modrinth.count", hits.size()) : L.t("modrinth.results", String.format(Locale.ROOT, "%,d", total));
+		String note = detail != null ? "" : tab != Tab.INSTALLED ? L.t("modrinth.results", String.format(Locale.ROOT, "%,d", total))
+			: hits.size() == installedAll.size() ? L.t("modrinth.count", hits.size()) : L.t("modrinth.countOf", hits.size(), installedAll.size());
 		String unofficial = L.t("modrinth.unofficial");
 		g.text(font, Theme.ellipsize(note.isEmpty() ? unofficial : note + "  ·  " + unofficial, room), x1, y, DIM, false);
 	}
@@ -246,6 +339,13 @@ public final class PClientModrinthScreen extends PcScreen {
 		int x1 = fx + 12, x2 = fx + fw - 12, y = fy + HEADER + 7, bottom = fy + fh - 20;
 		boolean filterable = tab != Tab.INSTALLED, narrow = fw < NARROW;
 		int listRight = filterable && !narrow ? x2 - SIDE_W - 8 : x2;
+		if (!filterable) {
+			int sortW = 120, fieldRight = x2 - sortW - 4;
+			textField(g, x1, y, fieldRight, y + 17, localSearch, 11, "search");
+			String label = L.t("modrinth.sortLabel", L.t("modrinth.sort." + localSort));
+			if (brandButton(g, fieldRight + 4, y, x2, y + 17, label, false, this::cycleLocalSort, false)) tipNow(L.t("modrinth.sortHint"));
+			y = chips(g, x1, y + 22, x2) + 5;
+		}
 		if (filterable) {
 			int sortW = 110, filterW = narrow ? 60 : 0, fieldRight = listRight - sortW - filterW - (narrow ? 8 : 4);
 			textField(g, x1, y, fieldRight, y + 17, search, 11, "search");
@@ -266,6 +366,36 @@ public final class PClientModrinthScreen extends PcScreen {
 		listY1 = y;
 		listY2 = bottom;
 		list(g, x1, listRight);
+	}
+
+	/** Tür/favori/etkin görünüm çipleri; sığmazsa alt satıra geçer. Alt kenarı döner. */
+	private int chips(GuiGraphicsExtractor g, int x1, int y, int x2) {
+		int x = x1;
+		for (Show s : Show.values()) {
+			String label = L.t("modrinth.show." + s.name().toLowerCase(Locale.ROOT));
+			String count = Integer.toString(showCounts.getOrDefault(s, 0));
+			boolean star = s == Show.FAVORITE;
+			int w = font.width(label) + font.width(count) + 18 + (star ? 13 : 0);
+			if (x > x1 && x + w > x2) {
+				x = x1;
+				y += 17;
+			}
+			boolean on = s == show, hov = hit(x, y, x + w, y + 14, () -> {
+				show = s;
+				scroll = scrollTarget = 0;
+				refilter();
+			});
+			Theme.rounded(g, x, y, x + w, y + 14, 7, on ? GREEN_SOFT : hov ? RAISED_HOVER : RAISED);
+			int tx = x + 7;
+			if (star) {
+				PixelIcons.drawCentered(g, "star", tx + 4, y + 7, 1, on ? GOLD : hov ? Theme.TEXT : DIM);
+				tx += 13;
+			}
+			g.text(font, label, tx, y + 3, on ? GREEN : hov ? Theme.TEXT : SUB, false);
+			g.text(font, count, tx + font.width(label) + 4, y + 3, on ? GREEN : DIM, false);
+			x += w + 4;
+		}
+		return y + 14;
 	}
 
 	private void cycleSort() {
@@ -361,7 +491,9 @@ public final class PClientModrinthScreen extends PcScreen {
 		if (!loading && tab != Tab.INSTALLED && hits.size() < total && scrollTarget >= maxScroll - ROW) load(true);
 		int cx = (x1 + x2) / 2;
 		if (hits.isEmpty()) {
-			String key = loading ? "modrinth.loading" : failed ? "modrinth.failed" : tab == Tab.INSTALLED ? "modrinth.noneInstalled" : "modrinth.empty";
+			String key = loading ? "modrinth.loading" : failed ? "modrinth.failed"
+				: tab == Tab.INSTALLED ? (installedAll.isEmpty() ? "modrinth.noneInstalled" : show == Show.FAVORITE && localSearch.value().isBlank() ? "modrinth.noFavorites" : "modrinth.noMatch")
+				: "modrinth.empty";
 			g.centeredText(font, L.t(key), cx, listY1 + 40, Theme.MUTED);
 			return;
 		}
@@ -406,8 +538,9 @@ public final class PClientModrinthScreen extends PcScreen {
 		icon(g, h, x1 + 5, y + 5, 40);
 		int bw = 84, bx = x2 - bw - 6, by = y + 27;
 		Act act = action(h);
-		brandButton(g, bx, by, bx + bw, by + 17, act.label, act.brand, act.run, true);
+		brandButton(g, bx, by, bx + bw, by + 17, act.label, act.brand, thenRefresh(act.run), true);
 		String file = Modrinth.installedFile(h.id());
+		if (file != null && tab == Tab.INSTALLED) favoriteStar(g, h, x2 - 17, y + 4, true);
 		boolean resource = h.kind() == Modrinth.Kind.RESOURCE, active = file != null && (resource ? Modrinth.resourceActive(file) : Modrinth.shaderActive(file));
 		if (file != null && !active && Modrinth.progress(h.id()) < 0) {
 			int tx = bx - 18;
@@ -435,6 +568,14 @@ public final class PClientModrinthScreen extends PcScreen {
 		g.text(font, Theme.ellipsize(by2, Math.max(0, nameRoom - font.width(title) - 6)), tx + font.width(title) + 6, y + 7, DIM, false);
 		g.text(font, Theme.ellipsize(h.description(), room + 18), tx, y + 19, SUB, false);
 		int cx = tx;
+		if (tab == Tab.INSTALLED) {
+			// İndirilen paketlerde etiket yerine tür, durum ve sürüm gösterilir.
+			cx = badge(g, L.t(h.kind() == Modrinth.Kind.SHADER ? "modrinth.kind.shader" : "modrinth.kind.resource"), cx, y + 33, bx - 22, SUB, 0x22FFFFFF);
+			if (active) cx = badge(g, L.t("modrinth.activeBadge"), cx, y + 33, bx - 22, GREEN, GREEN_SOFT);
+			String number = Modrinth.installedNumber(h.id());
+			if (!number.isEmpty()) badge(g, "v" + number, cx, y + 33, bx - 22, DIM, 0x14FFFFFF);
+			return;
+		}
 		for (String c : h.categories()) {
 			String label = L.t("modrinth.tag." + c);
 			// "minecraft", "iris" gibi yükleyici etiketleri filtre değildir, gösterilmez.
@@ -445,6 +586,28 @@ public final class PClientModrinthScreen extends PcScreen {
 			Theme.scaledText(g, label, cx + 4, y + 35.5f, 0.75f, SUB, false);
 			cx += w + 3;
 		}
+	}
+
+	/** Küçük etiket rozeti; sığmazsa çizilmez. Sonraki rozetin x'ini döner. */
+	private int badge(GuiGraphicsExtractor g, String label, int x, int y, int limit, int color, int fill) {
+		int w = (int) (font.width(label) * 0.75f) + 8;
+		if (x + w > limit) return x;
+		Theme.rounded(g, x, y, x + w, y + 11, 3, fill);
+		Theme.scaledText(g, label, x + 4, y + 2.5f, 0.75f, color, false);
+		return x + w + 3;
+	}
+
+	/** Favori yıldızı: doluysa altın, değilse soluk; tıklayınca durum değişir. */
+	private void favoriteStar(GuiGraphicsExtractor g, Modrinth.Hit h, int x, int y, boolean inList) {
+		boolean fav = Modrinth.favorite(h.id());
+		Runnable toggle = () -> {
+			Modrinth.toggleFavorite(h.id());
+			if (tab == Tab.INSTALLED && detail == null) refilter();
+		};
+		boolean hov = inList ? clipped(x, y, x + 13, y + 13, toggle) : hit(x, y, x + 13, y + 13, toggle);
+		if (hov) Theme.rounded(g, x, y, x + 13, y + 13, 3, 0x22FFFFFF);
+		PixelIcons.drawCentered(g, "star", x + 7, y + 7, 1, fav ? GOLD : hov ? Theme.TEXT : 0xFF555B64);
+		if (hov) tipNow(L.t(fav ? "modrinth.unfavorite" : "modrinth.favorite"));
 	}
 
 	private void icon(GuiGraphicsExtractor g, Modrinth.Hit h, int x, int y, int size) {
@@ -480,6 +643,7 @@ public final class PClientModrinthScreen extends PcScreen {
 		g.text(font, Theme.ellipsize(detail.description(), room), tx, y + 27, DIM, false);
 		Act act = action(detail);
 		brandButton(g, bx, y, x2, y + 20, act.label, act.brand, act.run, false);
+		if (Modrinth.installedFile(detail.id()) != null) favoriteStar(g, detail, bx - 18, y + 3, false);
 		brandButton(g, bx, y + 24, x2, y + 40, L.t("modrinth.openWeb"), false, () -> Blaze3D.openUri(URI.create("https://modrinth.com/project/" + detail.id())), false);
 		y += 47;
 		int tabs = x1;
@@ -691,7 +855,7 @@ public final class PClientModrinthScreen extends PcScreen {
 	}
 
 	@Override public boolean mouseScrolled(double x, double y, double h, double v) {
-		if (detail == null && y >= sideY1 && y < sideY2 && x >= fx + fw - 12 - SIDE_W) sideTarget = Math.max(0, Math.min(sideMax, sideTarget - v * 26));
+		if (detail == null && tab != Tab.INSTALLED && y >= sideY1 && y < sideY2 && x >= fx + fw - 12 - SIDE_W) sideTarget = Math.max(0, Math.min(sideMax, sideTarget - v * 26));
 		else scrollTarget = Math.max(0, Math.min(maxScroll, scrollTarget - v * 30));
 		return true;
 	}

@@ -5,6 +5,32 @@ Windows için Rust tabanlı Minecraft Java Edition launcher'ı. Uygulama
 `src-tauri/` içindeki Rust çekirdeği. Ayrıntılar için
 [patronlauncher-tauri/README.md](patronlauncher-tauri/README.md).
 
+## Sürümler / Versions
+
+Bu depoda iki ayrı ürün vardır ve **sürüm numaraları birbirinden bağımsızdır**:
+
+| Ürün | Ne | Güncel sürüm | Nerede görünür |
+| --- | --- | --- | --- |
+| **PatronLauncher** | Windows launcher'ı (`patronlauncher-tauri/`) | 1.0.3 | Launcher ayarları, kurulum dosyası adı |
+| **PClient** | Oyun içi istemci, Fabric modu (`pclient-fabric/`) | 1.1.0 (Minecraft 26.3) | Oyun içi ana menü ve PClient ayarları |
+
+- PClient ayrı indirilmez; PatronLauncher'ın içinde gelir ve launcher güncellenince o da güncellenir.
+- Bu yüzden GitHub'daki her sürüm bir **PatronLauncher** sürümü olarak yayımlanır (ör. `v1.0.3`).
+  Sürüm notlarında iki ayrı başlık bulunur: *PatronLauncher* değişiklikleri ve o sürümle gelen
+  *PClient x.y.z* değişiklikleri. PClient o sürümde değişmediyse bu belirtilir.
+- PClient yalnızca kendi kodu değiştiğinde yeni sürüm numarası alır; launcher güncellemesi tek başına
+  PClient sürümünü değiştirmez.
+
+There are two products in this repository with **independent version numbers**: the
+**PatronLauncher** Windows launcher and the **PClient** in-game client (a Fabric mod). PClient ships
+inside the launcher, so every GitHub release is a PatronLauncher release (e.g. `v1.0.3`); its notes have
+a separate *PClient* section that names the bundled PClient version and lists its own changes.
+
+| PatronLauncher | PClient bundled |
+| --- | --- |
+| 1.0.0 – 1.0.2 | 1.0.0 (before separate versioning) |
+| 1.0.3 | 1.1.0 |
+
 ## Derleme
 
 Proje kökünden `./build.ps1` çalıştırın. Script arayüzü derler, Rust testlerini

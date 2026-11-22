@@ -296,6 +296,39 @@ public final class Modrinth {
 		return o == null || installedFile(id) == null ? "" : text(o, "version");
 	}
 
+	/** Kurulu dosyanın okunabilir sürüm numarası (ör. "1.4.2"); eski kayıtlarda boş. */
+	public static synchronized String installedNumber(String id) {
+		JsonObject o = records().get(id);
+		return o == null ? "" : text(o, "number");
+	}
+
+	/** Paketin indirildiği an (epoch ms). Eski kayıtlarda dosyanın değişme zamanı kullanılır. */
+	public static synchronized long installedAt(String id) {
+		JsonObject o = records().get(id);
+		if (o == null) return 0;
+		long at = number(o, "installed");
+		if (at > 0) return at;
+		try {
+			return Files.getLastModifiedTime(folder(Kind.valueOf(text(o, "kind"))).resolve(text(o, "file"))).toMillis();
+		} catch (IOException | RuntimeException e) {
+			return 0;
+		}
+	}
+
+	public static synchronized boolean favorite(String id) {
+		JsonObject o = records().get(id);
+		return o != null && o.has("favorite") && o.get("favorite").getAsBoolean();
+	}
+
+	/** Yalnızca indirilmiş paketler favorilenebilir; durum modrinth.json'a yazılır. */
+	public static synchronized void toggleFavorite(String id) {
+		JsonObject o = records().get(id);
+		if (o == null) return;
+		if (favorite(id)) o.remove("favorite");
+		else o.addProperty("favorite", true);
+		saveRecords();
+	}
+
 	public static CompletableFuture<Void> install(Hit hit) { return install(hit, null); }
 
 	/** Belirli bir sürümü (null ise en güncel kararlıyı) kurar; önceki sürümün dosyası kaldırılır. */
@@ -313,12 +346,16 @@ public final class Modrinth {
 				JsonObject o = new JsonObject();
 				o.addProperty("file", remote.file);
 				o.addProperty("version", chosen.id);
+				o.addProperty("number", chosen.number);
+				o.addProperty("installed", System.currentTimeMillis());
 				o.addProperty("kind", hit.kind.name());
 				o.addProperty("title", hit.title);
 				o.addProperty("author", hit.author);
 				o.addProperty("description", hit.description);
 				o.addProperty("icon", hit.icon);
 				synchronized (Modrinth.class) {
+					// Güncellemede favori işareti korunur.
+					if (favorite(hit.id)) o.addProperty("favorite", true);
 					records().put(hit.id, o);
 					saveRecords();
 				}

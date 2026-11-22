@@ -53,6 +53,11 @@ public final class DevShots {
 			return new HudEditorScreen(null);
 		}),
 		new Shot("36-modrinth-filtered", () -> modrinthPage("filtered")),
+		new Shot("43-modrinth-installed", () -> modrinthPage("installed:ALL")),
+		new Shot("44-modrinth-installed-shader", () -> modrinthPage("installed:SHADER")),
+		new Shot("45-modrinth-installed-fav", () -> modrinthPage("installed:FAVORITE")),
+		new Shot("46-modrinth-installed-search", () -> modrinthPage("installed:ALL:dark")),
+		new Shot("47-modrinth-installed-nomatch", () -> modrinthPage("installed:ALL:zzzz")),
 		new Shot("37-modrinth-detail", () -> modrinthPage("BODY")),
 		new Shot("38-modrinth-detail-loaded", () -> Minecraft.getInstance().gui.screen()),
 		new Shot("39-modrinth-gallery", () -> modrinthPage("GALLERY")),
@@ -87,6 +92,26 @@ public final class DevShots {
 	private static Screen modrinthPage(String page) {
 		try {
 			var type = com.patron.pclient.gui.PClientModrinthScreen.class;
+			if (page.startsWith("installed:")) {
+				var tab = type.getDeclaredField("tab");
+				var show = type.getDeclaredField("show");
+				tab.setAccessible(true);
+				show.setAccessible(true);
+				tab.set(null, tab.getType().getEnumConstants()[2]);
+				String[] parts = page.split(":");
+				for (Object constant : show.getType().getEnumConstants()) if (constant.toString().equals(parts[1])) show.set(null, constant);
+				var screen = new com.patron.pclient.gui.PClientModrinthScreen(null);
+				if (parts.length > 2) {
+					// Yerel arama: alan doldurulunca liste hemen süzülmeli.
+					var local = type.getDeclaredField("localSearch");
+					local.setAccessible(true);
+					var load = type.getDeclaredMethod("load", boolean.class);
+					load.setAccessible(true);
+					load.invoke(screen, false);
+					((com.patron.pclient.gui.PcTextField) local.get(screen)).set(parts[2]);
+				}
+				return screen;
+			}
 			if (page.equals("filtered")) {
 				var filters = type.getDeclaredField("FILTERS");
 				var tab = type.getDeclaredField("tab");
