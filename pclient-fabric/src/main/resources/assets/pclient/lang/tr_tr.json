@@ -765,5 +765,11 @@
 	"pclient.friends.notify.toasts": "Mesaj bildirimleri",
 	"pclient.friends.notify.sound": "Bildirim sesi",
 	"pclient.friends.notify.testFrom": "PatronLauncher",
-	"pclient.friends.notify.testBody": "Bildirimler böyle görünecek."
+	"pclient.friends.notify.testBody": "Bildirimler böyle görünecek.",
+	"pclient.friends.remove": "Arkadaşlıktan çıkar",
+	"pclient.friends.block": "Engelle",
+	"pclient.friends.sure": "Emin misin?",
+	"pclient.friends.blocked": "Engellenenler",
+	"pclient.friends.noBlocked": "Engellenen kimse yok.",
+	"pclient.friends.unblock": "Engeli kaldır"
 }

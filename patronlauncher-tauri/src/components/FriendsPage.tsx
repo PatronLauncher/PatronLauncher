@@ -265,6 +265,16 @@ export default function FriendsPage({ variant }: { variant: "classic" | "pclient
                       >
                         ✕
                       </button>
+                      <button
+                        className="so-icon no"
+                        title={t("Engelle")}
+                        aria-label={t("Engelle")}
+                        onClick={() => {
+                          if (confirm(t("{name} engellensin mi?", { name: f.displayUsername }))) void act("block", f.username);
+                        }}
+                      >
+                        ⦸
+                      </button>
                     </li>
                   );
                 })

@@ -765,5 +765,11 @@
 	"pclient.friends.notify.toasts": "Message notifications",
 	"pclient.friends.notify.sound": "Notification sound",
 	"pclient.friends.notify.testFrom": "PatronLauncher",
-	"pclient.friends.notify.testBody": "This is how notifications look."
+	"pclient.friends.notify.testBody": "This is how notifications look.",
+	"pclient.friends.remove": "Remove friend",
+	"pclient.friends.block": "Block",
+	"pclient.friends.sure": "Are you sure?",
+	"pclient.friends.blocked": "Blocked",
+	"pclient.friends.noBlocked": "Nobody is blocked.",
+	"pclient.friends.unblock": "Unblock"
 }

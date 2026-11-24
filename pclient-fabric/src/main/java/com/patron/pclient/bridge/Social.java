@@ -26,7 +26,7 @@ public final class Social {
 	}
 	public record Chat(String username, String display, String preview, int unread) {}
 
-	private static volatile List<Person> friends = List.of(), incoming = List.of(), outgoing = List.of();
+	private static volatile List<Person> friends = List.of(), incoming = List.of(), outgoing = List.of(), blocked = List.of();
 	private static volatile List<Chat> chats = List.of();
 	private static volatile List<Message> messages = List.of();
 	private static volatile String active, activeDisplay, note;
@@ -41,6 +41,7 @@ public final class Social {
 	public static List<Person> friends() { return friends; }
 	public static List<Person> incoming() { return incoming; }
 	public static List<Person> outgoing() { return outgoing; }
+	public static List<Person> blocked() { return blocked; }
 	public static List<Chat> chats() { return chats; }
 	public static List<Message> messages() { return messages; }
 	public static String active() { return active; }
@@ -110,6 +111,7 @@ public final class Social {
 			friends = people(o.getAsJsonArray("friends"), true);
 			incoming = people(o.getAsJsonArray("incoming"), false);
 			outgoing = people(o.getAsJsonArray("outgoing"), false);
+			blocked = people(o.getAsJsonArray("blocked"), false);
 		}).exceptionally(t -> null);
 	}
 
@@ -207,6 +209,7 @@ public final class Social {
 		b.addProperty("action", action);
 		b.addProperty("username", username);
 		call("POST", "/api/social/friends", b).thenAccept(json -> {
+			if (("block".equals(action) || "remove".equals(action)) && username.equals(active)) close();
 			if ("request".equals(action))
 				note = L.t("friends".equals(str(json.getAsJsonObject(), "result")) ? "friends.becameFriends" : "friends.sent");
 			refreshFriends();

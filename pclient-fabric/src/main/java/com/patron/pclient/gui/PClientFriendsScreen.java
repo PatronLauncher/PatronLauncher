@@ -18,6 +18,9 @@ public final class PClientFriendsScreen extends PcScreen {
 	private enum Tab { FRIENDS, REQUESTS, PRIVACY }
 
 	private Tab tab = Tab.FRIENDS;
+	/** İki adımlı onay: ilk tıklamada düğme "Emin misin?" olur, ikinci tıklama işlemi yapar. */
+	private String confirmAction, confirmUser;
+	private long confirmAt;
 	private final PcTextField addField = new PcTextField(16, L.t("friends.addPlaceholder")).onSubmit(this::addFriend);
 	private final PcTextField msgField = new PcTextField(500, L.t("friends.placeholder")).onSubmit(this::sendMessage);
 
@@ -230,6 +233,35 @@ public final class PClientFriendsScreen extends PcScreen {
 			com.patron.pclient.config.PClientConfig.save();
 			if (cfg.messageSound) MessageToasts.show(L.t("friends.notify.testFrom"), L.t("friends.notify.testBody"));
 		});
+		y += 22;
+		g.fill(x1, y, x2, y + 1, Theme.LINE);
+		y += 8;
+		g.text(font, L.t("friends.blocked"), x1 + 2, y, Theme.TEXT, false);
+		y += 12;
+		if (Social.blocked().isEmpty()) g.text(font, L.t("friends.noBlocked"), x1 + 2, y, Theme.MUTED, false);
+		for (Social.Person p : Social.blocked()) {
+			g.text(font, Theme.ellipsize(p.display(), x2 - x1 - 70), x1 + 2, y + 4, Theme.MUTED, false);
+			button(g, x2 - 64, y, x2, y + 16, L.t("friends.unblock"), Style.GHOST, () -> Social.friendAction("unblock", p.username()));
+			y += 20;
+		}
+	}
+
+	/** Sağdan sola yerleşen iki adımlı onay düğmesi; döner: düğmenin sol kenarı. */
+	private int confirmButton(GuiGraphicsExtractor g, int right, int y, String action, String user, String labelKey) {
+		boolean armed = action.equals(confirmAction) && user.equals(confirmUser) && System.currentTimeMillis() - confirmAt < 4000;
+		String label = L.t(armed ? "friends.sure" : labelKey);
+		int w = font.width(label) + 12, left = right - w;
+		button(g, left, y, right, y + 16, label, armed ? Style.DANGER : Style.GHOST, () -> {
+			if (armed) {
+				confirmAction = null;
+				Social.friendAction(action, user);
+			} else {
+				confirmAction = action;
+				confirmUser = user;
+				confirmAt = System.currentTimeMillis();
+			}
+		});
+		return left;
 	}
 
 	/** Bir gizlilik ayarı: tıkladıkça sıradaki seçeneğe geçer ve hemen kaydedilir. */
@@ -257,6 +289,9 @@ public final class PClientFriendsScreen extends PcScreen {
 		avatar(g, x1 + 24, y1 + 4, name, f == null ? null : presenceColor(f.presence()));
 		g.text(font, Theme.ellipsize(name, x2 - x1 - 60), x1 + 46, y1 + 5, Theme.TEXT, false);
 		if (f != null) Theme.scaledText(g, presenceText(f.presence()), x1 + 46, y1 + 15, 0.75f, Theme.MUTED, false);
+		int bx = x2 - 6;
+		bx = confirmButton(g, bx, y1 + 4, "block", active, "friends.block");
+		if (f != null) confirmButton(g, bx - 4, y1 + 4, "remove", active, "friends.remove");
 		g.fill(x1 + 1, y1 + 24, x2 - 1, y1 + 25, Theme.LINE);
 		int composerTop = y2 - 26;
 		messages(g, x1 + 6, y1 + 28, x2 - 6, composerTop - 4);
