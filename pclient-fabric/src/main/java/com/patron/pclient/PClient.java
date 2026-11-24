@@ -25,6 +25,8 @@ public final class PClient implements ClientModInitializer {
 		ModuleManager.init();
 		PClientConfig.load();
 		PClientConfig.installPresets();
+		// Arkadaş mesajları ve durumları: launcher açıksa anlık olaylar dinlenir (değilse sessizce bekler).
+		com.patron.pclient.bridge.Social.start();
 		LOG.info("PClient {} hazır ({} modül, {} ms)", version, ModuleManager.all().size(), (System.nanoTime() - started) / 1_000_000);
 	}
 
@@ -63,6 +65,10 @@ public final class PClient implements ClientModInitializer {
 		var music = ModuleManager.get(com.patron.pclient.modules.MusicModule.class);
 		if (music.isEnabled() && event.key() == music.controlsKey.get()) {
 			mc.gui.setScreen(new com.patron.pclient.gui.MusicOverlayScreen());
+			return true;
+		}
+		if (event.key() == PClientConfig.get().friendsKey) {
+			mc.gui.setScreen(new com.patron.pclient.gui.PClientFriendsScreen(null));
 			return true;
 		}
 		if (event.key() != PClientConfig.get().menuKey) return false;

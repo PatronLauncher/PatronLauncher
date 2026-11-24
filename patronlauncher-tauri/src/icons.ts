@@ -6,6 +6,7 @@ export const paths = {
   profiles: "<path d='m12 3 9 5-9 5-9-5zM3 12l9 5 9-5M3 16l9 5 9-5'/>",
   account:
     "<circle cx='12' cy='8' r='4'/><path d='M4 21v-2a8 8 0 0 1 16 0v2'/>",
+  friends: "<circle cx='9' cy='8' r='3.5'/><path d='M2.5 20v-1.5a6.5 6.5 0 0 1 13 0V20'/><circle cx='17' cy='9' r='2.8'/><path d='M16.5 14.2a5 5 0 0 1 5 5V20'/>",
   folder: "<path d='M3 6h7l2 3h9v11H3zM3 9V4h7l2 2h9v3'/>",
   settings:
     "<path d='M4 7h16M4 17h16'/><rect x='7' y='4' width='4' height='6' rx='1'/><rect x='14' y='14' width='4' height='6' rx='1'/>",

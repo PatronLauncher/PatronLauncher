@@ -244,7 +244,8 @@ public abstract class PcScreen extends Screen {
 		List<DockItem> items = new ArrayList<>(List.of(
 			new DockItem("home", "home", L.t("dock.home"), () -> open(minecraft.level == null ? new PClientTitleScreen() : new PClientHomeScreen())),
 			new DockItem("modules", "grid", L.t("dock.modules"), () -> open(new ModulesScreen(ModulesScreen.Tab.MODULES))),
-			new DockItem("hud", "hud", L.t("dock.hud"), () -> open(new HudEditorScreen(this)))));
+			new DockItem("hud", "hud", L.t("dock.hud"), () -> open(new HudEditorScreen(this))),
+			new DockItem("friends", "chat", L.t("dock.friends"), () -> open(new PClientFriendsScreen(this)))));
 		// Sunucu listesi yalnızca bir dünyada değilken (ana menüde) açılır.
 		if (minecraft.level == null)
 			items.add(new DockItem("servers", "server", L.t("dock.servers"), () -> open(new PClientServersScreen(new PClientTitleScreen()))));

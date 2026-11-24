@@ -97,6 +97,8 @@ fn main() {
             "patron_account_profile",
             "patron_account_language",
             "patron_open_help",
+            "social_api",
+            "social_status",
         ]),
     ))
     .expect("Tauri build failed");

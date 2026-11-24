@@ -5,6 +5,8 @@ export type Page =
   | "mods"
   | "profiles"
   | "account"
+  /** Arkadaşlar ve mesajlar (PatronLauncher hesabı gerekir). */
+  | "friends"
   | "folder"
   | "activity"
   | "settings"
@@ -20,6 +22,7 @@ export const items: [Page, string][] = [
   ["mods", msg("Keşfet")],
   ["profiles", msg("Profiller")],
   ["account", msg("Hesaplar")],
+  ["friends", msg("Arkadaşlar")],
   ["folder", msg("Oyun dosyaları")],
 ];
 export const items2: [Page, string][] = [
@@ -32,6 +35,7 @@ export const titles: Record<Page, [string, string]> = {
   versions: [msg("Sürümler"), msg("Bir sürüm ailesi seç, kendi maceranı oluştur.")],
   profiles: [msg("Oyun profilleri"), msg("Her dünyaya ayrı bir başlangıç.")],
   account: [msg("Hesapların"), msg("Oyuncunu seç, macerana devam et.")],
+  friends: [msg("Arkadaşlar"), msg("Arkadaşların ne oynuyor gör, anında mesajlaş.")],
   folder: [msg("Oyun dosyaları"), msg("Dünyaların, paketlerin ve ayarların bir arada.")],
   activity: [msg("İşlem geçmişi"), msg("Bu oturumda olan biten her şey.")],
   settings: [msg("Launcher ayarları"), msg("Deneyimini sana göre düzenle.")],

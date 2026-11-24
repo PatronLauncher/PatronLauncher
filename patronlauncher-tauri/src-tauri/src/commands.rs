@@ -1299,3 +1299,16 @@ pub async fn patron_open_help(lang: String, minecraft: Option<String>) -> Result
         .map_err(blocking_error)?
         .map_err(|e| format!("{e:#}"))
 }
+
+// ── Arkadaşlar ve mesajlar (sitenin /api/social/* uçlarına aracı; anlık olaylar social::EVENT ile gelir) ──
+#[tauri::command]
+pub async fn social_api(method: String, path: String, body: Option<serde_json::Value>) -> Result<serde_json::Value, String> {
+    tauri::async_runtime::spawn_blocking(move || crate::social::api(&method, &path, body))
+        .await
+        .map_err(blocking_error)?
+        .map_err(|e| format!("{e:#}"))
+}
+#[tauri::command]
+pub fn social_status() -> serde_json::Value {
+    serde_json::json!({ "connected": crate::social::connected() })
+}

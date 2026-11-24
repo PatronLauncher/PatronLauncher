@@ -22,6 +22,7 @@ const rail: [Page, string][] = [
   ["editions", msg("Sürümler")],
   ["modules", msg("Modüller")],
   ["account", msg("Hesaplar")],
+  ["friends", msg("Arkadaşlar")],
 ];
 const rail2: [Page, string][] = [
   ["activity", msg("İşlem geçmişi")],
@@ -31,6 +32,7 @@ function RailIcon({ page }: { page: Page }) {
   if (page === "modules") return <PcIcon name="modules" />;
   if (page === "servers") return <PcIcon name="server" />;
   if (page === "editions") return <PcIcon name="layers" />;
+  if (page === "friends") return <PcIcon name="users" />;
   return <Icon name={(page === "home" ? "play" : page) as keyof typeof paths} />;
 }
 /** PClient arayüzünün çerçevesi: sol ray, üst bar ve kendi arka planı. */

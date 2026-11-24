@@ -101,7 +101,7 @@ pub fn status() -> Status {
 // ── Site adresi ─────────────────────────────────────────────────────────────────────────────────────
 
 /// support.json'daki site; `PATRONLAUNCHER_WEB` yerel deneme için ezer (http yalnızca localhost'ta).
-fn base_url() -> Result<String> {
+pub(crate) fn base_url() -> Result<String> {
     let configured = std::env::var("PATRONLAUNCHER_WEB").ok().filter(|v| !v.trim().is_empty());
     let raw = match configured {
         Some(v) => v,
@@ -126,7 +126,7 @@ fn lang_prefix(lang: &str) -> String {
     if SITE.contains(&lang) { format!("/{lang}") } else { String::new() }
 }
 
-fn client(base: &str) -> Result<Client> {
+pub(crate) fn client(base: &str) -> Result<Client> {
     Ok(Client::builder()
         .user_agent(concat!("PatronLauncher/", env!("CARGO_PKG_VERSION")))
         .connect_timeout(Duration::from_secs(10))
@@ -140,7 +140,7 @@ fn client(base: &str) -> Result<Client> {
 fn entry() -> Result<keyring::Entry> {
     Ok(keyring::Entry::new(SERVICE, SECRET_KEY)?)
 }
-fn read_token() -> Option<String> {
+pub(crate) fn read_token() -> Option<String> {
     entry().ok()?.get_password().ok().filter(|t| !t.is_empty())
 }
 fn save_token(token: &str) -> Result<()> {

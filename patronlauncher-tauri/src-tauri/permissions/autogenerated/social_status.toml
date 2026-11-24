@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-social-status"
+description = "Enables the social_status command without any pre-configured scope."
+commands.allow = ["social_status"]
+
+[[permission]]
+identifier = "deny-social-status"
+description = "Denies the social_status command without any pre-configured scope."
+commands.deny = ["social_status"]

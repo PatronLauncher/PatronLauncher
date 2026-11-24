@@ -38,6 +38,7 @@ import { useAppearance } from "./appearance";
 import { t } from "./i18n";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import PClientShell from "./pclient/PClientShell";
+import FriendsPage from "./components/FriendsPage";
 import PClientHome from "./pclient/PClientHome";
 import PClientAccounts from "./pclient/PClientAccounts";
 import PClientModules from "./pclient/PClientModules";
@@ -262,6 +263,23 @@ export default function App() {
     toast(m);
     setLog((old) => [...old.slice(-59), m]);
   };
+  // Arkadaşlar sayfası açık değilken gelen mesaj kısa bir bildirimle gösterilir.
+  const pageRef = useRef(page);
+  pageRef.current = page;
+  useEffect(() => {
+    let off: (() => void) | undefined;
+    let alive = true;
+    void listen<{ type: string; with?: string; message?: { from: string; body: string } }>("patronlauncher://social", (e) => {
+      const ev = e.payload;
+      if (ev.type !== "message" || !ev.message || ev.message.from === "me" || pageRef.current === "friends") return;
+      const body = ev.message.body.length > 80 ? ev.message.body.slice(0, 80) + "…" : ev.message.body;
+      toast(ev.with + ": " + body);
+    }).then((u) => (alive ? (off = u) : u()));
+    return () => {
+      alive = false;
+      off?.();
+    };
+  }, []);
   /** Ana sayfa dışındaki sayfalar iki arayüzde de aynı bileşenlerle çalışır. */
   const sharedPage = (s: Snapshot) =>
     page === "versions" ? (
@@ -277,6 +295,8 @@ export default function App() {
       <ProfilesPage s={s} run={run} go={setPage} create={() => setWizard(true)} />
     ) : page === "account" ? (
       <AccountsPage s={s} run={run} />
+    ) : page === "friends" ? (
+      <FriendsPage variant={pclient ? "pclient" : "classic"} />
     ) : page === "folder" ? (
       <StoragePage s={s} run={run} />
     ) : page === "settings" ? (

@@ -1,9 +1,9 @@
-//! PClient köprüsü: oyun içi arayüzün launcher'daki hesap ve müzik işlevlerine ulaştığı yerel kanal.
+//! PClient kÃ¶prÃ¼sÃ¼: oyun iÃ§i arayÃ¼zÃ¼n launcher'daki hesap ve mÃ¼zik iÅŸlevlerine ulaÅŸtÄ±ÄŸÄ± yerel kanal.
 //!
-//! Yenileme anahtarları Windows Kimlik Bilgisi Yöneticisi'nde kalır; oyuna yalnızca kısa ömürlü
-//! Minecraft oturumu verilir. Sunucu yalnızca 127.0.0.1 üzerinde dinler, her açılışta rastgele bir
-//! parola üretir ve parolayı PClient oyun klasöründeki `pclient/bridge.json` dosyasına yazar. Host
-//! başlığı da denetlendiği için tarayıcıdaki bir sayfa bu kanala istek gönderemez.
+//! Yenileme anahtarlarÄ± Windows Kimlik Bilgisi YÃ¶neticisi'nde kalÄ±r; oyuna yalnÄ±zca kÄ±sa Ã¶mÃ¼rlÃ¼
+//! Minecraft oturumu verilir. Sunucu yalnÄ±zca 127.0.0.1 Ã¼zerinde dinler, her aÃ§Ä±lÄ±ÅŸta rastgele bir
+//! parola Ã¼retir ve parolayÄ± PClient oyun klasÃ¶rÃ¼ndeki `pclient/bridge.json` dosyasÄ±na yazar. Host
+//! baÅŸlÄ±ÄŸÄ± da denetlendiÄŸi iÃ§in tarayÄ±cÄ±daki bir sayfa bu kanala istek gÃ¶nderemez.
 use crate::{
     auth,
     core::{
@@ -34,7 +34,7 @@ use uuid::Uuid;
 const MAX_HEAD: usize = 16 * 1024;
 const MAX_BODY: usize = 8 * 1024;
 const MAX_CONNECTIONS: usize = 16;
-/// Oyundaki HUD ve müzik ekranı aynı anda sorsa da medya oturumu bir kez okunur.
+/// Oyundaki HUD ve mÃ¼zik ekranÄ± aynÄ± anda sorsa da medya oturumu bir kez okunur.
 const NOW_PLAYING_TTL: Duration = Duration::from_millis(1500);
 
 #[derive(Default)]
@@ -83,7 +83,7 @@ fn parse_head(text: &str) -> Option<Head> {
     Some(Head { method, path, host, authorization, length })
 }
 
-/// Süre sızdırmayan karşılaştırma.
+/// SÃ¼re sÄ±zdÄ±rmayan karÅŸÄ±laÅŸtÄ±rma.
 fn same(a: &str, b: &str) -> bool {
     a.len() == b.len() && a.bytes().zip(b.bytes()).fold(0u8, |acc, (x, y)| acc | (x ^ y)) == 0
 }
@@ -92,9 +92,9 @@ fn authorized(head: &Head, token: &str, port: u16) -> bool {
     same(&head.authorization, &format!("Bearer {token}")) && head.host == format!("127.0.0.1:{port}")
 }
 
-/// `auth::login` bildiriminden cihaz kodunu çıkarır.
+/// `auth::login` bildiriminden cihaz kodunu Ã§Ä±karÄ±r.
 fn device_code(status: &str) -> Option<String> {
-    let code = status.strip_prefix("Microsoft girişi: ")?.rsplit_once("Kod: ")?.1.trim();
+    let code = status.strip_prefix("Microsoft giriÅŸi: ")?.rsplit_once("Kod: ")?.1.trim();
     (!code.is_empty()).then(|| code.to_string())
 }
 
@@ -107,16 +107,16 @@ fn read_request(stream: &mut TcpStream) -> Result<(Head, Vec<u8>)> {
             break i;
         }
         let n = stream.read(&mut chunk)?;
-        ensure!(n > 0, "bağlantı kapandı");
+        ensure!(n > 0, "baÄŸlantÄ± kapandÄ±");
         buffer.extend_from_slice(&chunk[..n]);
-        ensure!(buffer.len() <= MAX_HEAD, "istek çok büyük");
+        ensure!(buffer.len() <= MAX_HEAD, "istek Ã§ok bÃ¼yÃ¼k");
     };
-    let head = parse_head(std::str::from_utf8(&buffer[..end])?).context("istek okunamadı")?;
-    ensure!(head.length <= MAX_BODY, "istek gövdesi çok büyük");
+    let head = parse_head(std::str::from_utf8(&buffer[..end])?).context("istek okunamadÄ±")?;
+    ensure!(head.length <= MAX_BODY, "istek gÃ¶vdesi Ã§ok bÃ¼yÃ¼k");
     let mut body = buffer[end + 4..].to_vec();
     while body.len() < head.length {
         let n = stream.read(&mut chunk)?;
-        ensure!(n > 0, "bağlantı kapandı");
+        ensure!(n > 0, "baÄŸlantÄ± kapandÄ±");
         body.extend_from_slice(&chunk[..n]);
     }
     body.truncate(head.length);
@@ -145,7 +145,7 @@ fn accounts_json(state: &Snapshot) -> Value {
 }
 
 fn text_field(body: &Value, key: &str) -> Result<String> {
-    Ok(body[key].as_str().with_context(|| format!("{key} alanı eksik."))?.to_string())
+    Ok(body[key].as_str().with_context(|| format!("{key} alanÄ± eksik."))?.to_string())
 }
 
 fn session_json(account: &Account, client_id: &str) -> Result<Value> {
@@ -159,10 +159,10 @@ fn session_json(account: &Account, client_id: &str) -> Result<Value> {
     }))
 }
 
-/// Oturum alınamazsa (ör. süresi dolmuş giriş) seçim değişmez.
+/// Oturum alÄ±namazsa (Ã¶r. sÃ¼resi dolmuÅŸ giriÅŸ) seÃ§im deÄŸiÅŸmez.
 fn select(bridge: &Bridge, id: Uuid) -> Result<Value> {
     let state = call(bridge, Action::Read)?;
-    let account = state.accounts.iter().find(|a| a.id == id).context("Hesap bulunamadı.")?;
+    let account = state.accounts.iter().find(|a| a.id == id).context("Hesap bulunamadÄ±.")?;
     let session = session_json(account, &state.settings.microsoft_client_id)?;
     let state = call(bridge, Action::SelectAccount { id })?;
     Ok(json!({ "session": session, "state": accounts_json(&state) }))
@@ -173,7 +173,7 @@ fn microsoft_start(bridge: &Arc<Bridge>) -> Result<Value> {
     let cancel = Arc::new(AtomicBool::new(false));
     {
         let mut login = bridge.login.lock().map_err(|_| anyhow!("kilit"))?;
-        ensure!(!login.active, "Microsoft girişi zaten sürüyor.");
+        ensure!(!login.active, "Microsoft giriÅŸi zaten sÃ¼rÃ¼yor.");
         *login = Login { active: true, cancel: Some(cancel.clone()), ..Login::default() };
     }
     let bridge = bridge.clone();
@@ -187,7 +187,7 @@ fn microsoft_start(bridge: &Arc<Bridge>) -> Result<Value> {
         let outcome = result.map_err(|e| format!("{e:#}")).and_then(|account| {
             let name = account.name.clone();
             call(&bridge, Action::AccountLoggedIn { account }).map_err(|e| format!("{e:#}"))?;
-            // Çekirdek olayı bir sonraki tikte işler; oyun hesabı listede bulabilsin.
+            // Ã‡ekirdek olayÄ± bir sonraki tikte iÅŸler; oyun hesabÄ± listede bulabilsin.
             for _ in 0..40 {
                 if call(&bridge, Action::Read).is_ok_and(|s| s.accounts.iter().any(|a| a.name == name)) {
                     break;
@@ -239,7 +239,7 @@ fn now_playing(bridge: &Bridge) -> Result<Value> {
     Ok(value)
 }
 
-/// Modrinth görselleri WebP'dir ve oyun bu biçimi çözemez; izinli adreslerden PNG üretilir.
+/// Modrinth gÃ¶rselleri WebP'dir ve oyun bu biÃ§imi Ã§Ã¶zemez; izinli adreslerden PNG Ã¼retilir.
 fn icon_png(url: &str, size: u32) -> Result<Value> {
     let image = crate::mod_images::fetch_sniffed(url)?;
     let bytes = STANDARD.decode(image.data)?;
@@ -248,7 +248,7 @@ fn icon_png(url: &str, size: u32) -> Result<Value> {
     Ok(json!({ "png": STANDARD.encode(png.into_inner()) }))
 }
 
-/// Launcher'ın zaten getirdiği haberler; görseller küçültülmüş PNG veri adresleridir.
+/// Launcher'Ä±n zaten getirdiÄŸi haberler; gÃ¶rseller kÃ¼Ã§Ã¼ltÃ¼lmÃ¼ÅŸ PNG veri adresleridir.
 fn news(bridge: &Bridge) -> Result<Value> {
     let service = bridge.app.state::<CoreService>();
     let reply = tauri::async_runtime::block_on(service.call(Action::News { refresh: false })).map_err(|e| anyhow!(e))?;
@@ -271,7 +271,7 @@ fn route(bridge: &Arc<Bridge>, head: &Head, body: &[u8]) -> Result<Value> {
             Ok(accounts_json(&call(bridge, Action::AddLocal { name })?))
         }
         ("POST", "/v1/accounts/select") => {
-            let id = Uuid::parse_str(&text_field(&parsed, "id")?).context("Hesap kimliği geçersiz.")?;
+            let id = Uuid::parse_str(&text_field(&parsed, "id")?).context("Hesap kimliÄŸi geÃ§ersiz.")?;
             select(bridge, id)
         }
         ("POST", "/v1/accounts/microsoft/start") => microsoft_start(bridge),
@@ -282,7 +282,18 @@ fn route(bridge: &Arc<Bridge>, head: &Head, body: &[u8]) -> Result<Value> {
             icon_png(&text_field(&parsed, "url")?, size)
         }
         ("GET", "/v1/news") => news(bridge),
-        // PatronLauncher hesabı (site hesabı): oyun içi hesap menüsü durumu gösterir, girişi launcher yürütür.
+        // PatronLauncher hesabÄ± (site hesabÄ±): oyun iÃ§i hesap menÃ¼sÃ¼ durumu gÃ¶sterir, giriÅŸi launcher yÃ¼rÃ¼tÃ¼r.
+        // ArkadaÅŸlar ve mesajlar: sitenin sosyal uÃ§larÄ±na aracÄ± ve anlÄ±k olaylarÄ±n uzun sorgusu.
+        ("POST", "/v1/social/api") => {
+            let method = text_field(&parsed, "method")?;
+            let path = text_field(&parsed, "path")?;
+            let body = parsed.get("body").cloned().filter(|b| !b.is_null());
+            crate::social::api(&method, &path, body)
+        }
+        ("GET", path) if path.starts_with("/v1/social/events") => {
+            let since = path.split_once("since=").and_then(|(_, v)| v.split('&').next()).and_then(|v| v.parse().ok()).unwrap_or(0);
+            Ok(crate::social::events_since(since, std::time::Duration::from_secs(10)))
+        }
         ("GET", "/v1/patron") => Ok(serde_json::to_value(crate::patron_account::status())?),
         ("POST", "/v1/patron/login") => {
             let lang = parsed["lang"].as_str().unwrap_or("").to_string();
@@ -312,7 +323,7 @@ fn route(bridge: &Arc<Bridge>, head: &Head, body: &[u8]) -> Result<Value> {
 
 fn handle(bridge: &Arc<Bridge>, mut stream: TcpStream, token: &str, port: u16) {
     let Ok((head, body)) = read_request(&mut stream) else {
-        respond(&mut stream, "400 Bad Request", &json!({ "error": "İstek okunamadı." }));
+        respond(&mut stream, "400 Bad Request", &json!({ "error": "Ä°stek okunamadÄ±." }));
         return;
     };
     if !authorized(&head, token, port) {
@@ -332,8 +343,8 @@ fn publish(root: &Path, port: u16, token: &str) -> Result<()> {
     crate::profiles::atomic_write(&dir.join("bridge.json"), &body)
 }
 
-/// Köprüyü arka planda başlatır. Başlatılamazsa launcher çalışmaya devam eder; yalnızca oyun içi
-/// hesap ve Spotify özellikleri "launcher'a ulaşılamıyor" uyarısı gösterir.
+/// KÃ¶prÃ¼yÃ¼ arka planda baÅŸlatÄ±r. BaÅŸlatÄ±lamazsa launcher Ã§alÄ±ÅŸmaya devam eder; yalnÄ±zca oyun iÃ§i
+/// hesap ve Spotify Ã¶zellikleri "launcher'a ulaÅŸÄ±lamÄ±yor" uyarÄ±sÄ± gÃ¶sterir.
 pub fn start(app: AppHandle, root: &Path) {
     let prepare = || -> Result<(TcpListener, u16, String)> {
         let listener = TcpListener::bind(("127.0.0.1", 0))?;
@@ -345,7 +356,7 @@ pub fn start(app: AppHandle, root: &Path) {
     let (listener, port, token) = match prepare() {
         Ok(ready) => ready,
         Err(error) => {
-            eprintln!("PClient köprüsü başlatılamadı: {error:#}");
+            eprintln!("PClient kÃ¶prÃ¼sÃ¼ baÅŸlatÄ±lamadÄ±: {error:#}");
             return;
         }
     };
@@ -398,7 +409,7 @@ mod tests {
         assert!(authorized(&head("127.0.0.1:9", "Bearer abc"), "abc", 9));
         assert!(!authorized(&head("127.0.0.1:9", "Bearer abd"), "abc", 9));
         assert!(!authorized(&head("127.0.0.1:9", ""), "abc", 9));
-        // DNS yeniden bağlama: tarayıcıdan gelen başka bir Host reddedilir.
+        // DNS yeniden baÄŸlama: tarayÄ±cÄ±dan gelen baÅŸka bir Host reddedilir.
         assert!(!authorized(&head("evil.test:9", "Bearer abc"), "abc", 9));
         assert!(!authorized(&head("127.0.0.1:8", "Bearer abc"), "abc", 9));
     }
@@ -406,9 +417,9 @@ mod tests {
     #[test]
     fn device_code_comes_from_the_login_notice() {
         assert_eq!(
-            device_code("Microsoft girişi: https://microsoft.com/devicelogin adresini açın. Kod: AB12-CD").as_deref(),
+            device_code("Microsoft giriÅŸi: https://microsoft.com/devicelogin adresini aÃ§Ä±n. Kod: AB12-CD").as_deref(),
             Some("AB12-CD")
         );
-        assert_eq!(device_code("Minecraft hesabı doğrulanıyor…"), None);
+        assert_eq!(device_code("Minecraft hesabÄ± doÄŸrulanÄ±yorâ€¦"), None);
     }
 }

@@ -37,6 +37,8 @@ public final class PClientConfig {
 	private static final PClientConfig INSTANCE = new PClientConfig();
 
 	public int menuKey = InputConstants.KEY_RSHIFT;
+	/** Arkadaşlar ve mesajlar ekranı (oyun içi). */
+	public int friendsKey = InputConstants.KEY_U;
 	public boolean blur = true;
 	public String accent = "red";
 	public boolean openSound = true;
@@ -78,6 +80,7 @@ public final class PClientConfig {
 			JsonObject root = JsonParser.parseString(Files.readString(path, StandardCharsets.UTF_8)).getAsJsonObject();
 			PClientConfig c = INSTANCE;
 			if (num(root, "menuKey")) c.menuKey = root.get("menuKey").getAsInt();
+			if (num(root, "friendsKey")) c.friendsKey = root.get("friendsKey").getAsInt();
 			if (bool(root, "blur")) c.blur = root.get("blur").getAsBoolean();
 			if (bool(root, "openSound")) c.openSound = root.get("openSound").getAsBoolean();
 			if (bool(root, "hidePerformanceNotice")) c.hidePerformanceNotice = root.get("hidePerformanceNotice").getAsBoolean();
@@ -154,6 +157,7 @@ public final class PClientConfig {
 		JsonObject root = new JsonObject();
 		root.addProperty("version", 2);
 		root.addProperty("menuKey", INSTANCE.menuKey);
+		root.addProperty("friendsKey", INSTANCE.friendsKey);
 		root.addProperty("blur", INSTANCE.blur);
 		root.addProperty("openSound", INSTANCE.openSound);
 		root.addProperty("hidePerformanceNotice", INSTANCE.hidePerformanceNotice);
