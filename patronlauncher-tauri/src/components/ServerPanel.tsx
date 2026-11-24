@@ -365,13 +365,16 @@ export default function ServerPanel({
           .toLocaleLowerCase(locale())
           .includes(needle)),
   );
-  // Durumlar yalnızca görünen sunucular için altışar altışar sorgulanır; oyun açıkken durur.
+  // Durumlar yalnızca görünen sunucular için altışar altışar sorgulanır. Oyun açıkken oyunun bağlantısını
+  // yormamak için yenileme durur; yalnızca henüz hiç bilgisi (logo, oyuncu sayısı) olmayanlar ikişer ikişer bir kez sorulur.
   const visibleKey = visible.map((sv) => sv.id).sort().join(",");
+  const pingsRef = useRef(pings);
+  pingsRef.current = pings;
   useEffect(() => {
-    if (!visibleKey || s.running) return;
+    if (!visibleKey) return;
     let stop = false;
     const refresh = async () => {
-      const queue = visibleKey.split(",");
+      const queue = visibleKey.split(",").filter((id) => !s.running || !pingsRef.current[id]);
       const worker = async () => {
         for (let id = queue.shift(); id && !stop; id = queue.shift()) {
           try {
@@ -383,9 +386,12 @@ export default function ServerPanel({
           }
         }
       };
-      await Promise.all(Array.from({ length: 6 }, worker));
+      await Promise.all(Array.from({ length: s.running ? 2 : 6 }, worker));
     };
     void refresh();
+    if (s.running) return () => {
+      stop = true;
+    };
     const timer = setInterval(() => {
       if (document.hasFocus()) void refresh();
     }, 90_000);

@@ -5,6 +5,7 @@ import type { Run } from "../backend";
 import { t } from "../i18n";
 import { PcIcon } from "./icons";
 import SkinHead from "./SkinHead";
+import { PatronAccountMini } from "../components/PatronAccountCard";
 
 /**
  * Üst bardaki hesap menüsü: hesaplar arasında geçiş, Microsoft ile giriş ve yerel hesap oluşturma.
@@ -65,6 +66,14 @@ export default function AccountMenu({ s, run, manage }: { s: Snapshot; run: Run;
       </button>
       {open && (
         <div className="pc-acct-menu" role="dialog" aria-label={t("Hesaplar")}>
+          <h4>{t("PatronLauncher hesabı")}</h4>
+          <PatronAccountMini
+            manage={() => {
+              setOpen(false);
+              manage();
+            }}
+          />
+          <div className="pc-acct-sep" />
           {s.accounts.length > 0 && (
             <>
               <h4>{t("Hesapların")}</h4>

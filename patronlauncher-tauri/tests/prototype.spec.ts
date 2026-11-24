@@ -321,8 +321,8 @@ test("reference-inspired themes centralize colors and respect reduced motion", (
 test("saved records, header and news use core commands", async ({ page }) => {
   await setup(page);
   await expect(page.locator(".hero h2")).toHaveText("OldWorld");
-  await page.getByLabel("Hesap seç").click();
-  await page.getByRole("option",{name:"OtherPlayer · Microsoft",exact:true}).click();
+  await page.getByRole("button", { name: "Hesap menüsü" }).click();
+  await page.locator(".as-menu .as-item").filter({ hasText: "OtherPlayer" }).click();
   await expect(page.locator(".hero")).toContainText("OtherPlayer");
   await page.getByTitle("Oyun klasörünü aç").click();
   await page.getByTitle("Yenile", { exact: true }).click();
@@ -382,9 +382,7 @@ test("launch stages, progress, cancel and running follow core events", async ({
 });
 test("missing account and profile route to management", async ({ page }) => {
   await setup(page, true);
-  await expect(
-    page.locator(".top").getByRole("button", { name: "Hesap ekle" }),
-  ).toBeVisible();
+  await expect(page.locator(".top .as-btn")).toContainText("Hesap ekle");
   await expect(page.locator("#play")).toContainText("HESAP EKLE");
   await page.locator("#play").click();
   await page.getByLabel("Oyuncu adı").fill("NewPlayer");
@@ -552,15 +550,11 @@ test("accounts preserve warnings and reject invalid names before invoking", asyn
   ).toEqual([]);
   await page.getByLabel("Oyuncu adı").fill("Valid_Player");
   await page.getByRole("button", { name: "Yerel hesap oluştur" }).click();
-  await expect(page.locator(".pf.sel")).toContainText("Valid_Player");
-  await page
-    .locator(".pf")
-    .filter({ hasText: "OtherPlayer" })
-    .getByRole("button", { name: "Hesabı seç" })
-    .click();
+  await expect(page.locator(".acc-card.sel")).toContainText("Valid_Player");
+  await page.locator(".acc-card").filter({ hasText: "OtherPlayer" }).click();
   await page.getByRole("button", { name: "Seçili hesabı kaldır" }).click();
   await expect(
-    page.locator(".pf").filter({ hasText: "OtherPlayer" }),
+    page.locator(".acc-card").filter({ hasText: "OtherPlayer" }),
   ).toHaveCount(0);
   expect(await page.evaluate(() => (window as any).commands)).toContainEqual({
     command: "remove_account",
@@ -1167,9 +1161,9 @@ test('rich mod content renders GFM and HTML while blocking XSS and proxying artw
 });
 
 test('shared selectors support keyboard, bounded portals and persistent sidebar collapse',async({page})=>{
- await setup(page);await page.getByLabel('Hesap seç',{exact:true}).focus();await page.keyboard.press('ArrowDown');await expect(page.getByRole('listbox')).toBeVisible();await page.keyboard.press('End');await page.keyboard.press('Enter');
+ await setup(page);await page.getByRole('button',{name:'Hesap menüsü'}).focus();await page.keyboard.press('Enter');await expect(page.locator('.as-menu')).toBeVisible();await page.locator('.as-menu .as-item').filter({hasText:'OtherPlayer'}).click();
  expect(await page.evaluate(()=>(window as any).commands.some((c:any)=>c.command==='select_account'&&c.args.id==='b'))).toBe(true);
- await page.getByLabel('Hesap seç',{exact:true}).click();const box=await page.locator('.ui-select-portal').boundingBox();expect(box!.x).toBeGreaterThanOrEqual(0);expect(box!.x+box!.width).toBeLessThanOrEqual(1280);await page.keyboard.press('Escape');await expect(page.getByRole('listbox')).toHaveCount(0);
+ const box=await page.locator('.as-menu').boundingBox();expect(box!.x).toBeGreaterThanOrEqual(0);expect(box!.x+box!.width).toBeLessThanOrEqual(1280);await page.keyboard.press('Escape');await expect(page.locator('.as-menu')).toHaveCount(0);
  await page.getByRole('button',{name:'Menüyü daralt',exact:true}).click();await expect(page.locator('.side')).toHaveClass(/collapsed/);await page.reload();await expect(page.locator('.side')).toHaveClass(/collapsed/);await page.getByRole('button',{name:'Menüyü genişlet',exact:true}).click();
  await page.locator('[data-p="settings"]').click();await page.locator('.settings-tab').filter({hasText:'Discord'}).click();await page.getByRole('switch',{name:"Etkinliği Discord'da göster",exact:true}).check();expect(await page.evaluate(()=>(window as any).commands.some((c:any)=>c.command==='save_settings'&&c.args.settings.discord_client_id==='1566023032466571287'))).toBe(true);
  await page.getByRole('switch',{name:"Etkinliği Discord'da göster",exact:true}).uncheck();expect(await page.evaluate(()=>(window as any).commands.some((c:any)=>c.command==='save_settings'&&c.args.settings.discord_client_id===''))).toBe(true);

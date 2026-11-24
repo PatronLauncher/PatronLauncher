@@ -1,5 +1,5 @@
 // PatronLauncher hesabı (Minecraft hesaplarından ayrı): durum, giriş, çıkış ve "Yardım al".
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { getLanguage } from "./i18n";
@@ -21,7 +21,19 @@ const isTauri = () => typeof window !== "undefined" && "__TAURI_INTERNALS__" in 
 export function usePatronAccount() {
   const [account, setAccount] = useState<PatronAccount>(EMPTY);
   const [error, setError] = useState("");
+  // Bekleyen giriş tamamlanınca birkaç saniye "giriş yapıldı" kutlaması gösterilir.
+  const [justSignedIn, setJustSignedIn] = useState(false);
+  const previous = useRef<PatronAccount["state"]>("signed_out");
   const language = getLanguage();
+  useEffect(() => {
+    const was = previous.current;
+    previous.current = account.state;
+    if (was === "pending" && account.state === "signed_in") {
+      setJustSignedIn(true);
+      const timer = setTimeout(() => setJustSignedIn(false), 8000);
+      return () => clearTimeout(timer);
+    }
+  }, [account.state]);
   useEffect(() => {
     if (!isTauri()) return;
     let off: (() => void) | undefined;
@@ -51,6 +63,7 @@ export function usePatronAccount() {
   return {
     account,
     error,
+    justSignedIn,
     login: act("patron_account_login", { lang: language }),
     reopen: act("patron_account_reopen"),
     cancel: act("patron_account_cancel"),

@@ -26,6 +26,7 @@ export default function PClientAccounts({ s, run }: { s: Snapshot; run: Run }) {
   return (
     <div className="pc-accounts">
       <section className="pc-accounts-list">
+        <PatronAccountCard variant="pclient" />
         <header className="pc-section-head">
           <h3>{t("Hesapların")}</h3>
           <span className="pc-count">{s.accounts.length}</span>
@@ -68,7 +69,6 @@ export default function PClientAccounts({ s, run }: { s: Snapshot; run: Run }) {
             {t("Seçili hesabı kaldır")}
           </button>
         )}
-        <PatronAccountCard variant="pclient" />
       </section>
       <section className="pc-welcome">
         <img className="pc-welcome-logo" src={logo} alt="" />
