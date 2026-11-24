@@ -1255,3 +1255,47 @@ pub async fn player_skin(name: String, uuid: Option<String>) -> Result<Option<cr
         .map_err(|e| e.to_string())?
         .map_err(|e| format!("{e:#}"))
 }
+
+// ── PatronLauncher hesabı (Minecraft hesaplarından ayrı) ─────────────────────────────────────────────
+use crate::patron_account::{self, Status as PatronStatus};
+fn blocking_error(e: impl std::fmt::Display) -> String {
+    e.to_string()
+}
+#[tauri::command]
+pub fn patron_account_status() -> PatronStatus {
+    patron_account::status()
+}
+#[tauri::command]
+pub async fn patron_account_login(lang: String) -> Result<PatronStatus, String> {
+    tauri::async_runtime::spawn_blocking(move || patron_account::login(&lang))
+        .await
+        .map_err(blocking_error)?
+        .map_err(|e| format!("{e:#}"))
+}
+#[tauri::command]
+pub fn patron_account_cancel() -> PatronStatus {
+    patron_account::cancel()
+}
+#[tauri::command]
+pub fn patron_account_reopen() -> Result<(), String> {
+    patron_account::reopen().map_err(|e| format!("{e:#}"))
+}
+#[tauri::command]
+pub fn patron_account_logout() -> PatronStatus {
+    patron_account::logout()
+}
+#[tauri::command]
+pub fn patron_account_profile() -> Result<(), String> {
+    patron_account::open_profile().map_err(|e| format!("{e:#}"))
+}
+#[tauri::command]
+pub fn patron_account_language(lang: String) {
+    patron_account::set_language(&lang);
+}
+#[tauri::command]
+pub async fn patron_open_help(lang: String, minecraft: Option<String>) -> Result<(), String> {
+    tauri::async_runtime::spawn_blocking(move || patron_account::open_help(&lang, minecraft.as_deref()))
+        .await
+        .map_err(blocking_error)?
+        .map_err(|e| format!("{e:#}"))
+}

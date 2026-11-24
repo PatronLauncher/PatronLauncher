@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { Snapshot } from "../types/core";
 import type { Run } from "../backend";
 import Icon from "./Icon";
+import PatronAccountCard from "./PatronAccountCard";
 export default function AccountsPage({ s, run }: { s: Snapshot; run: Run }) {
   const [name, setName] = useState(""),
     [error, setError] = useState("");
@@ -135,6 +136,7 @@ export default function AccountsPage({ s, run }: { s: Snapshot; run: Run }) {
           onClick={() => void run("remove_account", { id: selected.id })}
         >{t("Seçili hesabı kaldır")}</button>
       )}
+      <PatronAccountCard variant="classic" />
     </>
   );
 }

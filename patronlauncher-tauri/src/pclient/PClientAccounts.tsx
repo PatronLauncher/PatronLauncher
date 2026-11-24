@@ -6,6 +6,7 @@ import { t } from "../i18n";
 import logo from "../assets/patronlauncher3transparent-mark.png";
 import { PcIcon } from "./icons";
 import SkinHead from "./SkinHead";
+import PatronAccountCard from "../components/PatronAccountCard";
 
 /**
  * PClient hesap ekranı. Klasik Hesaplar sayfasıyla aynı çekirdek komutlarını
@@ -67,6 +68,7 @@ export default function PClientAccounts({ s, run }: { s: Snapshot; run: Run }) {
             {t("Seçili hesabı kaldır")}
           </button>
         )}
+        <PatronAccountCard variant="pclient" />
       </section>
       <section className="pc-welcome">
         <img className="pc-welcome-logo" src={logo} alt="" />

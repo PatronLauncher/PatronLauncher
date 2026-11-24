@@ -29,6 +29,7 @@ mod net;
 mod news;
 mod pclient;
 mod pclient_bridge;
+mod patron_account;
 mod skins;
 mod performance;
 mod profile_appearance;
@@ -73,6 +74,7 @@ fn main() {
                 },
             ));
             pclient_bridge::start(app.handle().clone(), &model::data_root());
+            patron_account::start(app.handle().clone(), &model::data_root());
             tauri::WebviewWindowBuilder::from_config(app, &app.config().app.windows[0])?
                 .on_navigation(core::security::approved_navigation)
                 .on_new_window(|_, _| tauri::webview::NewWindowResponse::Deny)
@@ -174,7 +176,15 @@ fn main() {
             commands::curseforge_files,
             commands::curseforge_plan,
             commands::curseforge_install,
-            commands::curseforge_content_install
+            commands::curseforge_content_install,
+            commands::patron_account_status,
+            commands::patron_account_login,
+            commands::patron_account_cancel,
+            commands::patron_account_reopen,
+            commands::patron_account_logout,
+            commands::patron_account_profile,
+            commands::patron_account_language,
+            commands::patron_open_help
         ])
         .run(tauri::generate_context!())
         .expect("PatronLauncher başlatılamadı");

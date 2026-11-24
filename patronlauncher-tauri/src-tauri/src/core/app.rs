@@ -414,6 +414,7 @@ impl App {
                         if s.starts_with("Minecraft çalışıyor") {
                             self.running = true;
                             crate::discord::game_started(self.launch_pclient);
+                            crate::patron_account::game_started();
                             if let Some(address) = self.launch_target.clone() {
                                 self.publish_server(address);
                             }
@@ -503,6 +504,7 @@ impl App {
                         self.running = false;
                         self.game_ready = false;
                         crate::discord::game_stopped();
+                        crate::patron_account::game_stopped();
                         self.java_retry = None;
                         match result {
                             Ok(()) => {}
@@ -866,6 +868,7 @@ impl App {
     }
     /// Sunucu listesi okunurken çekirdek bekletilmez; sonuç Discord etkinliğine yazılır.
     fn publish_server(&self, address: String) {
+        crate::patron_account::game_server(Some(&address));
         let root = self.root.clone();
         std::thread::spawn(move || crate::discord::game_server(listed_server(&root, &address)));
     }
@@ -873,6 +876,7 @@ impl App {
     fn game_server_event(&mut self, status: &str) -> bool {
         if status == game::SERVER_LEFT_STATUS {
             crate::discord::game_server(None);
+            crate::patron_account::game_server(None);
             return true;
         }
         if let Some(address) = status.strip_prefix(game::SERVER_JOIN_STATUS) {
@@ -894,6 +898,7 @@ impl App {
     fn start_game(&mut self, mut state: State, version: Version, server: Option<game::ServerTarget>, launch: Launch) {
         let pclient = matches!(launch, Launch::PClient { .. });
         self.launch_pclient = pclient;
+        crate::patron_account::game_preparing(&version.id, pclient);
         self.launch_target = server.as_ref().map(|target| match target.port {
             Some(port) => format!("{}:{port}", target.host),
             None => target.host.clone(),

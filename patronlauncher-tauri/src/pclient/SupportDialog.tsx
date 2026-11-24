@@ -3,6 +3,7 @@ import type { Snapshot } from "../types/core";
 import type { Run } from "../backend";
 import { t } from "../i18n";
 import support from "../../src-tauri/resources/pclient/support.json";
+import { openHelp } from "../patronAccount";
 
 /** Çekirdeğin oyun hata koduyla kapandığında yazdığı durum metni (game.rs). */
 const CRASH = "hata koduyla kapandı";
@@ -60,10 +61,10 @@ export default function SupportDialog({
           <button
             className="pc-ghost-btn"
             disabled={!support.website}
-            title={support.website ? undefined : t("Yakında")}
-            onClick={() => void run("open_external", { url: support.website })}
+            title={support.website ? t("Destek formunu sürüm bilgilerinle doldurulmuş açar") : t("Yakında")}
+            onClick={() => void openHelp().catch(() => run("open_external", { url: support.website }))}
           >
-            {t("Web sitesi")}
+            {t("Yardım al")}
           </button>
           <button className="pc-ghost-btn" onClick={() => void run("open_folder", { target: "pclient" })}>
             {t("Oyun klasörü")}

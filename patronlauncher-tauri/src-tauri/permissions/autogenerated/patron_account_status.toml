@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-patron-account-status"
+description = "Enables the patron_account_status command without any pre-configured scope."
+commands.allow = ["patron_account_status"]
+
+[[permission]]
+identifier = "deny-patron-account-status"
+description = "Denies the patron_account_status command without any pre-configured scope."
+commands.deny = ["patron_account_status"]

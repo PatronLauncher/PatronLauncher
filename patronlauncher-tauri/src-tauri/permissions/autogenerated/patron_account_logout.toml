@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-patron-account-logout"
+description = "Enables the patron_account_logout command without any pre-configured scope."
+commands.allow = ["patron_account_logout"]
+
+[[permission]]
+identifier = "deny-patron-account-logout"
+description = "Denies the patron_account_logout command without any pre-configured scope."
+commands.deny = ["patron_account_logout"]

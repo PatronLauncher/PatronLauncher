@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-patron-account-language"
+description = "Enables the patron_account_language command without any pre-configured scope."
+commands.allow = ["patron_account_language"]
+
+[[permission]]
+identifier = "deny-patron-account-language"
+description = "Denies the patron_account_language command without any pre-configured scope."
+commands.deny = ["patron_account_language"]

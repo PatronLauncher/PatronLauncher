@@ -113,3 +113,21 @@
 :root[data-motion="off"] .cm-mark { animation: none; }
 :root[data-motion="off"] .cm-sparks { display: none; }
 :root[data-motion="off"] .cm-link::before { display: none; }
+
+/* "Yardım al": topluluk düğmelerinin altında sade bir bağlantı (destek formunu sürüm bilgileriyle açar). */
+.cm-links.cm-row { flex-wrap: wrap; }
+.cm-help {
+  flex: 1 0 100%;
+  padding: 4px 0;
+  border: 0;
+  background: none;
+  color: var(--muted, rgba(255, 255, 255, 0.6));
+  font: inherit;
+  font-size: 12px;
+  text-align: center;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.cm-help:hover, .cm-help:focus-visible { color: var(--text, #fff); }
+.side.collapsed .cm-help { display: none; }

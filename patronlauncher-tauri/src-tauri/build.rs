@@ -89,6 +89,14 @@ fn main() {
             "curseforge_plan",
             "curseforge_install",
             "curseforge_content_install",
+            "patron_account_status",
+            "patron_account_login",
+            "patron_account_cancel",
+            "patron_account_reopen",
+            "patron_account_logout",
+            "patron_account_profile",
+            "patron_account_language",
+            "patron_open_help",
         ]),
     ))
     .expect("Tauri build failed");

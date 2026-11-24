@@ -163,6 +163,26 @@ fn reply(stream: &mut TcpStream, status: &str, text: &str) {
     );
 }
 
+/// Giriş bitince tarayıcı sitenin markalı "giriş tamamlandı" sayfasına gider (yerel adres yalnızca bir an görünür).
+/// Site adresi kullanılamazsa eski yerel sayfa gösterilir.
+fn finish_page(stream: &mut TcpStream, status: &str, text: &str) {
+    match crate::patron_account::login_complete_url(status) {
+        Some(url) => {
+            let _ = write!(
+                stream,
+                "HTTP/1.1 302 Found
+Location: {url}
+Cache-Control: no-store
+Content-Length: 0
+Connection: close
+
+"
+            );
+        }
+        None => reply(stream, "200 OK", text),
+    }
+}
+
 /// Tarayıcı doğrudan Microsoft giriş sayfasını açar; giriş bitince kod yerel adrese döner (PKCE).
 fn authorize(
     client_id: &str,
@@ -225,12 +245,12 @@ fn authorize(
             bail!("Microsoft girişi doğrulanamadı; yeniden deneyin.");
         }
         if let Some(error) = get("error") {
-            reply(&mut stream, "200 OK", "Giriş iptal edildi. / Sign-in cancelled.");
+            finish_page(&mut stream, "cancelled", "Giriş iptal edildi. / Sign-in cancelled.");
             bail!("Microsoft girişi tamamlanmadı ({error}).");
         }
-        reply(
+        finish_page(
             &mut stream,
-            "200 OK",
+            "ok",
             "Giriş tamamlandı, bu sekmeyi kapatabilirsin. / Signed in, you can close this tab.",
         );
         return Ok((get("code").unwrap_or_default(), verifier, redirect));

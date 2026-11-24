@@ -6,6 +6,7 @@ import mark from "../assets/patronlauncher3transparent-mark.png";
 import discordPixel from "../assets/loaders/discord-pixel.png";
 import support from "../../src-tauri/resources/pclient/support.json";
 import "../styles/community.css";
+import { openHelp } from "../patronAccount";
 
 /** Karttan yükselen kıvılcımlar; konumları sabit olduğu için her çizimde aynı kalır. */
 const sparks = Array.from({ length: 9 }, (_, i) => ({
@@ -76,6 +77,11 @@ export default function CommunityLinks({ layout }: { layout: "row" | "rail" }) {
     <div className={`cm-links cm-${layout}`}>
       <Link kind="discord" url={support.discord} title="Discord" subtitle={t("Sunucumuza katıl")} />
       <Link kind="web" url={support.website} title={t("Web sitesi")} subtitle={t("Ziyaret et")} />
+      {support.website && (
+        <button className="cm-help" title={t("Destek formunu sürüm bilgilerinle doldurulmuş açar")} onClick={() => void openHelp().catch(() => {})}>
+          {t("Yardım al")}
+        </button>
+      )}
     </div>
   );
 }
