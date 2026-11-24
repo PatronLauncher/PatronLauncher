@@ -289,7 +289,8 @@ pub fn login(lang: &str) -> Result<Status> {
         reopen()?;
         return Ok(status());
     }
-    let lang = clean_lang(lang);
+    // Boş dil (oyun içinden): launcher arayüzünün dili kullanılır.
+    let lang = if lang.is_empty() { lock().lang.clone() } else { clean_lang(lang) };
     lock().lang = lang.clone();
     let base = base_url()?;
     let http = client(&base)?;

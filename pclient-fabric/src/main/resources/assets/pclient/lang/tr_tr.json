@@ -709,5 +709,12 @@
 	"pclient.support.discordSub": "Topluluğa katıl",
 	"pclient.support.webSub": "Web sitemiz",
 	"pclient.support.soon": "Yakında",
-	"pclient.support.folderHint": "Oyun klasörünü aç"
+	"pclient.support.folderHint": "Oyun klasörünü aç",
+	"pclient.patron.title": "PatronLauncher hesabı",
+	"pclient.patron.login": "PatronLauncher hesabıyla giriş yap",
+	"pclient.patron.opening": "Tarayıcıda açılıyor…",
+	"pclient.patron.code": "Tarayıcıda onayla · kod",
+	"pclient.patron.reopen": "Sayfayı aç",
+	"pclient.patron.profile": "Profil",
+	"pclient.patron.error": "Giriş tamamlanamadı; launcher açık olmalı."
 }

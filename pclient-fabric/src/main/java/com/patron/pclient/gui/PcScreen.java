@@ -2,6 +2,7 @@ package com.patron.pclient.gui;
 
 import com.patron.pclient.L;
 import com.patron.pclient.bridge.Accounts;
+import com.patron.pclient.bridge.Patron;
 import com.patron.pclient.config.PClientConfig;
 import com.patron.pclient.module.ModuleManager;
 import com.patron.pclient.modules.SoonModule;
@@ -119,6 +120,7 @@ public abstract class PcScreen extends Screen {
 	@Override public void removed() {
 		focused = null;
 		accountOpen = false;
+		accountClosing = false;
 		PClientConfig.save();
 	}
 
@@ -161,9 +163,9 @@ public abstract class PcScreen extends Screen {
 	}
 
 	@Override public boolean keyPressed(net.minecraft.client.input.KeyEvent e) {
-		if (accountOpen && e.key() == com.mojang.blaze3d.platform.InputConstants.KEY_ESCAPE) {
+		if (accountOpen && !accountClosing && e.key() == com.mojang.blaze3d.platform.InputConstants.KEY_ESCAPE) {
 			focus(null);
-			accountOpen = false;
+			closeAccount();
 			return true;
 		}
 		if (focused != null && fieldKey(e)) return true;
@@ -292,8 +294,34 @@ public abstract class PcScreen extends Screen {
 
 	// --- Hesap menüsü (sol üst) ---
 
-	private static boolean accountOpen;
+	private static boolean accountOpen, accountClosing;
+	/** Menünün açılma/kapanma animasyonunun başladığı an (ns). */
+	private static long accountAnimAt;
+	private static final float ACCOUNT_ANIM_MS = 160f;
 	private PcTextField accountField;
+
+	private void openAccount() {
+		accountOpen = true;
+		accountClosing = false;
+		accountAnimAt = System.nanoTime();
+		Accounts.clearError();
+		Accounts.refresh();
+		Patron.clearError();
+		Patron.refresh();
+	}
+
+	private void closeAccount() {
+		if (!accountOpen || accountClosing) return;
+		accountClosing = true;
+		accountAnimAt = System.nanoTime();
+	}
+
+	/** 0→1 açılış (kapanırken 1→0), yumuşak yavaşlayan eğri. */
+	private static float accountProgress() {
+		float t = Math.min(1f, (System.nanoTime() - accountAnimAt) / 1e6f / ACCOUNT_ANIM_MS);
+		float eased = 1f - (1f - t) * (1f - t) * (1f - t);
+		return accountClosing ? 1f - eased : eased;
+	}
 
 	private PcTextField accountField() {
 		if (accountField == null) {
@@ -315,11 +343,8 @@ public abstract class PcScreen extends Screen {
 		String name = minecraft.getUser().getName();
 		int x = 8, y = 8, w = font.width(name) + 38, h = 20;
 		boolean hov = hit(x, y, x + w, y + h, () -> {
-			accountOpen = !accountOpen;
-			if (accountOpen) {
-				Accounts.clearError();
-				Accounts.refresh();
-			}
+			if (accountOpen && !accountClosing) closeAccount();
+			else openAccount();
 		});
 		Theme.notched(g, x, y, x + w, y + h, 3, hov || accountOpen ? 0xE81A1C26 : 0xC00A0B10);
 		Theme.notchedOutline(g, x, y, x + w, y + h, 3, accountOpen ? Theme.accent() : Theme.LINE);
@@ -329,9 +354,7 @@ public abstract class PcScreen extends Screen {
 		// Hesap eklenebildiğini belli eden + düğmesi; menüyü açar.
 		int px = x + w + 3;
 		boolean add = hit(px, y, px + h, y + h, () -> {
-			accountOpen = true;
-			Accounts.clearError();
-			Accounts.refresh();
+			if (!accountOpen || accountClosing) openAccount();
 		});
 		float pulse = (float) (Math.sin(System.nanoTime() / 1e9 * 3) * 0.5 + 0.5);
 		Theme.notched(g, px, y, px + h, y + h, 3, add ? Theme.accent() : Theme.withAlpha(Theme.accent(), 0x30 + (int) (pulse * 0x30)));
@@ -339,11 +362,18 @@ public abstract class PcScreen extends Screen {
 		g.fill(px + 6, y + 9, px + 14, y + 11, Theme.TEXT);
 		g.fill(px + 9, y + 6, px + 11, y + 14, Theme.TEXT);
 		if (add) tipNow(L.t("account.add"));
-		if (accountOpen) accountMenu(g, x, y + h + 3);
+		if (accountOpen) {
+			float progress = accountProgress();
+			if (accountClosing && progress <= 0f) {
+				accountOpen = false;
+				accountClosing = false;
+			} else accountMenu(g, x, y + h + 3, progress);
+		}
 	}
 
-	private void accountMenu(GuiGraphicsExtractor g, int x, int y) {
-		hit(0, 0, width, height, () -> accountOpen = false);
+	private void accountMenu(GuiGraphicsExtractor g, int x, int y, float progress) {
+		// Kapanırken tıklamalar menüye gitmez.
+		if (!accountClosing) hit(0, 0, width, height, this::closeAccount);
 		boolean inWorld = minecraft.level != null, reachable = Accounts.reachable();
 		List<Accounts.Entry> list = Accounts.list();
 		int w = 196, rowH = 20, rows = Math.min(7, Math.max(1, list.size()));
@@ -354,11 +384,21 @@ public abstract class PcScreen extends Screen {
 		String error = Accounts.error();
 		List<FormattedCharSequence> errorLines = error == null ? List.of() : font.split(FormattedText.of(error), w - 16);
 		h += errorLines.size() * 10;
+		// Üstte PatronLauncher hesabı bölümü.
+		int patronH = patronHeight();
+		h += patronH;
 		g.nextStratum();
+		// Açılış: menü yukarıdan aşağı açılır ve hafifçe kayar; kapanış tersi.
+		int shown = Math.max(1, Math.round(h * progress));
+		y -= Math.round((1f - progress) * 6);
+		g.enableScissor(x - 1, y - 1, x + w + 1, y + shown + 1);
 		Theme.notched(g, x, y, x + w, y + h, 5, 0xF60A0B10);
 		Theme.notchedOutline(g, x, y, x + w, y + h, 5, Theme.LINE_STRONG);
-		hit(x, y, x + w, y + h, () -> {});
-		int x1 = x + 6, x2 = x + w - 6, ry = y + 6;
+		if (!accountClosing) hit(x, y, x + w, y + h, () -> {});
+		int x1 = x + 6, x2 = x + w - 6;
+		patronSection(g, x1, y + 6, x2);
+		int top = y + patronH;
+		int ry = top + 6;
 		if (list.isEmpty()) g.text(font, L.t(reachable ? "account.empty" : "account.launcher"), x1 + 2, ry + 6, Theme.MUTED, false);
 		java.util.UUID current = minecraft.getUser().getProfileId();
 		for (int i = 0; i < rows && i < list.size(); i++) {
@@ -373,17 +413,19 @@ public abstract class PcScreen extends Screen {
 			Theme.scaledText(g, tag, x2 - 5 - tagW, ry + 6, 0.7f, a.microsoft() ? 0xFF57B6FF : Theme.FAINT, false);
 			ry += rowH;
 		}
-		ry = y + 8 + rows * rowH;
+		ry = top + 8 + rows * rowH;
 		for (FormattedCharSequence line : errorLines) {
 			g.text(font, line, x1 + 2, ry, 0xFFE5A04D, false);
 			ry += 10;
 		}
 		if (!reachable) {
 			if (!list.isEmpty()) g.text(font, Theme.ellipsize(L.t("account.launcher"), x2 - x1), x1 + 2, ry + 6, 0xFFE5A04D, false);
+			g.disableScissor();
 			return;
 		}
 		if (inWorld) {
 			g.text(font, Theme.ellipsize(L.t("account.inWorld"), x2 - x1), x1 + 2, ry + 6, Theme.MUTED, false);
+			g.disableScissor();
 			return;
 		}
 		g.fill(x1, ry, x2, ry + 1, Theme.LINE);
@@ -399,6 +441,59 @@ public abstract class PcScreen extends Screen {
 		}
 		textField(g, x1, ry, x2 - 24, ry + 18, accountField());
 		button(g, x2 - 20, ry, x2, ry + 18, "+", Style.PRIMARY, this::addLocalAccount);
+		g.disableScissor();
+	}
+
+	/** PatronLauncher hesabı bölümünün yüksekliği (başlık + satır + ayırıcı). */
+	private int patronHeight() {
+		int h = 12 + 22 + 8;
+		if (Patron.state() == Patron.State.PENDING) h += 24;
+		if (Patron.error() != null) h += 10;
+		return h;
+	}
+
+	/**
+	 * Menünün en üstünde PatronLauncher hesabı (site hesabı): girişli ise ad + profil, bekliyorsa kod,
+	 * değilse "PatronLauncher hesabıyla giriş yap" (launcher tarayıcıda onay sayfasını açar).
+	 */
+	private void patronSection(GuiGraphicsExtractor g, int x1, int y, int x2) {
+		Theme.scaledText(g, L.up("patron.title"), x1 + 2, y, 0.7f, Theme.FAINT, false);
+		int ry = y + 10;
+		Patron.State st = Patron.state();
+		int accent = Theme.accent();
+		if (st == Patron.State.SIGNED_IN) {
+			Theme.notched(g, x1, ry, x2, ry + 20, 3, 0x183DDC84);
+			Theme.notchedOutline(g, x1, ry, x2, ry + 20, 3, 0x553DDC84);
+			String n = Patron.name() == null ? "?" : Patron.name();
+			g.fill(x1 + 4, ry + 4, x1 + 16, ry + 16, accent);
+			g.text(font, n.substring(0, 1).toUpperCase(), x1 + 7, ry + 6, Theme.TEXT, false);
+			String label = L.up("patron.profile");
+			int bw = font.width(label) + 10;
+			g.text(font, Theme.ellipsize(n, x2 - x1 - bw - 30), x1 + 21, ry + 6, Theme.TEXT, false);
+			button(g, x2 - bw - 2, ry + 2, x2 - 2, ry + 18, label, Style.GHOST, Patron::openProfile);
+		} else if (st == Patron.State.PENDING) {
+			Theme.notched(g, x1, ry, x2, ry + 20, 3, 0x18FFB454);
+			Theme.notchedOutline(g, x1, ry, x2, ry + 20, 3, 0x55FFB454);
+			String c = Patron.code() == null ? "…" : Patron.code();
+			g.text(font, L.t("patron.code"), x1 + 5, ry + 6, Theme.MUTED, false);
+			g.text(font, c, x2 - 5 - font.width(c), ry + 6, 0xFFFFB454, false);
+			ry += 24;
+			int mid = (x1 + x2) / 2;
+			button(g, x1, ry, mid - 2, ry + 18, L.up("patron.reopen"), Style.SECONDARY, Patron::reopen);
+			button(g, mid + 2, ry, x2, ry + 18, L.up("account.cancel"), Style.GHOST, Patron::cancel);
+		} else {
+			boolean hov = hit(x1, ry, x2, ry + 20, Patron::login);
+			Theme.notched(g, x1, ry, x2, ry + 20, 3, hov ? accent : Theme.withAlpha(accent, 0xC8));
+			Theme.notchedOutline(g, x1, ry, x2, ry + 20, 3, accent);
+			PixelIcons.drawCentered(g, "user", x1 + 11, ry + 10, 1, Theme.TEXT);
+			g.text(font, Theme.ellipsize(L.t(Patron.busy() ? "patron.opening" : "patron.login"), x2 - x1 - 26), x1 + 21, ry + 6, Theme.TEXT, false);
+		}
+		ry += 22;
+		if (Patron.error() != null) {
+			g.text(font, Theme.ellipsize(L.t("patron.error"), x2 - x1), x1 + 2, ry, 0xFFE5A04D, false);
+			ry += 10;
+		}
+		g.fill(x1, ry + 2, x2, ry + 3, Theme.LINE);
 	}
 
 	/** Microsoft'un dört kareli logosuyla giriş düğmesi; tarayıcıda doğrudan giriş sayfası açılır. */

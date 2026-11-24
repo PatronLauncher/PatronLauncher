@@ -709,5 +709,12 @@
 	"pclient.support.discordSub": "Join us",
 	"pclient.support.webSub": "Our website",
 	"pclient.support.soon": "Coming soon",
-	"pclient.support.folderHint": "Open the game folder"
+	"pclient.support.folderHint": "Open the game folder",
+	"pclient.patron.title": "PatronLauncher account",
+	"pclient.patron.login": "Sign in with PatronLauncher",
+	"pclient.patron.opening": "Opening in your browser…",
+	"pclient.patron.code": "Approve in browser · code",
+	"pclient.patron.reopen": "Open page",
+	"pclient.patron.profile": "Profile",
+	"pclient.patron.error": "Sign-in failed; the launcher must be open."
 }

@@ -282,6 +282,21 @@ fn route(bridge: &Arc<Bridge>, head: &Head, body: &[u8]) -> Result<Value> {
             icon_png(&text_field(&parsed, "url")?, size)
         }
         ("GET", "/v1/news") => news(bridge),
+        // PatronLauncher hesabı (site hesabı): oyun içi hesap menüsü durumu gösterir, girişi launcher yürütür.
+        ("GET", "/v1/patron") => Ok(serde_json::to_value(crate::patron_account::status())?),
+        ("POST", "/v1/patron/login") => {
+            let lang = parsed["lang"].as_str().unwrap_or("").to_string();
+            Ok(serde_json::to_value(crate::patron_account::login(&lang)?)?)
+        }
+        ("POST", "/v1/patron/cancel") => Ok(serde_json::to_value(crate::patron_account::cancel())?),
+        ("POST", "/v1/patron/reopen") => {
+            crate::patron_account::reopen()?;
+            Ok(json!({ "ok": true }))
+        }
+        ("POST", "/v1/patron/profile") => {
+            crate::patron_account::open_profile()?;
+            Ok(json!({ "ok": true }))
+        }
         ("POST", "/v1/iris/install") => install_iris(bridge),
         ("GET", "/v1/media/now") => now_playing(bridge),
         ("POST", "/v1/media/cover") => Ok(json!({ "png": media::cover(&text_field(&parsed, "key")?)? })),
