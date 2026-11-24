@@ -107,7 +107,7 @@ public final class PClientFriendsScreen extends PcScreen {
 		for (int i = 0; i < tabs.length; i++) {
 			Tab t = tabs[i];
 			int tx1 = x1 + i * tw, tx2 = i == tabs.length - 1 ? x2 : tx1 + tw - 2;
-			String label = L.t("friends.tab." + t.name().toLowerCase());
+			String label = L.t("friends.tab." + t.name().toLowerCase(java.util.Locale.ROOT));
 			if (t == Tab.REQUESTS && !Social.incoming().isEmpty()) label += " " + Social.incoming().size();
 			boolean on = tab == t;
 			boolean hov = hit(tx1, y, tx2, y + 16, () -> tab = t);
