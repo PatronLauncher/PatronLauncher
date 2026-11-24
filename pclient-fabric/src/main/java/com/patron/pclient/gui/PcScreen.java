@@ -73,6 +73,7 @@ public abstract class PcScreen extends Screen {
 		g.pose().popMatrix();
 		if (dock() != null) drawDock(g);
 		if (tooltip != null) drawTooltip(g);
+		MessageToasts.render(g);
 	}
 
 	protected abstract void draw(GuiGraphicsExtractor g, int mx, int my);

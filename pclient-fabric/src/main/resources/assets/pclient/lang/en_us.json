@@ -761,5 +761,9 @@
 	"pclient.friends.err.REQUESTS_CLOSED": "This player doesn’t accept requests.",
 	"pclient.friends.err.DM_CLOSED": "This player doesn’t accept messages from you.",
 	"pclient.friends.err.RATE_LIMITED": "Slow down a little and try again.",
-	"pclient.friends.err.generic": "Something went wrong."
+	"pclient.friends.err.generic": "Something went wrong.",
+	"pclient.friends.notify.toasts": "Message notifications",
+	"pclient.friends.notify.sound": "Notification sound",
+	"pclient.friends.notify.testFrom": "PatronLauncher",
+	"pclient.friends.notify.testBody": "This is how notifications look."
 }

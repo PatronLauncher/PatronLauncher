@@ -23,6 +23,7 @@ public abstract class HudMixin {
 	)
 	private void pclient$hud(GuiGraphicsExtractor graphics, DeltaTracker delta, CallbackInfo ci) {
 		ModuleManager.renderHud(graphics);
+		com.patron.pclient.gui.MessageToasts.render(graphics);
 	}
 
 	/** Özel nişangah açıkken Minecraft'ın nişangahı çizilmez. */

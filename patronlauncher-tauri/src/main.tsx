@@ -17,3 +17,14 @@ import "./styles/polish.css";
 import "./styles/music.css";
 import "./styles/java.css";
 import "./styles/pclient.css";
+import "./styles/selection.css";
+
+// Sağ tık menüsü (Kopyala, Yenile, İncele…) yalnızca yazı kutularında ve sohbet mesajlarında açılır.
+const SELECTABLE = "input, textarea, [contenteditable=true], .so-msg p, .pa-code, .selectable";
+document.addEventListener("contextmenu", (e) => {
+  if (!(e.target instanceof Element) || !e.target.closest(SELECTABLE)) e.preventDefault();
+});
+// Arayüz öğeleri (görsel, bağlantı, düğme) fareyle sürüklenmez.
+document.addEventListener("dragstart", (e) => {
+  if (!(e.target instanceof Element) || !e.target.closest(SELECTABLE)) e.preventDefault();
+});

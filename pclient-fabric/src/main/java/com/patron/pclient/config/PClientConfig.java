@@ -42,6 +42,8 @@ public final class PClientConfig {
 	public boolean blur = true;
 	public String accent = "red";
 	public boolean openSound = true;
+	/** Arkadaş mesajı bildirimi (sağ üst) ve sesi. */
+	public boolean messageToasts = true, messageSound = true;
 	/** Pencere arka plandayken kare hızı sınırı. */
 	public boolean backgroundFpsLimit = true;
 	public int backgroundFps = 30;
@@ -83,6 +85,8 @@ public final class PClientConfig {
 			if (num(root, "friendsKey")) c.friendsKey = root.get("friendsKey").getAsInt();
 			if (bool(root, "blur")) c.blur = root.get("blur").getAsBoolean();
 			if (bool(root, "openSound")) c.openSound = root.get("openSound").getAsBoolean();
+			if (bool(root, "messageToasts")) c.messageToasts = root.get("messageToasts").getAsBoolean();
+			if (bool(root, "messageSound")) c.messageSound = root.get("messageSound").getAsBoolean();
 			if (bool(root, "hidePerformanceNotice")) c.hidePerformanceNotice = root.get("hidePerformanceNotice").getAsBoolean();
 			if (bool(root, "backgroundFpsLimit")) c.backgroundFpsLimit = root.get("backgroundFpsLimit").getAsBoolean();
 			if (num(root, "backgroundFps")) c.backgroundFps = Math.max(5, Math.min(120, root.get("backgroundFps").getAsInt()));
@@ -157,6 +161,8 @@ public final class PClientConfig {
 		JsonObject root = new JsonObject();
 		root.addProperty("version", 2);
 		root.addProperty("menuKey", INSTANCE.menuKey);
+		root.addProperty("messageToasts", INSTANCE.messageToasts);
+		root.addProperty("messageSound", INSTANCE.messageSound);
 		root.addProperty("friendsKey", INSTANCE.friendsKey);
 		root.addProperty("blur", INSTANCE.blur);
 		root.addProperty("openSound", INSTANCE.openSound);

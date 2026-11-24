@@ -761,5 +761,9 @@
 	"pclient.friends.err.REQUESTS_CLOSED": "Bu oyuncu istek kabul etmiyor.",
 	"pclient.friends.err.DM_CLOSED": "Bu oyuncu senden mesaj kabul etmiyor.",
 	"pclient.friends.err.RATE_LIMITED": "Biraz yavaşla ve yeniden dene.",
-	"pclient.friends.err.generic": "Bir şeyler ters gitti."
+	"pclient.friends.err.generic": "Bir şeyler ters gitti.",
+	"pclient.friends.notify.toasts": "Mesaj bildirimleri",
+	"pclient.friends.notify.sound": "Bildirim sesi",
+	"pclient.friends.notify.testFrom": "PatronLauncher",
+	"pclient.friends.notify.testBody": "Bildirimler böyle görünecek."
 }

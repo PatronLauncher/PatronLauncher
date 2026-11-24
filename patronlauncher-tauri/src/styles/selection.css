@@ -1,0 +1,5 @@
+/* Arayüz metinleri seçilemez ve sürüklenemez (düğmeler, başlıklar). Yalnızca sohbet mesajları, yazı kutuları ve
+   kopyalanması gereken kodlar seçilebilir. Sağ tık menüsü de yalnızca bunlarda açılır (main.tsx). */
+html, body { -webkit-user-select: none; user-select: none; }
+img, a, button { -webkit-user-drag: none; }
+input, textarea, [contenteditable="true"], .so-msg p, .pa-code, .pc-device output, output.field, .selectable { -webkit-user-select: text; user-select: text; }

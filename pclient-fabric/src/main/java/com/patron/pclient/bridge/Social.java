@@ -9,9 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.chat.Component;
 
 /**
  * Arkadaşlar ve mesajlar (oyun içi). Veriler PatronLauncher sitesindedir; oyun launcher köprüsü üzerinden ister
@@ -287,17 +285,12 @@ public final class Social {
 		}
 	}
 
-	/** Oyundayken gelen mesaj sohbete kısa bir satır olarak yazılır (yalnızca bu oyuncuya görünür). */
+	/** Gelen mesaj sağ üstte bildirim kartı olarak gösterilir (sohbete yazılmaz). Ayarlardan kapatılabilir. */
 	private static void notifyChat(String from, String body) {
 		Minecraft mc = Minecraft.getInstance();
-		String text = body.length() > 120 ? body.substring(0, 120) + "…" : body;
 		mc.execute(() -> {
-			if (mc.level == null) return;
 			try {
-				mc.gui.hud.getChat().addClientSystemMessage(Component.literal("✉ ").withStyle(ChatFormatting.RED)
-					.append(Component.literal(from).withStyle(ChatFormatting.WHITE, ChatFormatting.BOLD))
-					.append(Component.literal(": " + text).withStyle(ChatFormatting.GRAY))
-					.append(Component.literal("  [" + L.t("friends.openHint") + "]").withStyle(ChatFormatting.DARK_GRAY)));
+				com.patron.pclient.gui.MessageToasts.show(from, body);
 			} catch (RuntimeException e) {
 				PClient.LOG.warn("Mesaj bildirimi gösterilemedi: {}", e.toString());
 			}

@@ -212,7 +212,24 @@ public final class PClientFriendsScreen extends PcScreen {
 		y += 6;
 		y = policyRow(g, x1, y, x2, "friends.privacy.dm", Social.dmPolicy(), POLICIES, "dmPolicy");
 		y = policyRow(g, x1, y, x2, "friends.privacy.presence", Social.presencePolicy(), POLICIES, "presencePolicy");
-		policyRow(g, x1, y, x2, "friends.privacy.requests", Social.friendPolicy(), new String[] { "everyone", "nobody" }, "friendPolicy");
+		y = policyRow(g, x1, y, x2, "friends.privacy.requests", Social.friendPolicy(), new String[] { "everyone", "nobody" }, "friendPolicy");
+		// Bu cihazdaki bildirim tercihleri (sitede değil, PClient ayarlarında saklanır).
+		y += 4;
+		g.fill(x1, y, x2, y + 1, Theme.LINE);
+		y += 8;
+		var cfg = com.patron.pclient.config.PClientConfig.get();
+		g.text(font, Theme.ellipsize(L.t("friends.notify.toasts"), x2 - x1 - 34), x1 + 2, y + 2, Theme.TEXT, false);
+		toggleSwitch(g, x2 - 26, y + 1, cfg.messageToasts, () -> {
+			cfg.messageToasts = !cfg.messageToasts;
+			com.patron.pclient.config.PClientConfig.save();
+		});
+		y += 18;
+		g.text(font, Theme.ellipsize(L.t("friends.notify.sound"), x2 - x1 - 34), x1 + 2, y + 2, cfg.messageToasts ? Theme.TEXT : Theme.FAINT, false);
+		toggleSwitch(g, x2 - 26, y + 1, cfg.messageSound, () -> {
+			cfg.messageSound = !cfg.messageSound;
+			com.patron.pclient.config.PClientConfig.save();
+			if (cfg.messageSound) MessageToasts.show(L.t("friends.notify.testFrom"), L.t("friends.notify.testBody"));
+		});
 	}
 
 	/** Bir gizlilik ayarı: tıkladıkça sıradaki seçeneğe geçer ve hemen kaydedilir. */
