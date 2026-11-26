@@ -308,6 +308,10 @@ fn route(bridge: &Arc<Bridge>, head: &Head, body: &[u8]) -> Result<Value> {
             crate::patron_account::open_profile()?;
             Ok(json!({ "ok": true }))
         }
+        ("POST", "/v1/patron/player") => {
+            crate::patron_account::open_player(&text_field(&parsed, "username")?)?;
+            Ok(json!({ "ok": true }))
+        }
         ("POST", "/v1/iris/install") => install_iris(bridge),
         ("GET", "/v1/media/now") => now_playing(bridge),
         ("POST", "/v1/media/cover") => Ok(json!({ "png": media::cover(&text_field(&parsed, "key")?)? })),

@@ -1,6 +1,7 @@
 /* Arkadaşlar ve mesajlar sayfası (klasik ve PClient). Renkler iki arayüzün değişkenlerinden. */
-.so-page { --so-red: var(--pc-red, var(--brand, #fa5265)); --so-line: var(--line, rgba(255, 255, 255, 0.09)); --so-panel: var(--panel, #141720); --so-muted: var(--muted, #a0a8b8);
-  display: grid; grid-template-columns: minmax(280px, 340px) minmax(0, 1fr); gap: 16px; align-items: start; }
+.so-page, .so-layer { --so-red: var(--brand, #fa5265); --so-line: var(--line, rgba(255, 255, 255, 0.09)); --so-panel: var(--panel, #141720); --so-muted: var(--muted, #a0a8b8);
+  --so-text: var(--text, #e9ecf2); }
+.so-page { display: grid; grid-template-columns: minmax(280px, 340px) minmax(0, 1fr); gap: 16px; align-items: start; }
 .so-page.so-signin { display: flex; flex-direction: column; gap: 14px; }
 .so-intro { margin: 0; color: var(--so-muted); }
 .so-side, .so-chat { border: 1px solid var(--so-line); border-radius: 16px; background: var(--so-panel); overflow: hidden; }
@@ -13,6 +14,11 @@ select.so-field option { background: #141720; }
 .so-btn.primary { border-color: transparent; background: var(--so-red); color: #fff; }
 .so-btn:hover { filter: brightness(1.1); }
 .so-note { margin: 0 12px 8px; padding: 8px 10px; border-radius: 10px; background: rgba(255, 255, 255, 0.05); font-size: 13px; animation: so-in 0.2s ease-out; }
+.so-offline { display: flex; align-items: center; gap: 10px; margin: 0 12px 10px; padding: 10px 12px; border: 1px solid color-mix(in srgb, #ffb454 40%, transparent); border-radius: 10px;
+  background: color-mix(in srgb, #ffb454 10%, transparent); color: #ffd59a; font-size: 12.5px; line-height: 1.4; animation: so-in 0.2s ease-out; }
+.so-offline span { flex: 1; }
+.so-offline .so-btn { padding: 6px 10px; font-size: 12px; }
+.so-pclient .so-offline { border-radius: 3px; }
 .so-tabs { display: flex; border-top: 1px solid var(--so-line); border-bottom: 1px solid var(--so-line); }
 .so-tabs button { flex: 1; padding: 10px 4px; border: 0; border-bottom: 2px solid transparent; background: none; color: var(--so-muted); font: inherit; font-size: 12.5px; font-weight: 700; cursor: pointer; }
 .so-tabs button.on { color: inherit; border-bottom-color: var(--so-red); }
@@ -57,7 +63,94 @@ select.so-field option { background: #141720; }
 .so-composer { display: flex; align-items: flex-end; gap: 8px; padding: 10px; border-top: 1px solid var(--so-line); }
 .so-composer textarea { resize: none; max-height: 140px; }
 .so-cannot { margin: 0; padding: 12px 16px; border-top: 1px solid var(--so-line); }
+/* Simgeler, etiketler, engellenen satırlar */
+.so-ico { flex: none; display: block; }
+.so-tag { display: inline-flex; align-items: center; gap: 4px; flex: none; padding: 2px 7px; border-radius: 999px; border: 1px solid; font-size: 10.5px; font-weight: 800; letter-spacing: 0.02em; }
+.so-tag.blocked { color: #ff7a8a; border-color: color-mix(in srgb, var(--so-red) 45%, transparent); background: color-mix(in srgb, var(--so-red) 12%, transparent); }
+.so-tag.muted { padding: 3px 5px; color: var(--so-muted); border-color: var(--so-line); }
+.so-avatar.dim { filter: grayscale(1); opacity: 0.55; }
+.so-row.is-blocked .so-meta b { color: var(--so-muted); }
+.so-cannot-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.so-btn.danger { border-color: transparent; background: linear-gradient(180deg, color-mix(in srgb, var(--so-red) 92%, #fff 8%), var(--so-red)); color: #fff; box-shadow: 0 8px 22px color-mix(in srgb, var(--so-red) 30%, transparent); }
+
+/* Arkadaşın sunucusuna katıl */
+.so-join { display: inline-flex; align-items: center; gap: 6px; flex: none; padding: 6px 11px; border: 1px solid color-mix(in srgb, #3ddc84 45%, transparent); border-radius: 9px;
+  background: color-mix(in srgb, #3ddc84 14%, transparent); color: #7ef0ae; font: inherit; font-size: 12px; font-weight: 800; cursor: pointer; transition: background 0.15s, transform 0.15s, box-shadow 0.15s; }
+.so-join:hover:not(:disabled) { background: color-mix(in srgb, #3ddc84 24%, transparent); box-shadow: 0 6px 18px color-mix(in srgb, #3ddc84 22%, transparent); transform: translateY(-1px); }
+.so-join:disabled { opacity: 0.6; cursor: default; }
+.so-pclient .so-join { border-radius: 3px; text-transform: uppercase; letter-spacing: 0.05em; font-size: 11px; }
+:root[data-motion="off"] .so-join { transition: none; }
+
+/* Sağ tık / "⋯" menüsü (Discord gibi). <body>'ye portal ile çizilir; renkler Görünüm temasından (--panel, --brand/--pc-red). */
+.so-menu { position: fixed; z-index: 2000; min-width: 220px; margin: 0; padding: 6px; list-style: none; border-radius: 12px; color: var(--so-text);
+  border: 1px solid color-mix(in srgb, var(--so-red) 22%, var(--so-line));
+  background: radial-gradient(140% 70% at 0% 0%, color-mix(in srgb, var(--so-red) 10%, transparent), transparent 60%),
+    color-mix(in srgb, var(--so-panel) 94%, transparent);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(14px) saturate(1.2); animation: so-menu-in 0.2s cubic-bezier(0.2, 0.9, 0.25, 1.15) both; }
+.so-menu li { animation: so-menu-item 0.22s ease-out both; animation-delay: calc(30ms + var(--k, 0) * 18ms); }
+.so-menu button { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 10px; border: 0; border-radius: 8px; background: none; color: inherit; font: inherit; font-size: 13px; font-weight: 600; text-align: left; cursor: pointer; transition: background 0.14s, color 0.14s, padding 0.14s; }
+.so-menu button .so-ico { opacity: 0.75; transition: color 0.14s, opacity 0.14s, transform 0.14s; }
+.so-menu button:hover, .so-menu button:focus-visible { outline: none; padding-left: 12px; background: color-mix(in srgb, var(--so-red) 14%, transparent); }
+.so-menu button:hover .so-ico, .so-menu button:focus-visible .so-ico { opacity: 1; color: var(--so-red); transform: scale(1.08); }
+.so-menu button.danger { color: #ff7a8a; }
+.so-menu button.danger:hover, .so-menu button.danger:focus-visible { background: color-mix(in srgb, #ff4d5e 20%, transparent); color: #ffa0ab; }
+.so-menu button.danger:hover .so-ico, .so-menu button.danger:focus-visible .so-ico { color: inherit; }
+.so-menu-sep { height: 1px; margin: 5px 6px; background: var(--so-line); }
+.so-pclient .so-menu { border-radius: 3px; padding-top: 7px; clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+  background: linear-gradient(90deg, var(--so-red) 0 36px, transparent 36px) top left / 100% 1px no-repeat, color-mix(in srgb, var(--so-panel) 96%, transparent); }
+.so-pclient .so-menu button { border-radius: 2px; }
+.so-pclient .so-menu button:hover, .so-pclient .so-menu button:focus-visible { box-shadow: inset 2px 0 0 var(--so-red); }
+:root[data-motion="off"] .so-menu, :root[data-motion="off"] .so-menu li { animation: none; }
+:root[data-motion="off"] .so-menu button, :root[data-motion="off"] .so-menu button .so-ico { transition: none; }
+
+/* Onay penceresi */
+.so-dialog { width: min(400px, calc(100vw - 32px)); margin: auto; padding: 24px; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 18px; color: #eef0f5;
+  background: radial-gradient(120% 90% at 0% 0%, color-mix(in srgb, var(--so-red) 14%, transparent), transparent 55%), linear-gradient(180deg, #1c1f2a, #12141c);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6); animation: so-dialog-in 0.22s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.so-dialog::backdrop { background: rgba(4, 5, 9, 0.62); backdrop-filter: blur(4px); animation: so-fade 0.2s ease-out; }
+.so-dialog-icon { display: grid; place-items: center; width: 44px; height: 44px; margin-bottom: 14px; border-radius: 12px; color: var(--so-red);
+  background: color-mix(in srgb, var(--so-red) 16%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--so-red) 35%, transparent); }
+.so-dialog h2 { margin: 0; font-size: 18px; line-height: 1.3; }
+.so-dialog p { margin: 8px 0 0; color: #a7afbf; font-size: 13.5px; line-height: 1.55; }
+.so-dialog-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 22px; }
+.so-dialog .so-btn { padding: 9px 16px; }
+.so-pclient .so-dialog { border-radius: 4px; clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px); }
+
+/* Gizlilik kartları ve kayan seçim */
+.so-pcard { position: relative; display: grid; gap: 12px; padding: 14px; border: 1px solid var(--so-line); border-radius: 14px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.01)); transition: border-color 0.25s, box-shadow 0.25s; animation: so-in 0.3s ease-out both; }
+.so-pcard:nth-of-type(2) { animation-delay: 0.05s; }
+.so-pcard:nth-of-type(3) { animation-delay: 0.1s; }
+.so-pcard:hover { border-color: color-mix(in srgb, var(--so-red) 35%, var(--so-line)); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25); }
+.so-pcard.saved { border-color: color-mix(in srgb, #3ddc84 55%, transparent); box-shadow: 0 0 0 3px color-mix(in srgb, #3ddc84 14%, transparent); }
+.so-pcard-head { display: flex; align-items: flex-start; gap: 11px; }
+.so-pcard-icon { display: grid; place-items: center; flex: none; width: 34px; height: 34px; border-radius: 10px; color: var(--so-red); background: color-mix(in srgb, var(--so-red) 14%, transparent); }
+.so-pcard-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+.so-pcard-text b { font-size: 13px; }
+.so-pcard-text small { color: var(--so-muted); font-size: 11.5px; font-weight: 500; line-height: 1.4; }
+.so-pcard-ok { display: inline-flex; align-items: center; gap: 4px; flex: none; color: #3ddc84; font-size: 11px; font-weight: 800; opacity: 0; transform: translateY(-3px); transition: opacity 0.2s, transform 0.2s; }
+.so-pcard.saved .so-pcard-ok { opacity: 1; transform: none; }
+.so-seg { position: relative; display: grid; grid-template-columns: repeat(var(--n), minmax(0, 1fr)); padding: 4px; border: 1px solid var(--so-line); border-radius: 11px; background: rgba(0, 0, 0, 0.3); isolation: isolate; }
+.so-seg-thumb { position: absolute; z-index: -1; top: 4px; bottom: 4px; left: 4px; width: calc((100% - 8px) / var(--n)); border-radius: 8px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--so-red) 88%, #fff 12%), var(--so-red)); box-shadow: 0 6px 18px color-mix(in srgb, var(--so-red) 38%, transparent);
+  transform: translateX(calc(var(--i) * 100%)); transition: transform 0.32s cubic-bezier(0.3, 1.25, 0.4, 1); }
+.so-seg button { padding: 8px 6px; border: 0; border-radius: 8px; background: none; color: var(--so-muted); font: inherit; font-size: 12px; font-weight: 800; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: color 0.2s; }
+.so-seg button:hover:not(.on) { color: #e9ecf2; }
+.so-seg button.on { color: #fff; }
+.so-seg button:focus-visible { outline: 2px solid color-mix(in srgb, var(--so-red) 70%, transparent); outline-offset: -2px; }
+
+/* PClient arayüzü: köşeler keskin, kartlar kesik köşeli */
+.so-pclient .so-pcard, .so-pclient .so-seg, .so-pclient .so-seg-thumb, .so-pclient .so-seg button, .so-pclient .so-pcard-icon { border-radius: 3px; }
+.so-pclient .so-pcard { clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px); }
+.so-pclient .so-pcard::before { content: ""; position: absolute; top: 0; left: 8px; width: 28px; height: 1px; background: var(--so-red); }
+.so-pclient .so-seg-thumb { transition: transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.so-pclient .so-seg button { text-transform: uppercase; letter-spacing: 0.06em; font-size: 11px; }
+@keyframes so-menu-in { from { opacity: 0; transform: scale(0.9); filter: blur(2px); } }
+@keyframes so-menu-item { from { opacity: 0; transform: translateX(-6px); } }
+@keyframes so-dialog-in { from { opacity: 0; transform: translateY(10px) scale(0.97); } }
+@keyframes so-fade { from { opacity: 0; } }
 @keyframes so-in { from { opacity: 0; transform: translateY(4px); } }
 @media (max-width: 980px) { .so-page { grid-template-columns: 1fr; } }
 @media (max-width: 720px) { .so-chat { grid-template-columns: 1fr; } .so-chats { border-right: 0; border-bottom: 1px solid var(--so-line); } }
-@media (prefers-reduced-motion: reduce) { .so-row, .so-msg, .so-note { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .so-row, .so-msg, .so-note, .so-pcard, .so-menu, .so-menu li, .so-dialog { animation: none; } .so-seg-thumb { transition: none; } }

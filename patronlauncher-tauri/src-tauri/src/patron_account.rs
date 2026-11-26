@@ -423,6 +423,16 @@ pub fn open_profile() -> Result<()> {
     Ok(())
 }
 
+/// Başka bir oyuncunun site profilini tarayıcıda açar (arkadaşlar menüsü). Ad sitenin kuralıyla denetlenir.
+pub fn open_player(username: &str) -> Result<()> {
+    let name = username.trim().to_ascii_lowercase();
+    if !(3..=16).contains(&name.len()) || !name.bytes().all(|b| b.is_ascii_alphanumeric() || b == b'_') {
+        bail!("Kullanıcı adı geçersiz.");
+    }
+    webbrowser::open(&format!("{}/u/{name}", base_url()?)).context("Tarayıcı açılamadı.")?;
+    Ok(())
+}
+
 /// Launcher'daki Microsoft girişinin bitiş sayfası (oyuncunun dilinde).
 pub fn login_complete_url(status: &str) -> Option<String> {
     let status = match status {

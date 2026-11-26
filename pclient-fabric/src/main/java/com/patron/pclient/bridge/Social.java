@@ -20,17 +20,18 @@ public final class Social {
 	public record Presence(boolean online, String version, String server) {
 		public boolean playing() { return version != null || server != null; }
 	}
-	public record Person(String id, String username, String display, Presence presence) {}
+	/** blocked: bu kişiyi ben engelledim (arkadaşlık sürer, mesaj ve durum kapalı). muted: bildirimleri sessizde. */
+	public record Person(String id, String username, String display, Presence presence, boolean blocked, boolean muted) {}
 	public record Message(long id, String from, String body, long at) {
 		public boolean mine() { return "me".equals(from); }
 	}
-	public record Chat(String username, String display, String preview, int unread) {}
+	public record Chat(String username, String display, String preview, int unread, boolean muted) {}
 
 	private static volatile List<Person> friends = List.of(), incoming = List.of(), outgoing = List.of(), blocked = List.of();
 	private static volatile List<Chat> chats = List.of();
 	private static volatile List<Message> messages = List.of();
 	private static volatile String active, activeDisplay, note;
-	private static volatile boolean canSend, signedIn = true, live, started;
+	private static volatile boolean canSend, iBlocked, signedIn = true, live, started;
 	private static volatile String dmPolicy = "friends", presencePolicy = "friends", friendPolicy = "everyone";
 	private static volatile long seq;
 	/** Arkadaşlar ekranı açıkken gelen mesajlar sohbete ayrıca yazılmaz. */
@@ -47,6 +48,28 @@ public final class Social {
 	public static String active() { return active; }
 	public static String activeDisplay() { return activeDisplay; }
 	public static boolean canSend() { return canSend; }
+	/** Açık sohbetteki kişiyi ben engelledim (yazma kutusu yerine "engeli kaldır" gösterilir). */
+	public static boolean iBlocked() { return iBlocked; }
+	public static Person friend(String username) {
+		for (Person p : friends) if (p.username().equals(username)) return p;
+		return null;
+	}
+	public static Chat chat(String username) {
+		for (Chat c : chats) if (c.username().equals(username)) return c;
+		return null;
+	}
+	public static boolean isBlocked(String username) {
+		Person f = friend(username);
+		if (f != null) return f.blocked();
+		for (Person p : blocked) if (p.username().equals(username)) return true;
+		return false;
+	}
+	public static boolean isMuted(String username) {
+		Person f = friend(username);
+		if (f != null) return f.muted();
+		Chat c = chat(username);
+		return c != null && c.muted();
+	}
 	public static boolean signedIn() { return signedIn; }
 	public static boolean live() { return live; }
 	public static String note() { return note; }
@@ -96,11 +119,17 @@ public final class Social {
 		return new Presence(p.has("online") && p.get("online").getAsBoolean(), null, null);
 	}
 
+	private static boolean bool(JsonObject o, String key) {
+		JsonElement e = o.get(key);
+		return e != null && !e.isJsonNull() && e.getAsBoolean();
+	}
+
 	private static List<Person> people(JsonArray arr, boolean withPresence) {
 		List<Person> out = new ArrayList<>();
 		for (JsonElement e : arr) {
 			JsonObject o = e.getAsJsonObject();
-			out.add(new Person(str(o, "id"), str(o, "username"), str(o, "displayUsername"), withPresence ? presence(o.get("presence")) : null));
+			out.add(new Person(str(o, "id"), str(o, "username"), str(o, "displayUsername"), withPresence ? presence(o.get("presence")) : null,
+				bool(o, "blocked"), bool(o, "muted")));
 		}
 		return List.copyOf(out);
 	}
@@ -126,7 +155,7 @@ public final class Social {
 					JsonObject l = last.getAsJsonObject();
 					preview = ("me".equals(str(l, "from")) ? L.t("friends.you") + ": " : "") + str(l, "body");
 				}
-				out.add(new Chat(str(c, "username"), str(c, "displayUsername"), preview, c.get("unread").getAsInt()));
+				out.add(new Chat(str(c, "username"), str(c, "displayUsername"), preview, c.get("unread").getAsInt(), bool(c, "muted")));
 			}
 			chats = List.copyOf(out);
 		}).exceptionally(t -> null);
@@ -164,6 +193,7 @@ public final class Social {
 			for (JsonElement e : o.getAsJsonArray("messages")) out.add(message(e.getAsJsonObject()));
 			messages = List.copyOf(out);
 			canSend = o.get("canSend").getAsBoolean();
+			iBlocked = bool(o, "iBlocked");
 			activeDisplay = str(o.getAsJsonObject("with"), "displayUsername");
 			markRead(username);
 		}).exceptionally(t -> {
@@ -209,7 +239,8 @@ public final class Social {
 		b.addProperty("action", action);
 		b.addProperty("username", username);
 		call("POST", "/api/social/friends", b).thenAccept(json -> {
-			if (("block".equals(action) || "remove".equals(action)) && username.equals(active)) close();
+			// Engel arkadaşlığı bitirmez: açık sohbet kalır, yazma durumu yenilenir.
+			if (username.equals(active)) open(username);
 			if ("request".equals(action))
 				note = L.t("friends".equals(str(json.getAsJsonObject(), "result")) ? "friends.becameFriends" : "friends.sent");
 			refreshFriends();
@@ -217,6 +248,39 @@ public final class Social {
 			note = errorText(t);
 			return null;
 		});
+	}
+
+	/** Kişiye özel tercih (Discord gibi): muted = bildirimleri sessize al; closed = sohbeti listeden kapat. */
+	public static void setPref(String username, Boolean muted, Boolean closed) {
+		JsonObject b = new JsonObject();
+		b.addProperty("username", username);
+		if (muted != null) b.addProperty("muted", muted);
+		if (closed != null) b.addProperty("closed", closed);
+		call("POST", "/api/social/prefs", b).thenRun(() -> {
+			if (Boolean.TRUE.equals(closed) && username.equals(active)) close();
+			refreshFriends();
+			refreshChats();
+		}).exceptionally(t -> {
+			note = errorText(t);
+			return null;
+		});
+	}
+
+	/** Oyuncunun site profilini tarayıcıda açar (launcher açar). */
+	public static void openProfile(String username) {
+		JsonObject b = new JsonObject();
+		b.addProperty("username", username);
+		Bridge.post("/v1/patron/player", b, 5_000).exceptionally(t -> {
+			note = errorText(t);
+			return null;
+		});
+	}
+
+	/** Kullanıcı adını panoya kopyalar. */
+	public static void copyName(String username) {
+		Minecraft mc = Minecraft.getInstance();
+		mc.execute(() -> mc.keyboardHandler.setClipboard(username));
+		note = L.t("friends.copied", username);
 	}
 
 	public static void setPrivacy(String key, String value) {
@@ -276,10 +340,19 @@ public final class Social {
 					if (!m.mine() && screenOpen) markRead(with);
 				}
 				refreshChats();
-				if (!m.mine() && !screenOpen) notifyChat(with, m.body());
+				// Sessize alınan kişiden gelen mesaj gelir ama kart/ses gösterilmez.
+				boolean muted = ev.has("muted") && !ev.get("muted").isJsonNull() && ev.get("muted").getAsBoolean();
+				if (!m.mine() && !screenOpen && !muted) notifyChat(with, m.body());
 			}
 			case "read" -> refreshChats();
-			case "friends", "presence" -> refreshFriends();
+			case "friends", "presence" -> {
+				refreshFriends();
+				if ("friends".equals(type) && active != null) open(active);
+			}
+			case "prefs" -> {
+				refreshFriends();
+				refreshChats();
+			}
 			case "privacy" -> refreshPrivacy();
 			case "connection" -> {
 				if (ev.has("online") && ev.get("online").getAsBoolean()) refreshAll();

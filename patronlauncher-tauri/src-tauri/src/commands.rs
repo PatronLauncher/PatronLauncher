@@ -836,6 +836,18 @@ pub async fn join_server(
         .call(Action::JoinServer { host: server.address, port: server.port, pclient: pclient.unwrap_or(false) })
         .await
 }
+/// Arkadaşın oynadığı sunucuya katılır. Adres siteden alınır; sürüm uyumunu sunucu kendisi bildirir.
+#[tauri::command]
+pub async fn join_friend(state: tauri::State<'_, CoreService>, username: String) -> Result<Reply, String> {
+    let friend = tauri::async_runtime::spawn_blocking(move || crate::social::friend_server(&username))
+        .await
+        .map_err(|e| e.to_string())?
+        .map_err(|e| format!("{e:#}"))?;
+    let current = state.call(Action::Read).await?;
+    let pclient_mc = crate::pclient::selected(&crate::model::data_root()).minecraft;
+    let pclient = crate::social::join_choice(friend.version.as_deref(), pclient_mc, current.state.selected_version.as_deref());
+    state.call(Action::JoinServer { host: friend.host, port: friend.port, pclient }).await
+}
 #[tauri::command]
 pub fn server_open_link(
     store: tauri::State<'_, crate::servers::Store>,
@@ -1287,6 +1299,10 @@ pub fn patron_account_logout() -> PatronStatus {
 #[tauri::command]
 pub fn patron_account_profile() -> Result<(), String> {
     patron_account::open_profile().map_err(|e| format!("{e:#}"))
+}
+#[tauri::command]
+pub fn patron_open_player(username: String) -> Result<(), String> {
+    patron_account::open_player(&username).map_err(|e| format!("{e:#}"))
 }
 #[tauri::command]
 pub fn patron_account_language(lang: String) {

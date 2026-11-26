@@ -729,9 +729,27 @@ main.pc-main {
 }
 main.pc-main.is-home {
   padding: 0;
+  /* Ana sayfa pencereye sabitlenir: sahne sığacak kadar küçülür, dış kaydırma çubuğu açılmaz. Açılış animasyonu
+     (aşağıdan kayma) ya da birkaç piksellik taşma artık sayfayı yukarı aşağı oynatmaz; haberler kendi içinde kayar. */
+  overflow: hidden;
 }
 .pc-main.is-home > .pc-page {
   height: 100%;
+  animation-name: pc-home-in;
+}
+@keyframes pc-home-in {
+  from { opacity: 0; }
+}
+.pc-main.is-home .pc-stage {
+  min-height: 0;
+}
+@media (max-width: 1080px) {
+  main.pc-main.is-home {
+    overflow-y: auto;
+  }
+  .pc-main.is-home .pc-stage {
+    min-height: 480px;
+  }
 }
 
 /* --- Ortak butonlar --- */

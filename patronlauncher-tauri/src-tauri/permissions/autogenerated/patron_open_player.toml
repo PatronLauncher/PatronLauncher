@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-patron-open-player"
+description = "Enables the patron_open_player command without any pre-configured scope."
+commands.allow = ["patron_open_player"]
+
+[[permission]]
+identifier = "deny-patron-open-player"
+description = "Denies the patron_open_player command without any pre-configured scope."
+commands.deny = ["patron_open_player"]

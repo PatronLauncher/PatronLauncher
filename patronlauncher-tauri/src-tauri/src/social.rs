@@ -203,6 +203,52 @@ fn connect_once() -> Result<()> {
     }
 }
 
+// ── Arkadaşın sunucusuna katılma ──────────────────────────────────────────────────────────────────
+
+/// Arkadaşın şu an bağlı olduğu sunucu. Adres arayüzden değil, siteden (arkadaşın gizlilik ayarı izin
+/// veriyorsa görünen durum bilgisinden) alınır; site adresi zaten yalnızca genel sunucular için kabul eder.
+pub struct FriendServer {
+    pub host: String,
+    pub port: Option<u16>,
+    pub version: Option<String>,
+}
+
+pub fn friend_server(username: &str) -> Result<FriendServer> {
+    let data = api("GET", "/api/social/friends", None)?;
+    let friend = data["friends"]
+        .as_array()
+        .into_iter()
+        .flatten()
+        .find(|f| f["username"].as_str().is_some_and(|u| u.eq_ignore_ascii_case(username)))
+        .ok_or_else(|| anyhow!("NOT_FOUND"))?;
+    if friend["blocked"].as_bool() == Some(true) {
+        bail!("BLOCKED");
+    }
+    let playing = &friend["presence"]["playing"];
+    let address = playing["server"].as_str().ok_or_else(|| anyhow!("NOT_ON_SERVER"))?;
+    let (host, port) = split_address(address).ok_or_else(|| anyhow!("NOT_ON_SERVER"))?;
+    Ok(FriendServer { host, port, version: playing["version"].as_str().map(str::to_string) })
+}
+
+/// "host" ya da "host:port"; yalnızca alan adı/IPv4 karakterleri kabul edilir.
+pub fn split_address(address: &str) -> Option<(String, Option<u16>)> {
+    let (host, port) = match address.rsplit_once(':') {
+        Some((h, p)) => (h, Some(p.parse::<u16>().ok().filter(|p| *p > 0)?)),
+        None => (address, None),
+    };
+    let ok = !host.is_empty()
+        && host.len() <= 253
+        && host.contains('.')
+        && host.chars().all(|c| c.is_ascii_alphanumeric() || c == '.' || c == '-');
+    ok.then(|| (host.to_ascii_lowercase(), port))
+}
+
+/// Hangi oyunla katılınacağı: arkadaşın sürümü seçili (normal) sürümle aynıysa normal oyun (false), diğer her
+/// durumda PClient (true). Sürüm uyumu engellenmez; çoğu sunucu birçok sürümü kabul eder, uymazsa sunucu söyler.
+pub fn join_choice(friend: Option<&str>, pclient: &str, selected: Option<&str>) -> bool {
+    !matches!(friend, Some(v) if v != pclient && Some(v) == selected)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -231,5 +277,25 @@ mod tests {
         assert_eq!(later["events"][0]["n"], 2);
         // Gelecekteki bir sıra (launcher yeniden başlamış) baştan verir.
         assert!(!events_since(seq + 100, Duration::from_millis(1))["events"].as_array().unwrap().is_empty());
+    }
+
+    #[test]
+    fn friend_address_is_split_and_validated() {
+        assert_eq!(split_address("play.chickennw.com"), Some(("play.chickennw.com".into(), None)));
+        assert_eq!(split_address("mc.example.net:25570"), Some(("mc.example.net".into(), Some(25570))));
+        assert_eq!(split_address("mc.example.net:0"), None);
+        assert_eq!(split_address("mc.example.net:abc"), None);
+        assert_eq!(split_address("localhost"), None);
+        assert_eq!(split_address("evil host.com"), None);
+        assert_eq!(split_address("a.com --server x"), None);
+    }
+
+    #[test]
+    fn join_prefers_matching_game_and_never_refuses() {
+        assert!(join_choice(Some("26.3"), "26.3", Some("1.21.11")));
+        assert!(!join_choice(Some("1.21.11"), "26.3", Some("1.21.11")));
+        // Farklı sürüm engellenmez: PClient ile denenir, uymazsa sunucu söyler.
+        assert!(join_choice(Some("1.20.1"), "26.3", Some("1.21.11")));
+        assert!(join_choice(None, "26.3", None));
     }
 }

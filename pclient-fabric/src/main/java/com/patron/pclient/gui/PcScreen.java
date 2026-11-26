@@ -72,6 +72,11 @@ public abstract class PcScreen extends Screen {
 		draw(g, mx, my);
 		g.pose().popMatrix();
 		if (dock() != null) drawDock(g);
+		// Açılır menü ve onay penceresi her şeyin üstünde; açıkken alttaki öğeler vurgulanmaz.
+		overlayDrawing = true;
+		if (menuItems != null) drawMenu(g);
+		if (confirm != null) drawConfirm(g);
+		overlayDrawing = false;
 		if (tooltip != null) drawTooltip(g);
 		MessageToasts.render(g);
 	}
@@ -81,6 +86,7 @@ public abstract class PcScreen extends Screen {
 	// --- Tıklama alanları ---
 
 	protected boolean hover(int x1, int y1, int x2, int y2) {
+		if ((menuItems != null || confirm != null) && !overlayDrawing) return false;
 		return mouseX >= x1 && mouseX < x2 && mouseY >= y1 && mouseY < y2;
 	}
 
@@ -120,6 +126,7 @@ public abstract class PcScreen extends Screen {
 
 	@Override public void removed() {
 		focused = null;
+		closeOverlays();
 		accountOpen = false;
 		accountClosing = false;
 		PClientConfig.save();
@@ -164,6 +171,10 @@ public abstract class PcScreen extends Screen {
 	}
 
 	@Override public boolean keyPressed(net.minecraft.client.input.KeyEvent e) {
+		if ((menuItems != null || confirm != null) && e.key() == com.mojang.blaze3d.platform.InputConstants.KEY_ESCAPE) {
+			closeOverlays();
+			return true;
+		}
 		if (accountOpen && !accountClosing && e.key() == com.mojang.blaze3d.platform.InputConstants.KEY_ESCAPE) {
 			focus(null);
 			closeAccount();
@@ -242,21 +253,22 @@ public abstract class PcScreen extends Screen {
 	private record DockItem(String id, String icon, String label, Runnable action) {}
 
 	private List<DockItem> dockItems() {
-		List<DockItem> items = new ArrayList<>(List.of(
-			new DockItem("home", "home", L.t("dock.home"), () -> open(minecraft.level == null ? new PClientTitleScreen() : new PClientHomeScreen())),
-			new DockItem("modules", "grid", L.t("dock.modules"), () -> open(new ModulesScreen(ModulesScreen.Tab.MODULES))),
-			new DockItem("hud", "hud", L.t("dock.hud"), () -> open(new HudEditorScreen(this))),
-			new DockItem("friends", "chat", L.t("dock.friends"), () -> open(new PClientFriendsScreen(this)))));
-		// Sunucu listesi yalnızca bir dünyada değilken (ana menüde) açılır.
-		if (minecraft.level == null)
-			items.add(new DockItem("servers", "server", L.t("dock.servers"), () -> open(new PClientServersScreen(new PClientTitleScreen()))));
+		// Ana menüde (dünyada değilken) çubuk sade: Sunucular ve Modüller ortadaki düğmelerde, Arkadaşlar ve
+		// Kozmetikler soldaki profil panelinde. Oyun içinde (duraklatma menüsü) tüm öğeler çubukta kalır.
+		boolean menu = minecraft.level == null;
+		List<DockItem> items = new ArrayList<>();
+		items.add(new DockItem("home", "home", L.t("dock.home"), () -> open(menu ? new PClientTitleScreen() : new PClientHomeScreen())));
+		if (!menu) items.add(new DockItem("modules", "grid", L.t("dock.modules"), () -> open(new ModulesScreen(ModulesScreen.Tab.MODULES))));
+		items.add(new DockItem("hud", "hud", L.t("dock.hud"), () -> open(new HudEditorScreen(this))));
+		if (!menu) items.add(new DockItem("friends", "chat", L.t("dock.friends"), () -> open(new PClientFriendsScreen(this))));
 		items.addAll(List.of(
 			new DockItem("music", "music", L.t("module.music.name"), () -> open(new PClientMusicScreen(this))),
 			new DockItem("themes", "image", L.t("dock.themes"), () -> open(new PClientThemesScreen(this))),
 			new DockItem("mods", "puzzle", L.t("dock.mods"), () -> open(new PClientModsScreen(this))),
 			new DockItem("modrinth", "download", L.t("dock.modrinth"), () -> open(new PClientModrinthScreen(this))),
-			new DockItem("schematics", "house", L.t("module.schematics.name"), () -> open(new ComingSoonScreen((SoonModule) ModuleManager.byId("schematics"), this))),
-			new DockItem("cosmetics", "shirt", L.t("module.cosmetics.name"), () -> open(new ComingSoonScreen((SoonModule) ModuleManager.byId("cosmetics"), this))),
+			new DockItem("schematics", "house", L.t("module.schematics.name"), () -> open(new ComingSoonScreen((SoonModule) ModuleManager.byId("schematics"), this)))));
+		if (!menu) items.add(new DockItem("cosmetics", "shirt", L.t("module.cosmetics.name"), () -> open(new ComingSoonScreen((SoonModule) ModuleManager.byId("cosmetics"), this))));
+		items.addAll(List.of(
 			new DockItem("minecraft", "grass", L.t("dock.minecraft"), () -> open(new net.minecraft.client.gui.screens.options.OptionsScreen(this, minecraft.options))),
 			new DockItem("settings", "gear", L.t("dock.settings"), () -> open(new ModulesScreen(ModulesScreen.Tab.SETTINGS)))));
 		return items;
@@ -467,8 +479,8 @@ public abstract class PcScreen extends Screen {
 			Theme.notched(g, x1, ry, x2, ry + 20, 3, 0x183DDC84);
 			Theme.notchedOutline(g, x1, ry, x2, ry + 20, 3, 0x553DDC84);
 			String n = Patron.name() == null ? "?" : Patron.name();
-			g.fill(x1 + 4, ry + 4, x1 + 16, ry + 16, accent);
-			g.text(font, n.substring(0, 1).toUpperCase(), x1 + 7, ry + 6, Theme.TEXT, false);
+			// Baş harf yerine PatronLauncher'ın piksel logosu (Microsoft düğmesindeki logo gibi).
+			Theme.logo(g, x1 + 4, ry + 3, 14);
 			String label = L.up("patron.profile");
 			int bw = font.width(label) + 10;
 			g.text(font, Theme.ellipsize(n, x2 - x1 - bw - 30), x1 + 21, ry + 6, Theme.TEXT, false);
@@ -509,6 +521,163 @@ public abstract class PcScreen extends Screen {
 		g.fill(lx, ly + 5, lx + 4, ly + 9, 0xFF00A4EF);
 		g.fill(lx + 5, ly + 5, lx + 9, ly + 9, 0xFFFFB900);
 		g.text(font, Theme.ellipsize(L.t("account.msLogin"), x2 - lx - 16), lx + 15, y1 + 6, Theme.TEXT, false);
+	}
+
+	// --- Açılır menü (sağ tık / "⋯") ve onay penceresi: Discord tarzı, tüm ekranlarda ortak ---
+
+	/** Menü öğesi; label null ise ayırıcı çizgi. */
+	protected record MenuItem(String icon, String label, Runnable run, boolean danger) {
+		public static MenuItem sep() { return new MenuItem(null, null, null, false); }
+	}
+	private record Confirm(String icon, String title, String text, String ok, Runnable run) {}
+
+	private List<MenuItem> menuItems;
+	private int menuX, menuY;
+	private long menuAt;
+	private Confirm confirm;
+	private long confirmAt;
+	private boolean overlayDrawing;
+
+	/** Fare konumunda (ya da bir düğmenin altında) menü açar; ekrana sığmazsa içeri kayar. */
+	protected void openMenu(int x, int y, List<MenuItem> items) {
+		menuItems = List.copyOf(items);
+		menuX = x;
+		menuY = y;
+		menuAt = System.nanoTime();
+		focus(null);
+	}
+
+	/** Tehlikeli işlemler (engelle, çıkar) için ortadaki onay penceresi. */
+	protected void askConfirm(String icon, String title, String text, String ok, Runnable run) {
+		menuItems = null;
+		confirm = new Confirm(icon, title, text, ok, run);
+		confirmAt = System.nanoTime();
+		focus(null);
+	}
+
+	protected boolean overlayOpen() { return menuItems != null || confirm != null; }
+
+	protected void closeOverlays() {
+		menuItems = null;
+		confirm = null;
+	}
+
+	private static float easeOut(long since, float ms) {
+		float t = Math.min(1f, (System.nanoTime() - since) / 1e6f / ms);
+		return 1f - (1f - t) * (1f - t) * (1f - t);
+	}
+
+	private void drawMenu(GuiGraphicsExtractor g) {
+		List<MenuItem> items = menuItems;
+		int rowH = 17, sepH = 7, w = 0, h = 6;
+		for (MenuItem it : items) {
+			if (it.label() == null) h += sepH;
+			else {
+				w = Math.max(w, font.width(it.label()));
+				h += rowH;
+			}
+		}
+		w += 34;
+		int x = Math.max(4, Math.min(menuX, width - w - 4)), y = menuY + h > height - 4 ? Math.max(4, menuY - h) : menuY;
+		g.nextStratum();
+		// Menünün dışına tıklama (sol ya da sağ) menüyü kapatır; öğeler bundan sonra kaydedildiği için önce onlar denenir.
+		hit(0, 0, width, height, this::closeOverlays, this::closeOverlays);
+		float p = easeOut(menuAt, 140);
+		int shown = Math.max(1, Math.round(h * p));
+		g.enableScissor(x - 1, y - 1, x + w + 1, y + shown + 1);
+		Theme.notched(g, x, y, x + w, y + h, 4, 0xF80B0C12);
+		Theme.notchedOutline(g, x, y, x + w, y + h, 4, Theme.LINE_STRONG);
+		g.fill(x + 4, y, x + 22, y + 1, Theme.accent());
+		hit(x, y, x + w, y + h, () -> {}, () -> {});
+		int ry = y + 3;
+		for (MenuItem it : items) {
+			if (it.label() == null) {
+				g.fill(x + 6, ry + 3, x + w - 6, ry + 4, Theme.LINE);
+				ry += sepH;
+				continue;
+			}
+			MenuItem item = it;
+			boolean hov = hit(x + 3, ry, x + w - 3, ry + rowH, () -> {
+				closeOverlays();
+				item.run().run();
+			});
+			int danger = 0xFFFF7A8A;
+			if (hov) Theme.notched(g, x + 3, ry, x + w - 3, ry + rowH, 2, it.danger() ? 0x38E5484D : 0x1EFFFFFF);
+			int color = it.danger() ? danger : hov ? Theme.TEXT : 0xFFD7DBE4;
+			if (it.icon() != null) PixelIcons.drawCentered(g, it.icon(), x + 12, ry + rowH / 2, 1, it.danger() ? danger : hov ? Theme.TEXT : Theme.MUTED);
+			g.text(font, it.label(), x + 23, ry + 5, color, false);
+			ry += rowH;
+		}
+		g.disableScissor();
+	}
+
+	private void drawConfirm(GuiGraphicsExtractor g) {
+		Confirm c = confirm;
+		float p = easeOut(confirmAt, 200);
+		g.nextStratum();
+		g.fill(0, 0, width, height, Theme.withAlpha(0xFF04050A, (int) (0xB4 * p)));
+		// Pencerenin dışına tıklamak vazgeçer.
+		hit(0, 0, width, height, this::closeOverlays, this::closeOverlays);
+		int w = Math.min(270, width - 40);
+		List<FormattedCharSequence> lines = font.split(FormattedText.of(c.text()), w - 28);
+		List<FormattedCharSequence> titleLines = font.split(FormattedText.of(c.title()), w - 28);
+		int h = 14 + 26 + 8 + titleLines.size() * 11 + 6 + lines.size() * 10 + 14 + 20 + 14;
+		int x = (width - w) / 2, y = (height - h) / 2 + Math.round((1 - p) * 8);
+		Theme.notched(g, x, y, x + w, y + h, 7, 0xFA101219);
+		Theme.notchedOutline(g, x, y, x + w, y + h, 7, Theme.LINE_STRONG);
+		for (int i = 0; i < 7; i++) g.fill(x + 7 - i, y + i, x + 8 - i, y + i + 1, Theme.accent());
+		g.fill(x + 7, y, x + 40, y + 1, Theme.accent());
+		hit(x, y, x + w, y + h, () -> {}, () -> {});
+		int ix = x + 14, iy = y + 14;
+		Theme.notched(g, ix, iy, ix + 26, iy + 26, 3, Theme.withAlpha(Theme.accent(), 0x36));
+		Theme.notchedOutline(g, ix, iy, ix + 26, iy + 26, 3, Theme.withAlpha(Theme.accent(), 0x80));
+		PixelIcons.drawCentered(g, c.icon(), ix + 13, iy + 13, 1, Theme.accent());
+		int ty = iy + 26 + 8;
+		for (FormattedCharSequence l : titleLines) {
+			g.text(font, l, x + 14, ty, Theme.TEXT, false);
+			ty += 11;
+		}
+		ty += 6;
+		for (FormattedCharSequence l : lines) {
+			g.text(font, l, x + 14, ty, Theme.MUTED, false);
+			ty += 10;
+		}
+		String cancel = L.t("friends.cancelBtn");
+		int by = y + h - 14 - 20, okW = Math.max(70, font.width(c.ok()) + 24), cancelW = Math.max(64, font.width(cancel) + 20);
+		button(g, x + w - 14 - okW, by, x + w - 14, by + 20, L.upper(c.ok()), Style.DANGER, () -> {
+			closeOverlays();
+			c.run().run();
+		});
+		button(g, x + w - 14 - okW - 6 - cancelW, by, x + w - 14 - okW - 6, by + 20, L.upper(cancel), Style.GHOST, this::closeOverlays);
+	}
+
+	// --- Kayan vurgulu seçim (Herkes / Arkadaşlar / Kimse) ---
+
+	private final java.util.Map<String, Float> segmentPos = new java.util.HashMap<>();
+
+	/** Eşit parçalı seçim; seçili parçanın arkasındaki vurgu yumuşakça kayar. */
+	protected void segmented(GuiGraphicsExtractor g, int x1, int y1, int x2, int y2, String id, String[] labels, int selected, java.util.function.IntConsumer pick) {
+		int n = labels.length;
+		float cur = segmentPos.getOrDefault(id, (float) selected);
+		cur += (selected - cur) * Math.min(1f, dt * 14f);
+		if (Math.abs(selected - cur) < 0.002f) cur = selected;
+		segmentPos.put(id, cur);
+		Theme.notched(g, x1, y1, x2, y2, 3, 0x40000000);
+		Theme.notchedOutline(g, x1, y1, x2, y2, 3, Theme.LINE);
+		float segW = (x2 - x1 - 4) / (float) n;
+		int tx = Math.round(x1 + 2 + cur * segW);
+		Theme.notched(g, tx, y1 + 2, Math.round(tx + segW), y2 - 2, 2, Theme.accent());
+		g.fill(tx + 2, y1 + 2, Math.round(tx + segW) - 2, y1 + 3, 0x40FFFFFF);
+		for (int i = 0; i < n; i++) {
+			int sx1 = Math.round(x1 + 2 + i * segW), sx2 = Math.round(x1 + 2 + (i + 1) * segW);
+			int idx = i;
+			boolean hov = hit(sx1, y1, sx2, y2, () -> {
+				if (idx != selected) pick.accept(idx);
+			});
+			boolean on = i == selected;
+			String label = Theme.ellipsize(labels[i], sx2 - sx1 - 6);
+			g.text(font, label, (sx1 + sx2) / 2 - font.width(label) / 2, (y1 + y2) / 2 - 4, on ? Theme.TEXT : hov ? 0xFFE9ECF2 : Theme.MUTED, false);
+		}
 	}
 
 	// --- Ortak kontroller ---

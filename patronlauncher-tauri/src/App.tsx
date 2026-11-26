@@ -269,9 +269,10 @@ export default function App() {
   useEffect(() => {
     let off: (() => void) | undefined;
     let alive = true;
-    void listen<{ type: string; with?: string; message?: { from: string; body: string } }>("patronlauncher://social", (e) => {
+    void listen<{ type: string; with?: string; message?: { from: string; body: string }; muted?: boolean }>("patronlauncher://social", (e) => {
       const ev = e.payload;
-      if (ev.type !== "message" || !ev.message || ev.message.from === "me" || pageRef.current === "friends") return;
+      // Sessize alınan kişiden gelen mesaj için bildirim gösterilmez (mesaj yine gelir).
+      if (ev.type !== "message" || !ev.message || ev.message.from === "me" || ev.muted || pageRef.current === "friends") return;
       const body = ev.message.body.length > 80 ? ev.message.body.slice(0, 80) + "…" : ev.message.body;
       toast(ev.with + ": " + body);
     }).then((u) => (alive ? (off = u) : u()));

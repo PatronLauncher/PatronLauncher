@@ -62,6 +62,15 @@ public final class DevShots {
 		new Shot("38-modrinth-detail-loaded", () -> Minecraft.getInstance().gui.screen()),
 		new Shot("39-modrinth-gallery", () -> modrinthPage("GALLERY")),
 		new Shot("40-modrinth-versions", () -> modrinthPage("VERSIONS")),
+		// Arkadaşlar: örnek verilerle (köprü yokken) liste, sağ tık menüsü, onay penceresi, gizlilik ve ana menü paneli.
+		new Shot("48-friends-demo", () -> friendsDemo(null)),
+		new Shot("49-friends-menu", () -> friendsDemo("menu")),
+		new Shot("50-friends-confirm", () -> friendsDemo("confirm")),
+		new Shot("51-friends-privacy", () -> friendsDemo("privacy")),
+		new Shot("52-title-profile", () -> {
+			friendsDemo(null);
+			return new com.patron.pclient.gui.PClientTitleScreen();
+		}),
 		new Shot("41-title-panels", com.patron.pclient.gui.PClientTitleScreen::new),
 		new Shot("42-title-panels-loaded", () -> Minecraft.getInstance().gui.screen()),
 		new Shot("29-modrinth", () -> new com.patron.pclient.gui.PClientModrinthScreen(null)),
@@ -87,6 +96,59 @@ public final class DevShots {
 		new Shot("20-module-autotext", () -> new ModuleSettingsScreen(ModuleManager.byId("autotext"), null)));
 
 	private DevShots() {}
+
+	/** Arkadaş ekranı için örnek veriler (yalnızca -Pdevshots); mode: null | menu | confirm | privacy. */
+	private static Screen friendsDemo(String mode) {
+		try {
+			var social = com.patron.pclient.bridge.Social.class;
+			var patron = com.patron.pclient.bridge.Patron.class;
+			set(patron, "state", com.patron.pclient.bridge.Patron.State.SIGNED_IN);
+			set(patron, "name", "Justt_");
+			var playing = new com.patron.pclient.bridge.Social.Presence(true, "26.3", "play.chickennw.com");
+			var online = new com.patron.pclient.bridge.Social.Presence(true, null, null);
+			set(social, "friends", List.of(
+				new com.patron.pclient.bridge.Social.Person("1", "justt2", "justt2", playing, false, false),
+				new com.patron.pclient.bridge.Social.Person("2", "cekuuuu", "Cekuuuu", online, false, true),
+				new com.patron.pclient.bridge.Social.Person("3", "astro", "astropipicik", null, false, false),
+				new com.patron.pclient.bridge.Social.Person("5", "eskici", "Eskici", new com.patron.pclient.bridge.Social.Presence(true, "1.20.1", "mc.hypixel.net"), false, false),
+				new com.patron.pclient.bridge.Social.Person("4", "s2kci", "s2kcipromaX", null, true, false)));
+			set(social, "blocked", List.of(new com.patron.pclient.bridge.Social.Person("4", "s2kci", "s2kcipromaX", null, false, false)));
+			set(social, "chats", List.of(
+				new com.patron.pclient.bridge.Social.Chat("justt2", "justt2", "Sen: tm gel", 0, false),
+				new com.patron.pclient.bridge.Social.Chat("cekuuuu", "Cekuuuu", "akşam oynuyor muyuz?", 2, true)));
+			set(social, "signedIn", true);
+			set(social, "live", true);
+			set(social, "dmPolicy", "friends");
+			set(social, "presencePolicy", "everyone");
+			set(social, "friendPolicy", "everyone");
+			var screen = new com.patron.pclient.gui.PClientFriendsScreen(null);
+			var type = com.patron.pclient.gui.PClientFriendsScreen.class;
+			if ("privacy".equals(mode)) {
+				var tab = type.getDeclaredField("tab");
+				tab.setAccessible(true);
+				tab.set(screen, tab.getType().getEnumConstants()[2]);
+			} else if ("menu".equals(mode)) {
+				var menu = type.getDeclaredMethod("personMenu", String.class, String.class);
+				menu.setAccessible(true);
+				var open = com.patron.pclient.gui.PcScreen.class.getDeclaredMethod("openMenu", int.class, int.class, List.class);
+				open.setAccessible(true);
+				open.invoke(screen, 150, 110, menu.invoke(screen, "justt2", "justt2"));
+			} else if ("confirm".equals(mode)) {
+				var confirm = type.getDeclaredMethod("confirmBlock", String.class, String.class);
+				confirm.setAccessible(true);
+				confirm.invoke(screen, "justt2", "justt2");
+			}
+			return screen;
+		} catch (ReflectiveOperationException e) {
+			throw new IllegalStateException(e);
+		}
+	}
+
+	private static void set(Class<?> type, String field, Object value) throws ReflectiveOperationException {
+		var f = type.getDeclaredField(field);
+		f.setAccessible(true);
+		f.set(null, value);
+	}
 
 	/** Filtreli liste ya da gerçek bir projenin istenen sekmesi. */
 	private static Screen modrinthPage(String page) {
