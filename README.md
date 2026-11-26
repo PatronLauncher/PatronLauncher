@@ -1,30 +1,26 @@
 # PatronLauncher
 
-Windows için Rust tabanlı Minecraft Java Edition launcher'ı. Uygulama
-`patronlauncher-tauri/` altındadır: Tauri 2 + React + Vite + TypeScript arayüzü ve
-`src-tauri/` içindeki Rust çekirdeği. Ayrıntılar için
-[patronlauncher-tauri/README.md](patronlauncher-tauri/README.md).
+A Rust-based Minecraft Java Edition launcher for Windows. The app lives in
+`patronlauncher-tauri/`: a Tauri 2 + React + Vite + TypeScript interface and the Rust core in
+`src-tauri/`. See [patronlauncher-tauri/README.md](patronlauncher-tauri/README.md) for details.
 
-## Sürümler / Versions
+Website: [patronlauncher.net](https://patronlauncher.net)
 
-Bu depoda iki ayrı ürün vardır ve **sürüm numaraları birbirinden bağımsızdır**:
+## Versions
 
-| Ürün | Ne | Güncel sürüm | Nerede görünür |
+This repository contains two products with **independent version numbers**:
+
+| Product | What | Current version | Where it is shown |
 | --- | --- | --- | --- |
-| **PatronLauncher** | Windows launcher'ı (`patronlauncher-tauri/`) | 1.1.0 | Launcher ayarları, kurulum dosyası adı |
-| **PClient** | Oyun içi istemci, Fabric modu (`pclient-fabric/`) | 1.2.0 (Minecraft 26.3) | Oyun içi ana menü ve PClient ayarları |
+| **PatronLauncher** | Windows launcher (`patronlauncher-tauri/`) | 1.1.0 | Launcher settings, installer file name |
+| **PClient** | In-game client, a Fabric mod (`pclient-fabric/`) | 1.2.0 (Minecraft 26.3) | In-game main menu and PClient settings |
 
-- PClient ayrı indirilmez; PatronLauncher'ın içinde gelir ve launcher güncellenince o da güncellenir.
-- Bu yüzden GitHub'daki her sürüm bir **PatronLauncher** sürümü olarak yayımlanır (ör. `v1.0.3`).
-  Sürüm notlarında iki ayrı başlık bulunur: *PatronLauncher* değişiklikleri ve o sürümle gelen
-  *PClient x.y.z* değişiklikleri. PClient o sürümde değişmediyse bu belirtilir.
-- PClient yalnızca kendi kodu değiştiğinde yeni sürüm numarası alır; launcher güncellemesi tek başına
-  PClient sürümünü değiştirmez.
-
-There are two products in this repository with **independent version numbers**: the
-**PatronLauncher** Windows launcher and the **PClient** in-game client (a Fabric mod). PClient ships
-inside the launcher, so every GitHub release is a PatronLauncher release (e.g. `v1.0.3`); its notes have
-a separate *PClient* section that names the bundled PClient version and lists its own changes.
+- PClient is not downloaded separately; it ships inside PatronLauncher and updates with it.
+- That is why every GitHub release is a **PatronLauncher** release (e.g. `v1.1.0`). The release notes
+  have two sections: the *PatronLauncher* changes and the changes in the bundled *PClient x.y.z*.
+  If PClient did not change in a release, the notes say so.
+- PClient only gets a new version number when its own code changes; a launcher update alone does
+  not change the PClient version.
 
 | PatronLauncher | PClient bundled |
 | --- | --- |
@@ -32,45 +28,50 @@ a separate *PClient* section that names the bundled PClient version and lists it
 | 1.0.3 | 1.1.0 |
 | 1.1.0 | 1.2.0 |
 
-## Derleme
+## Building
 
-Proje kökünden `./build.ps1` çalıştırın. Script arayüzü derler, Rust testlerini
-çalıştırır, release EXE'yi üretir ve:
+Run `./build.ps1` from the project root. The script builds the interface, runs the Rust tests,
+produces the release EXE and:
 
-- `dist/PatronLauncher-latest.exe` dosyasını en son başarılı build ile günceller,
-- `dist/archive/PatronLauncher-<sürüm>-<yyyy-MM-dd-HHmm>.exe` olarak arşivler
-  (Europe/Istanbul saati, son 5 build tutulur),
-- oyunculara dağıtılacak kurulum sihirbazını `dist/PatronLauncher-<sürüm>-setup.exe` olarak
-  üretir (NSIS, kullanıcı başına kurulum, yönetici izni gerekmez).
+- updates `dist/PatronLauncher-latest.exe` with the latest successful build,
+- archives it as `dist/archive/PatronLauncher-<version>-<yyyy-MM-dd-HHmm>.exe`
+  (Europe/Istanbul time, the last 5 builds are kept),
+- produces the installer for players as `dist/PatronLauncher-<version>-setup.exe`
+  (NSIS, per-user install, no administrator rights needed).
 
-Rust araçları `.tools/` altındaki yerel kurulumdan kullanılır; genel PATH değişmez.
+The Rust toolchain is used from the local install under `.tools/`; the global PATH is not changed.
 
-PClient (oyun içi istemci, `pclient-fabric/`) Gradle 9.8+ ve JDK 25 varsa derlemede yeniden
-üretilip launcher'a gömülür; yoksa `src-tauri/resources/pclient/PClient.jar` kullanılır.
+PClient (the in-game client, `pclient-fabric/`) is rebuilt and embedded in the launcher when
+Gradle 9.8+ and JDK 25 are available; otherwise `src-tauri/resources/pclient/PClient.jar` is used.
 
-### Derlemeye gömülen bilgiler
+### Values embedded at build time
 
-Depoya girmeyen `.secrets/` klasöründen okunur; dosya yoksa ilgili özellik kapalı kalır:
+They are read from the `.secrets/` folder, which is not in the repository. If a file is missing,
+the related feature stays off:
 
-| Dosya | Ne için |
+| File | Used for |
 | --- | --- |
-| `.secrets/microsoft-client-id` | Microsoft girişi için Azure uygulama kimliği (GUID). |
-| `.secrets/curseforge.key` | CurseForge içerik araması için API anahtarı. |
-| `.secrets/contact` | Modrinth'e gönderilen User-Agent iletişim bilgisi. |
+| `.secrets/microsoft-client-id` | Azure application ID (GUID) for Microsoft sign-in. |
+| `.secrets/curseforge.key` | API key for CurseForge content search. |
+| `.secrets/contact` | Contact info in the User-Agent sent to Modrinth. |
 
-Microsoft girişi için Azure'da "Mobile and desktop applications" platformlu, yönlendirme adresi
-`http://localhost` olan, kişisel Microsoft hesaplarına açık bir uygulama kaydı gerekir. Minecraft
-API erişimi için uygulama kimliği Mojang'a ayrıca onaylatılmalıdır.
+Microsoft sign-in needs an Azure app registration with the "Mobile and desktop applications"
+platform, the redirect URI `http://localhost`, and personal Microsoft accounts enabled. The
+application ID must also be approved by Mojang for Minecraft API access.
 
-## Veriler
+## Data
 
-1.0 sürümünde tüm ayarlar, profiller, yedekler ve hesaplar oyuncunun kendi bilgisayarında
-(`%APPDATA%\#PatronLauncher`) tutulur; PatronLauncher sunucusu yoktur. Microsoft oturumları
-Windows Kimlik Bilgisi Yöneticisi'nde saklanır.
+Settings, profiles, backups and Minecraft accounts are stored on the player's own computer
+(`%APPDATA%\#PatronLauncher`). Microsoft sessions are kept in the Windows Credential Manager.
 
-## Lisans
+A **PatronLauncher account** on [patronlauncher.net](https://patronlauncher.net) is optional. It
+is only needed for online features such as friends, messages, joining a friend's server and the
+public player profile. The launcher keeps only the account's session key, also in the Windows
+Credential Manager.
 
-Kaynak kod [GNU AGPL v3.0](LICENSE) ile lisanslanmıştır. Logolar, sürüm kapakları ve müzikler
-AGPL kapsamında değildir; ayrıntılar ve "resmi değildir" bildirimi için [NOTICE.md](NOTICE.md).
+## License
+
+The source code is licensed under the [GNU AGPL v3.0](LICENSE). Logos, version covers and music
+are not covered by the AGPL; see [NOTICE.md](NOTICE.md) for details and the "not official" notice.
 
 NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG OR MICROSOFT.
