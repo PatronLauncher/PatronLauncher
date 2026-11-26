@@ -11,8 +11,8 @@ Bu depoda iki ayrı ürün vardır ve **sürüm numaraları birbirinden bağıms
 
 | Ürün | Ne | Güncel sürüm | Nerede görünür |
 | --- | --- | --- | --- |
-| **PatronLauncher** | Windows launcher'ı (`patronlauncher-tauri/`) | 1.0.3 | Launcher ayarları, kurulum dosyası adı |
-| **PClient** | Oyun içi istemci, Fabric modu (`pclient-fabric/`) | 1.1.0 (Minecraft 26.3) | Oyun içi ana menü ve PClient ayarları |
+| **PatronLauncher** | Windows launcher'ı (`patronlauncher-tauri/`) | 1.1.0 | Launcher ayarları, kurulum dosyası adı |
+| **PClient** | Oyun içi istemci, Fabric modu (`pclient-fabric/`) | 1.2.0 (Minecraft 26.3) | Oyun içi ana menü ve PClient ayarları |
 
 - PClient ayrı indirilmez; PatronLauncher'ın içinde gelir ve launcher güncellenince o da güncellenir.
 - Bu yüzden GitHub'daki her sürüm bir **PatronLauncher** sürümü olarak yayımlanır (ör. `v1.0.3`).
@@ -30,6 +30,7 @@ a separate *PClient* section that names the bundled PClient version and lists it
 | --- | --- |
 | 1.0.0 – 1.0.2 | 1.0.0 (before separate versioning) |
 | 1.0.3 | 1.1.0 |
+| 1.1.0 | 1.2.0 |
 
 ## Derleme
 

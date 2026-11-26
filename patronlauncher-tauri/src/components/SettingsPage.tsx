@@ -29,7 +29,8 @@ type Row = {
   description: string;
   body: ReactNode;
 };
-export const version = "1.0.0";
+export const version = __APP_VERSION__;
+export const pclientVersion = __PCLIENT_VERSION__;
 const categories: [Category, keyof typeof paths, string][] = [
   ["game", "play", msg("Oyun")],
   ["general", "globe", msg("Genel")],

@@ -6,7 +6,7 @@ import { useAppearance } from "../appearance";
 import { msg, t } from "../i18n";
 import Icon from "../components/Icon";
 import type { paths } from "../icons";
-import { version } from "../components/SettingsPage";
+import { pclientVersion } from "../components/SettingsPage";
 import logo from "../assets/patronlauncher3transparent-mark.png";
 import { PcIcon } from "./icons";
 import LaunchOverlay from "./LaunchOverlay";
@@ -114,7 +114,7 @@ export default function PClientShell({
             <b>
               P<span>CLIENT</span>
             </b>
-            <small>v{version}</small>
+            <small>v{pclientVersion}</small>
           </div>
           <div className="pc-crumb" key={page}>
             <span>{t(titles[page][0])}</span>
